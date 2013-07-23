@@ -259,11 +259,11 @@ function TapperRegion.Update(self,elapsed)
       self.group.r:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
       
       for i=1, #self.group.regions do
-        if self.group.regions[i] ~= self then
-          rx,ry = self.group.regions[i]:Center()
-          self.group.regions[i].oldx = rx+self.dx -- FIXME: stopgap
-          self.group.regions[i].oldy = ry+self.dy
-          self.group.regions[i]:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
+        if self.group.regions[i].r ~= self then
+          rx,ry = self.group.regions[i].r:Center()
+          self.group.regions[i].r.oldx = rx+self.dx -- FIXME: stopgap
+          self.group.regions[i].r.oldy = ry+self.dy
+          self.group.regions[i].r:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
         end       
       end
     end
@@ -374,7 +374,7 @@ function TapperRegion.TouchUp(self)
           EndLinkRegion(heldRegions[i])
           initialLinkRegion = nil
           
-          -- initialize bounce back animation, it runs in VUpdate later
+          -- initialize bounce back animation, it runs in TapperRegion.Update later
           x1,y1 = self:Center()
           x2,y2 = heldRegions[i]:Center()
           EXRATE = 150000

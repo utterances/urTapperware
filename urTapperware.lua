@@ -54,17 +54,17 @@ end
 	
 function TouchUp(self)
 	shadow:Hide()
-  if startedSelection then
+	if startedSelection then
 		startedSelection = false
 		local tempSelected = {}
 		for i = 1, #regions do
-			if regions[i].usable then
-				x,y = regions[i]:Center()
+			if regions[i].r.usable then
+				x,y = regions[i].r:Center()
 				if pointInSelectionPolygon(x,y) then
 					table.insert(tempSelected, regions[i])
-					ChangeSelectionStateRegion(regions[i], true)
+					ChangeSelectionStateRegion(regions[i].r, true)
 				else
-					ChangeSelectionStateRegion(regions[i], false)
+					ChangeSelectionStateRegion(regions[i].r, false)
 				end
 			end
 		end
@@ -382,7 +382,7 @@ function HoldToTrigger(self, elapsed) -- for long tap
     else 
         if math.abs(self.x - x) > 10 or math.abs(self.y - y) > 10 then
             self:Handle("OnUpdate",nil)
-            self:Handle("OnUpdate",VUpdate)
+            self:Handle("OnUpdate",TapperRegion.Update)
         end
 				if self.holdtime < MENUHOLDWAIT/2 then
 					DPrint("hold for menu")
@@ -402,7 +402,7 @@ end
 function DeTrigger(self) -- for long tap
     self.eventlist["OnUpdate"].currentevent = nil
     self:Handle("OnUpdate",nil)
-    self:Handle("OnUpdate",VUpdate)
+    self:Handle("OnUpdate",TapperRegion.Update)
 end
 --[[
 ------------------------------------------------------------
@@ -680,7 +680,7 @@ function EndLinkRegion(self)
 		linkLayer:ResetPotentialLink()
 		linkLayer:Draw()
 		-- add notification
-		linkIcon:ShowLinked()		
+		linkIcon:ShowLinked()
 		
 		CloseMenu(initialLinkRegion)
 		initialLinkRegion = nil
@@ -730,20 +730,20 @@ function DuplicateRegion(vv, cx, cy)
 	list = copyRegion.r.links["OnTouchUp"]
 	if list ~= nil then
 		for k = 1,#list do
-			linkLayer:Add(copyRegion, list[k][2])
+			linkLayer:Add(copyRegion.r, list[k][2])
 		end
 	end
 	
 	-- TODO: optimize this part: right now it's a messy search for every inbound links
 	for i = 1, #regions do
-		if regions[i].usable and (regions[i] ~= vv or regions[i] ~= copyRegion) then
-			linkList = regions[i].links["OnTouchUp"]
+		if regions[i].r.usable and (regions[i].r ~= vv or regions[i].r ~= copyRegion.r) then
+			linkList = regions[i].r.links["OnTouchUp"]
 			if linkList ~= nil then
 				
 				for k = 1,#linkList do
 					if linkList[k][2] == vv then
-						table.insert(linkList, {TapperRegion.TouchUp, copyRegion})
-						linkLayer:Add(regions[i], copyRegion)
+						table.insert(linkList, {TapperRegion.TouchUp, copyRegion.r})
+						linkLayer:Add(regions[i].r, copyRegion.r)
 					end
 				end
 			end			
@@ -753,7 +753,7 @@ function DuplicateRegion(vv, cx, cy)
 	if copyRegion.r.counter == 1 then
 		SwitchRegionType(copyRegion)
 		copyRegion.r.value = vv.value
-	  copyRegion.r.tl:SetLabel(copyRegion.value)
+		copyRegion.r.tl:SetLabel(copyRegion.r.value)
 	end
 	
 	linkLayer:Draw()

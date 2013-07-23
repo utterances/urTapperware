@@ -120,7 +120,7 @@ function Group:SetRegions(listOfRegions)
 	
 	-- assign groups to each region in the list
 	for i = 1, #self.regions do
-		self.regions[i].group = self
+		self.regions[i].r.group = self
 	end
 end
 
@@ -132,9 +132,9 @@ function Group:Draw()
 	maxY = -1
 	
 	for i = 1, #self.regions do
-		x,y = self.regions[i]:Center()
-		w = self.regions[i]:Width()
-		h = self.regions[i]:Height()
+		x,y = self.regions[i].r:Center()
+		w = self.regions[i].r:Width()
+		h = self.regions[i].r:Height()
 		
 		if minX < 0 or minX > x - w/2 then
 			minX = x - w/2
@@ -164,7 +164,7 @@ function Group:Destroy()
 	--// not sure if this is needed or actually works yet //--
 	self:Hide()
 	for i = 1, #self.regions do
-		self.regions[i].group = nil
+		self.regions[i].r.group = nil
 	end
 	
 	self.regions = nil
