@@ -21,8 +21,13 @@ EPSILON = 0.001	--small number for rounding
 -- selection param
 LASSOSEPDISTANCE = 25 -- pixels between each point when drawing selection lasso
 
+<<<<<<< HEAD
 --regions = {}
 --recycledregions = {}
+=======
+regions = {}
+recycledregions = {}
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 initialLinkRegion = nil
 startedSelection = false
 -- touch event state machine:
@@ -36,11 +41,18 @@ FreeAllRegions()
 
 modes = {"EDIT","RELEASE"}
 current_mode = modes[1]
+<<<<<<< HEAD
 dofile(DocumentPath("urTapperwareTools.lua"))
 dofile(DocumentPath("urTapperwareMenu.lua"))	-- first!
 dofile(DocumentPath("urTapperwareLink.lua"))	-- needs menu
 dofile(DocumentPath("urTapperwareGroup.lua"))
 dofile(DocumentPath("urTapperwareRegion.lua"))
+=======
+dofile(SystemPath("urTapperwareTools.lua"))
+dofile(SystemPath("urTapperwareMenu.lua"))	-- first!
+dofile(SystemPath("urTapperwareLink.lua"))	-- needs menu
+dofile(SystemPath("urTapperwareGroup.lua"))
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 -- ============
 -- = Backdrop =
 -- ============
@@ -83,9 +95,15 @@ function TouchUp(self)
 			
 		if x>CREATION_MARGIN and x<ScreenWidth()-CREATION_MARGIN and 
 			y>CREATION_MARGIN and y<ScreenHeight()-CREATION_MARGIN then
+<<<<<<< HEAD
 			local region = TapperRegion:new()
 			region.r:Show()
 			region.r:SetAnchor("CENTER",x,y)
+=======
+			local region = CreateorRecycleregion('region', 'backdrop', UIParent)
+			region:Show()
+			region:SetAnchor("CENTER",x,y)
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 			-- DPrint(region:Name().." created, centered at "..x..", "..y)
 		end
 	
@@ -257,6 +275,7 @@ linkLayer:Init()
 -- ==========================
 -- = Global event functions =
 -- ==========================
+<<<<<<< HEAD
 ------------------------------------------------------------
 -- ===================
 -- = Region Creation =
@@ -266,6 +285,17 @@ function CreateorRecycleregion(ftype, name, parent)
 	local region
 	if #recycledregions > 0 then
 		region = regions[recycledregions[#recycledregions] --Replace ] later
+=======
+
+-- ===================
+-- = Region Creation =
+-- ===================
+
+function CreateorRecycleregion(ftype, name, parent)
+	local region
+	if #recycledregions > 0 then
+		region = regions[recycledregions[#recycledregions]]
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 		table.remove(recycledregions)
 		region:EnableMoving(true)
 		region:EnableResizing(true)
@@ -318,7 +348,11 @@ function VRegion(ttype,name,parent,id) -- customized initialization of region
   return r
 end
 
+<<<<<<< HEAD
 --function PlainVRegion(r) -- customized parameter initialization of region, events are initialized in VRegion()
+=======
+function PlainVRegion(r) -- customized parameter initialization of region, events are initialized in VRegion()
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
     -- r.selected = 0 -- for multiple selection of menubar
 		r.alpha = 1	--target alpha for animation
 		r.menu = nil	--contextual menu
@@ -330,9 +364,15 @@ end
 		r.dx = 0	-- compute storing current movement speed, for gesture detection
 		r.dy = 0
 		x,y = r:Center()
+<<<<<<< HEAD
 		r.oldx = x
 		r.oldy = y
 		r.sx = 0
+=======
+		r.oldx = x	-- last x,y
+		r.oldy = y
+		r.sx = 0 -- target coordinate for animation
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 		r.sy = 0
 		r.w = INITSIZE
 		r.h = INITSIZE
@@ -361,11 +401,18 @@ end
     r.tl:SetShadowColor(100,100,100,255)
     r.tl:SetShadowOffset(1,1)
     r.tl:SetShadowBlur(1)
+<<<<<<< HEAD
     r:SetWidth(50)
     r:SetHeight(50)
 end
 ]]--
 ------------------------------------------------------------
+=======
+    r:SetWidth(20)
+    r:SetHeight(20)
+end
+
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 function HoldToTrigger(self, elapsed) -- for long tap
     x,y = self:Center()
     
@@ -404,8 +451,12 @@ function DeTrigger(self) -- for long tap
     self:Handle("OnUpdate",nil)
     self:Handle("OnUpdate",VUpdate)
 end
+<<<<<<< HEAD
 --[[
 ------------------------------------------------------------
+=======
+
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 function CallEvents(signal,vv)
     local list = {}
     if current_mode == modes[1] then
@@ -442,7 +493,11 @@ function VTouchDown(self)
 		RaiseMenu(self)
 	end
 end
+<<<<<<< HEAD
 ------------------------------------------------------------
+=======
+
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 function VDoubleTap(self)
 	DPrint("double tapped")
     CallEvents("OnDoubleTap",self)
@@ -492,7 +547,11 @@ function VTouchUp(self)
 		EndLinkRegion(self)
 		initialLinkRegion = nil
 	end
+<<<<<<< HEAD
 	CallEvents("OnTouchUp",self)
+=======
+  CallEvents("OnTouchUp",self)
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 end
 
 -- function VLeave(self)
@@ -586,11 +645,14 @@ function VUpdate(self,elapsed)
 
 	
 end
+<<<<<<< HEAD
 ]]--
 
 function CloseRegionWrapper(self)
 	RemoveRegion(self)
 end
+=======
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 
 function AddOneToCounter(self)
 	-- DPrint("adding one")
@@ -645,9 +707,15 @@ function StartLinkRegion(self, draglet)
 		-- if we have drag target, try creating a link right away
 		tx, ty = draglet:Center()
 		for i = 1, #regions do
+<<<<<<< HEAD
 			if regions[i] ~= self and regions[i].r.usable then
 				DPrint("try link "..self:Name().." "..regions[i].r:Name())
 				rx, ry = regions[i].r:Center()
+=======
+			if regions[i] ~= self and regions[i].usable then
+				DPrint("try link "..self:Name().." "..regions[i]:Name())
+				rx, ry = regions[i]:Center()
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 				if math.abs(tx-rx) < INITSIZE and math.abs(ty-ry) < INITSIZE then
 					-- found a match, create a link here
 					DPrint("linked")
@@ -673,7 +741,11 @@ function EndLinkRegion(self)
 		-- DPrint("linked from "..initialLinkRegion:Name().." to "..self:Name())
 		-- TODO create the link here!
 
+<<<<<<< HEAD
 		table.insert(initialLinkRegion.links["OnTouchUp"], {TapperRegion.TouchUp, self})
+=======
+		table.insert(initialLinkRegion.links["OnTouchUp"], {VTouchUp, self})
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 		
 		-- add visual link too:
 		linkLayer:Add(initialLinkRegion, self)
@@ -699,10 +771,17 @@ function RemoveLinkBetween(r1, r2)
 	end
 end
 	
+<<<<<<< HEAD
 --[[
 function RemoveV(vv)
 	CloseMenu(vv)
 
+=======
+
+function RemoveV(vv)
+		CloseMenu(vv)
+		
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
     PlainVRegion(vv)
     vv:EnableInput(false)
     vv:EnableMoving(false)
@@ -714,6 +793,7 @@ function RemoveV(vv)
     table.insert(recycledregions, vv.id)
     DPrint(vv:Name().." removed")
 end
+<<<<<<< HEAD
 ]]--
 function DuplicateRegion(vv, cx, cy)
 	x,y = vv:Center()
@@ -728,6 +808,22 @@ function DuplicateRegion(vv, cx, cy)
 	copyRegion.r.links = vv.links
 		
 	list = copyRegion.r.links["OnTouchUp"]
+=======
+
+function DuplicateRegion(vv, cx, cy)
+	x,y = vv:Center()
+	local copyRegion = CreateorRecycleregion('region', 'backdrop', UIParent)
+	copyRegion:Show()
+	if cx ~= nil then
+		copyRegion:SetAnchor("CENTER", cx, cy)
+	else
+		copyRegion:SetAnchor("CENTER",x+INITSIZE+20,y)
+	end		
+	copyRegion.counter = vv.counter
+	copyRegion.links = vv.links
+		
+	list = copyRegion.links["OnTouchUp"]
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 	if list ~= nil then
 		for k = 1,#list do
 			linkLayer:Add(copyRegion, list[k][2])
@@ -742,7 +838,11 @@ function DuplicateRegion(vv, cx, cy)
 				
 				for k = 1,#linkList do
 					if linkList[k][2] == vv then
+<<<<<<< HEAD
 						table.insert(linkList, {TapperRegion.TouchUp, copyRegion})
+=======
+						table.insert(linkList, {VTouchUp, copyRegion})
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 						linkLayer:Add(regions[i], copyRegion)
 					end
 				end
@@ -750,19 +850,33 @@ function DuplicateRegion(vv, cx, cy)
 		end
 	end
 	
+<<<<<<< HEAD
 	if copyRegion.r.counter == 1 then
 		SwitchRegionType(copyRegion)
 		copyRegion.r.value = vv.value
 	  copyRegion.r.tl:SetLabel(copyRegion.value)
+=======
+	if copyRegion.counter == 1 then
+		SwitchRegionType(copyRegion)
+		copyRegion.value = vv.value
+	  copyRegion.tl:SetLabel(copyRegion.value)
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 	end
 	
 	linkLayer:Draw()
 	
 -- 	TODO: make this a common function to raise region to top
+<<<<<<< HEAD
 	copyRegion.r.shadow:MoveToTop()
 	copyRegion.r.shadow:SetLayer("LOW")
 	copyRegion.r:MoveToTop()
 	copyRegion.r:SetLayer("LOW")
+=======
+	copyRegion.shadow:MoveToTop()
+	copyRegion.shadow:SetLayer("LOW")
+	copyRegion:MoveToTop()
+	copyRegion:SetLayer("LOW")
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 	
 	CloseMenu(vv)
 	OpenRegionMenu(vv)
@@ -794,3 +908,7 @@ pagebutton.texture:SetBlendMode("BLEND")
 pagebutton.texture:SetTexCoord(0,1.0,0,1.0)
 pagebutton:EnableInput(true)
 pagebutton:Show()
+<<<<<<< HEAD
+=======
+
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878

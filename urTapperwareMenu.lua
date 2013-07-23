@@ -26,7 +26,11 @@ function testMenu(self)
 end
 
 function CloseRegion(self)
+<<<<<<< HEAD
 	CloseRegionWrapper(self)
+=======
+	RemoveV(self)
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 end
 
 function StartLinkRegionAction(r, draglet)
@@ -347,7 +351,11 @@ function OpenLinkMenu(menu)
   menu.r:MoveToTop()
 	
 	X1,Y1 = menu.sender:Center()
+<<<<<<< HEAD
 	X2,Y2 = menu.receiver.r:Center()
+=======
+	X2,Y2 = menu.receiver:Center()
+>>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 	menu.r:SetAnchor("CENTER", (X1+X2)/2, (Y1+Y2)/2)	   
 end
 	
