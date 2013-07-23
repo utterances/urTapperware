@@ -87,11 +87,7 @@ function linkLayer:Draw()
 		X1, Y1 = sender:Center()		
 		for _, r in ipairs(receivers) do
 			
-<<<<<<< HEAD
 			X2, Y2 = r.r:Center()
-=======
-			X2, Y2 = r:Center()
->>>>>>> 64ab838a3096029f2042d005919c57a1973e4878
 			self.links.t:Line(X1,Y1,X2,Y2)			
 		end
 	end
