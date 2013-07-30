@@ -235,7 +235,6 @@ linkIcon:SetHeight(100)
 linkIcon:SetAnchor('CENTER',ScreenWidth()/2,ScreenHeight()/2)
 -- linkIcon:Handle(OnUpdate, IconUpdate)
 
-
 function linkIcon:ShowLinked(x,y)
 	self:Show()
 	self:SetAlpha(1)
@@ -254,118 +253,6 @@ end
 
 linkLayer:Init()
 
--- ==========================
--- = Global event functions =
--- ==========================
-------------------------------------------------------------
--- ===================
--- = Region Creation =
--- ===================
---[[
-function CreateorRecycleregion(ftype, name, parent)
-	local region
-	if #recycledregions > 0 then
-		region = regions[recycledregions[#recycledregions] --Replace ] later
-		table.remove(recycledregions)
-		region:EnableMoving(true)
-		region:EnableResizing(true)
-		region:EnableInput(true)
-		region.usable = true
-		region.t:SetTexture("tw_roundrec.png")	-- reset texture
-	else
-		region = VRegion(ftype, name, parent, #regions+1)
-		table.insert(regions,region)
-	end
-	region:SetAlpha(0)
-	region.shadow:SetAlpha(0)
-	region:MoveToTop()
-	return region
-end
-
-function VRegion(ttype,name,parent,id) -- customized initialization of region
-	-- add a visual shadow as a second layer	
-	local r_s = Region(ttype,"drops"..id,parent)
-	r_s.t = r_s:Texture("tw_shadow.png")
-	r_s.t:SetBlendMode("BLEND")
-  r_s:SetWidth(INITSIZE+70)
-  r_s:SetHeight(INITSIZE+70)
-	-- r_s:EnableMoving(true)
-	r_s:SetLayer("LOW")
-	r_s:Show()
-	
-  local r = Region(ttype,"Region "..id,parent)
-  r.tl = r:TextLabel()
-  r.t = r:Texture("tw_roundrec.png")
-	r:SetLayer("LOW")
-	r.shadow = r_s
-	r.shadow:SetAnchor("CENTER",r,"CENTER",0,0) 
-  -- initialize for regions{} and recycledregions{}
-  r.usable = true
-  r.id = id
-  PlainVRegion(r)
-  
-  r:EnableMoving(true)
-  r:EnableResizing(true)
-  r:EnableInput(true)
-  
-  r:Handle("OnDoubleTap",VDoubleTap)
-  r:Handle("OnTouchDown",VTouchDown)
-  r:Handle("OnTouchUp",VTouchUp)
-  -- r:Handle("OnDragStop",VDrag)
-	r:Handle("OnUpdate",VUpdate)
-  -- r:Handle("OnMove",VDrag)
-	
-  return r
-end
-
---function PlainVRegion(r) -- customized parameter initialization of region, events are initialized in VRegion()
-    -- r.selected = 0 -- for multiple selection of menubar
-		r.alpha = 1	--target alpha for animation
-		r.menu = nil	--contextual menu
-		r.counter = 0	--if this is a counter
-		r.isHeld = false -- if the r is held by tap currently
-		r.isSelected = false
-		r.group = nil
-		
-		r.dx = 0	-- compute storing current movement speed, for gesture detection
-		r.dy = 0
-		x,y = r:Center()
-		r.oldx = x
-		r.oldy = y
-		r.sx = 0
-		r.sy = 0
-		r.w = INITSIZE
-		r.h = INITSIZE
-		
-		-- event handling
-		r.links = {}
-    r.links["OnTouchDown"] = {}
-		r.links["OnTouchUp"] = {}
-    r.links["OnDoubleTap"] = {} --{CloseSharedStuff,OpenOrCloseKeyboard} 
-		
-    -- -- initialize for events and signals
-    r.eventlist = {}
-    r.eventlist["OnTouchDown"] = {HoldTrigger}
-    r.eventlist["OnTouchUp"] = {DeTrigger} 
-    r.eventlist["OnDoubleTap"] = {} --{CloseSharedStuff,OpenOrCloseKeyboard} 
-    r.eventlist["OnUpdate"] = {} 
-    r.eventlist["OnUpdate"].currentevent = nil
-
-		r.t:SetBlendMode("BLEND")
-    r.tl:SetLabel(r:Name())
-    r.tl:SetFontHeight(16)
-		r.tl:SetFont("AvenirNext-Medium.ttf")
-    r.tl:SetColor(0,0,0,255) 
-    r.tl:SetHorizontalAlign("JUSTIFY")
-    r.tl:SetVerticalAlign("MIDDLE")
-    r.tl:SetShadowColor(100,100,100,255)
-    r.tl:SetShadowOffset(1,1)
-    r.tl:SetShadowBlur(1)
-    r:SetWidth(50)
-    r:SetHeight(50)
-end
-]]--
-------------------------------------------------------------
 function HoldToTrigger(self, elapsed) -- for long tap
     x,y = self:Center()
     
@@ -404,189 +291,6 @@ function DeTrigger(self) -- for long tap
     self:Handle("OnUpdate",nil)
     self:Handle("OnUpdate",TapperRegion.Update)
 end
---[[
-------------------------------------------------------------
-function CallEvents(signal,vv)
-    local list = {}
-    if current_mode == modes[1] then
-        list = vv.eventlist[signal]
-    else
-        list = vv.reventlist[signal]
-    end
-    for k = 1,#list do
-        list[k](vv)
-    end
-		
-		-- fire off messages to linked regions
-		list = vv.links[signal]
-		if list ~= nil then
-			for k = 1,#list do
-				list[k][1](list[k][2])
-			end
-		end
-end
-
-function VTouchDown(self)
-  CallEvents("OnTouchDown",self)
-	-- DPrint("hold for menu")
-	self.shadow:MoveToTop()
-	self.shadow:SetLayer("LOW")
-	self:MoveToTop()
-	self:SetLayer("LOW")
-	self.alpha = .4
-	-- isHoldingRegion = true
-	table.insert(heldRegions, self)
-	
-	-- bring menu up if they are already open
-	if self.menu ~= nil then
-		RaiseMenu(self)
-	end
-end
-------------------------------------------------------------
-function VDoubleTap(self)
-	DPrint("double tapped")
-    CallEvents("OnDoubleTap",self)
-end
-
-function VTouchUp(self)
-	self.alpha = 1
-	if initialLinkRegion == nil then
-		DPrint("")
-		-- see if we can make links here, check how many regions are held
-		if #heldRegions >= 2 then
-			-- by default let's just link self and the first one that's different
-			for i = 1, #heldRegions do
-				if heldRegions[i] ~= self and RegionOverLap(self, heldRegions[i]) then
-					initialLinkRegion = self
-					EndLinkRegion(heldRegions[i])
-					initialLinkRegion = nil
-					
-					-- initialize bounce back animation, it runs in VUpdate later
-					x1,y1 = self:Center()
-					x2,y2 = heldRegions[i]:Center()
-					EXRATE = 150000
-					mx = (x1+x2)/2
-					my = (y1+y2)/2
-					ds = math.max((x1-x2)^2 + (y1-y2)^2, 400)
-					
-					self.sx = EXRATE*(x1 - mx)/ds
-					self.sy = EXRATE*(y1 - my)/ds
-					-- self.tl:SetLabel(self.sx.." "..self.sy)
-					heldRegions[i].sx = EXRATE*(x2 - mx)/ds
-					heldRegions[i].sy = EXRATE*(y2 - my)/ds
-					-- heldRegions[i].tl:SetLabel(heldRegions[i].sx.." "..heldRegions[i].sy)
-					-- DPrint(self:Name().." vs "..heldRegions[i]:Name())
-					-- temp remove touch input
-					-- self:EnableInput(false)
-					-- heldRegions[i]:EnableInput(false)
-					break
-				end
-			end
-			
-		end
-		
-		tableRemoveObj(heldRegions, self)
-		
-		-- isHoldingRegion = false
-	else
-		EndLinkRegion(self)
-		initialLinkRegion = nil
-	end
-	CallEvents("OnTouchUp",self)
-end
-
--- function VLeave(self)
--- 	DPrint("left")
--- end
-	
-function VUpdate(self,elapsed)
-	-- DPrint(elapsed)
-	if self:Alpha() ~= self.alpha then
-		if math.abs(self:Alpha() - self.alpha) < EPSILON then	-- just set if it's close enough
-			self:SetAlpha(self.alpha)
-		else
-			self:SetAlpha(self:Alpha() + (self.alpha-self:Alpha()) * elapsed/FADEINTIME)
-		end
-		self.shadow:SetAlpha(self:Alpha())
-	end
-	
-	x,y = self:Center()
-	if x ~= self.oldx then
-		self.dx = x - self.oldx
-	end
-	if y ~= self.oldy then
-		self.dy = y - self.oldy	
-	end
-	if x ~= self.oldx or y ~= self.oldy then
-		-- moved, draw link
-		linkLayer:Draw()
-		-- also update the rest of the group, if needed: TODO change this later
-		if self.group ~= nil then
-			rx,ry = self.group.r:Center()
-			self.group.r:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
-			
-			for i=1, #self.group.regions do
-				if self.group.regions[i] ~= self then
-					rx,ry = self.group.regions[i]:Center()
-					self.group.regions[i].oldx = rx+self.dx	-- FIXME: stopgap
-					self.group.regions[i].oldy = ry+self.dy
-					self.group.regions[i]:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
-				end				
-			end
-		end
-	end
-	
-	-- move if we have none zero speed
-	newx = x
-	newy = y
-	if self.sx ~= 0 then
-		newx = x + self.sx*elapsed
-		self.sx = self.sx*0.9
-		if self.sx < 2 then
-			self.sx = 0
-		end
-	end
-
-	if self.sy ~= 0 then
-		newy = y + self.sy*elapsed
-		self.sy = self.sy*0.9
-		if self.sy < 2 then
-			self.sy = 0
-		end
-	end
-	if self.sy ~= 0 or self.sx ~= 0 then
-		-- DPrint(self:Name().." bounced "..self.sx.." "..self.sy)
-		self:SetAnchor('CENTER', newx, newy)
-		self:EnableInput(true)
-	end
-	
-	self.oldx = x
-	self.oldy = y
-	
-	-- animate size if needed:
-	if self.w ~= self:Width() then
-		if math.abs(self:Width() - self.w) < EPSILON then	-- close enough
-			self:SetWidth(self.w)
-		else
-			self:SetWidth(self:Width() + (self.w-self:Width()) * elapsed/FADEINTIME)
-		end
-		self.tl:SetHorizontalAlign("JUSTIFY")
-    self.tl:SetVerticalAlign("MIDDLE")
-	end
-
-	if self.h ~= self:Height() then
-		if math.abs(self:Height() - self.h) < EPSILON then	-- close enough
-			self:SetHeight(self.h)
-		else
-			self:SetHeight(self:Height() + (self.h-self:Height()) * elapsed/FADEINTIME)
-		end
-		self.tl:SetHorizontalAlign("JUSTIFY")
-    self.tl:SetVerticalAlign("MIDDLE")
-	end
-
-	
-end
-]]--
 
 function CloseRegionWrapper(self)
 	RemoveRegion(self)
@@ -645,7 +349,7 @@ function StartLinkRegion(self, draglet)
 		-- if we have drag target, try creating a link right away
 		tx, ty = draglet:Center()
 		for i = 1, #regions do
-			if regions[i] ~= self and regions[i].r.usable then
+			if regions[i].r ~= self and regions[i].r.usable then
 				DPrint("try link "..self:Name().." "..regions[i].r:Name())
 				rx, ry = regions[i].r:Center()
 				if math.abs(tx-rx) < INITSIZE and math.abs(ty-ry) < INITSIZE then
@@ -658,7 +362,7 @@ function StartLinkRegion(self, draglet)
 				end
 			end
 		end
-		
+
 		initialLinkRegion = nil
 		CloseMenu(self)
 		OpenRegionMenu(self)
@@ -673,10 +377,10 @@ function EndLinkRegion(self)
 		-- DPrint("linked from "..initialLinkRegion:Name().." to "..self:Name())
 		-- TODO create the link here!
 
-		table.insert(initialLinkRegion.links["OnTouchUp"], {TapperRegion.TouchUp, self})
+		table.insert(initialLinkRegion.links["OnTouchUp"], {TapperRegion.TouchUp, self.r})
 		
 		-- add visual link too:
-		linkLayer:Add(initialLinkRegion, self)
+		linkLayer:Add(initialLinkRegion, self.r)
 		linkLayer:ResetPotentialLink()
 		linkLayer:Draw()
 		-- add notification
@@ -698,23 +402,15 @@ function RemoveLinkBetween(r1, r2)
 		end
 	end
 end
-	
---[[
-function RemoveV(vv)
-	CloseMenu(vv)
 
-    PlainVRegion(vv)
-    vv:EnableInput(false)
-    vv:EnableMoving(false)
-    vv:EnableResizing(false)
-    vv:Hide()
-    vv.usable = false
-    vv.group = nil
-
-    table.insert(recycledregions, vv.id)
-    DPrint(vv:Name().." removed")
+function RaiseToTop(vv)
+	vv.r.shadow:MoveToTop()
+	vv.r.shadow:SetLayer("LOW")
+	vv.r:MoveToTop()
+	vv.r:SetLayer("LOW")
 end
-]]--
+
+
 function DuplicateRegion(vv, cx, cy)
 	x,y = vv:Center()
 	local copyRegion = TapperRegion:new()
@@ -723,10 +419,10 @@ function DuplicateRegion(vv, cx, cy)
 		copyRegion.r:SetAnchor("CENTER", cx, cy)
 	else
 		copyRegion.r:SetAnchor("CENTER",x+INITSIZE+20,y)
-	end		
+	end
 	copyRegion.r.counter = vv.counter
 	copyRegion.r.links = vv.links
-		
+	
 	list = copyRegion.r.links["OnTouchUp"]
 	if list ~= nil then
 		for k = 1,#list do
@@ -739,19 +435,18 @@ function DuplicateRegion(vv, cx, cy)
 		if regions[i].r.usable and (regions[i].r ~= vv or regions[i].r ~= copyRegion.r) then
 			linkList = regions[i].r.links["OnTouchUp"]
 			if linkList ~= nil then
-				
 				for k = 1,#linkList do
 					if linkList[k][2] == vv then
 						table.insert(linkList, {TapperRegion.TouchUp, copyRegion.r})
 						linkLayer:Add(regions[i].r, copyRegion.r)
 					end
 				end
-			end			
+			end
 		end
 	end
 	
 	if copyRegion.r.counter == 1 then
-		SwitchRegionType(copyRegion)
+		SwitchRegionType(copyRegion.r)
 		copyRegion.r.value = vv.value
 		copyRegion.r.tl:SetLabel(copyRegion.r.value)
 	end
@@ -759,10 +454,11 @@ function DuplicateRegion(vv, cx, cy)
 	linkLayer:Draw()
 	
 -- 	TODO: make this a common function to raise region to top
-	copyRegion.r.shadow:MoveToTop()
+	--[[copyRegion.r.shadow:MoveToTop()
 	copyRegion.r.shadow:SetLayer("LOW")
 	copyRegion.r:MoveToTop()
-	copyRegion.r:SetLayer("LOW")
+	copyRegion.r:SetLayer("LOW")]]--
+	RaiseToTop(copyRegion)
 	
 	CloseMenu(vv)
 	OpenRegionMenu(vv)

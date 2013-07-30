@@ -65,8 +65,6 @@ function DeleteLinkAction(r1, r2)
 	RemoveLinkBetween(r1, r2)
 end
 
-
-
 -- radial menu layout:
 -- 1 2 3
 -- 4 9 5
@@ -79,7 +77,7 @@ local buttonLocation = {
 	[4]={"LEFT", BUTTONOFFSET, 0},
 	[5]={"RIGHT", -BUTTONOFFSET, 0},
 	[6]={"BOTTOMLEFT", BUTTONOFFSET, BUTTONOFFSET},
-	[7]={"BOTTOM", 0, BUTTONOFFSET},	
+	[7]={"BOTTOM", 0, BUTTONOFFSET},
 	[8]={"BOTTOMRIGHT", -BUTTONOFFSET, BUTTONOFFSET},
 	[9]={"CENTER", 0, 0}
 }
@@ -91,10 +89,18 @@ regionMenu.cmdList = {
 	{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag},
 	{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
 	{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag},
-	{"", testMenu, 6, "tw_timer.png"}
+	{"", testMenu, 6, "tw_timer.png"},
 	-- {"", testMenu, 7, "tw_paint.png"}
-	-- {"", testMenu, 8, "tw_run.png"}
+	--{"", testMenu, 8, "tw_run.png"}
+	{"", CloseMenu, 8, "tw_socket1.png"}
 }
+
+local linkMenu = {}
+linkMenu.cmdList = {
+	{"",testMenu, 3, "tw_socket1.png"}
+}
+
+
 
 local linkReceiverMenu = {}
 -- label, func, anchor relative to region, image file
@@ -108,6 +114,7 @@ linkReceiverMenu.cmdList = {
 }
 
 function initMenus(menuObj)
+	DPrint("Made Menu")
 	menuObj.items = {}
 
 	for _,item in pairs(menuObj.cmdList) do
@@ -174,7 +181,7 @@ end
 
 -- initialize regionMenu graphics
 initMenus(regionMenu)
-
+initMenus(linkMenu)
 -- initialize connection receiver menu graphics
 linkReceiverMenu.items = {}
 
@@ -228,9 +235,9 @@ function OpenMenu(self)
         regionMenu.items[i]:MoveToTop()
 				pos = regionMenu.items[i].anchorpos
 				regionMenu.items[i]:SetAnchor("CENTER", self,
-																			buttonLocation[pos][1],
-																			buttonLocation[pos][2],
-																			buttonLocation[pos][3])
+															buttonLocation[pos][1],
+															buttonLocation[pos][2],
+															buttonLocation[pos][3])
     end
       
 		self.menu = regionMenu
@@ -307,6 +314,15 @@ function CloseMenu(self)
 	end	
 end
 
+function SwitchToLinkMenu()
+	for i = 1,#regionMenu.items do
+        regionMenu.items[i]:Hide()
+        regionMenu.items[i]:EnableInput(false)
+		regionMenu.items[i]:Handle("OnTouchUp", nil)
+		regionMenu.items[i]:Handle("OnUpdate", nil)
+    end
+end
+
 
 function CallLinkFunc(self)
 	-- use this to call function on the link menu button
@@ -347,7 +363,7 @@ function OpenLinkMenu(menu)
   menu.r:MoveToTop()
 	
 	X1,Y1 = menu.sender:Center()
-	X2,Y2 = menu.receiver.r:Center()
+	X2,Y2 = menu.receiver:Center()
 	menu.r:SetAnchor("CENTER", (X1+X2)/2, (Y1+Y2)/2)	   
 end
 	
@@ -517,7 +533,7 @@ function MenuSelfShowHide(opt,vv)
     end
     vv.eventlist["OnUpdate"].currentevent = SelfShowHideEvent
     vv:Handle("OnUpdate",nil)
-    vv:Handle("OnUpdate",VUpdate)
+    vv:Handle("OnUpdate",TapperRegion.Update)
     DPrint(vv:Name().." randomly shows and hides. Click it to stop.")
     UnHighlight(opt)
     CloseMenu()

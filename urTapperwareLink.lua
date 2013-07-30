@@ -54,7 +54,7 @@ function linkLayer:Add(r1, r2)
 	else
 		table.insert(self.list[r1], r2)
 	end
-	local	menu = newLinkMenu(r1, r2)
+	local menu = newLinkMenu(r1, r2)
 	table.insert(self.menus, menu)
 end
 
@@ -84,14 +84,14 @@ function linkLayer:Draw()
 	self.links.t:SetBrushSize(8)
 	
 	for sender, receivers in pairs(self.list) do
-		X1, Y1 = sender:Center()		
+		X1, Y1 = sender:Center()
 		for _, r in ipairs(receivers) do
 			
-			X2, Y2 = r.r:Center()
-			self.links.t:Line(X1,Y1,X2,Y2)			
+			X2, Y2 = r:Center()
+			self.links.t:Line(X1,Y1,X2,Y2)
 		end
 	end
-
+	
 	-- draw the link menu (close button), it will compute centroid using
 	-- region locations	
 	for _,menu in ipairs(self.menus) do

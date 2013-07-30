@@ -1,83 +1,11 @@
 -- =================
--- = region object =
+-- = Region Object =
 -- =================
 
 -- rewrite of the urVen region code as OO Lua
 
 -- using the prototype facility in lua to do OO, a bit painful yes:
 
--- ===================
--- = Region Creation =
--- ===================
---[[
-FreeAllRegions()
-DPrint(" ")
-
-toDelete = nil
-
-INITSIZE = 140
-EPSILON = 0.001
-FADEINTIME = .2
-
-function TouchUp(self)
-  --shadow:Hide()
-  
--- only create if we are not too close to the edge
-  local x,y = InputPosition()
-
-    --if x>CREATION_MARGIN and x<ScreenWidth()-CREATION_MARGIN and 
-    --  y>CREATION_MARGIN and y<ScreenHeight()-CREATION_MARGIN then
-    local region = TapperRegion:new()--CreateorRecycleregion('region', 'backdrop', UIParent)
-    region.r:Show()
-    region.r:SetAnchor("CENTER",x,y)
-  --DPrint(region:Name().." created, centered at "..x..", "..y)
-  --end
-end
-
-backdrop = Region('region', 'backdrop', UIParent)
-backdrop:SetWidth(ScreenWidth())
-backdrop:SetHeight(ScreenHeight())
-backdrop:SetLayer("BACKGROUND")
-backdrop:SetAnchor('BOTTOMLEFT',0,0)
-backdrop:Handle("OnTouchUp", TouchUp)
-backdrop:EnableInput(true)
-backdrop:SetClipRegion(0,0,ScreenWidth(),ScreenHeight())
-backdrop:EnableClipping(true)
-backdrop.player = {}
-backdrop.t = backdrop:Texture("tw_gridback.jpg")
-backdrop.t:SetTexCoord(0,ScreenWidth()/1024.0,1.0,0.0)
-backdrop.t:SetBlendMode("BLEND")
-backdrop:Show()
-
-function RemoveRegionButton(self)
-  RemoveRegion(regions[toDelete])
-end
-
-deleteButton = Region()
-deleteButton:SetWidth(100)
-deleteButton:SetHeight(100)
-deleteButton:SetAnchor('BOTTOMLEFT',0,0)
-deleteButton:Handle("OnTouchUp",RemoveRegionButton)
-deleteButton:EnableInput(true)
-deleteButton.t = deleteButton:Texture(255,0,255,255)
-deleteButton:Show()
-
-function InfoBoxUpdate(self)
-  self.tl:SetLabel("Number of Regions: "..#regions.."\nNumber of Reclyced Regions: "..#recycledregions)
-end
-
-InfoBox = Region()
-InfoBox.tl = InfoBox:TextLabel()
-
-InfoBox:Show()
-InfoBox.t = InfoBox:Texture(0,0,255,255)
-InfoBox:SetWidth(500)
-InfoBox:SetHeight(100)
-InfoBox:SetAnchor("BOTTOMLEFT",0,ScreenHeight()-100)
-InfoBox:Handle("OnUpdate",InfoBoxUpdate)
-InfoBox.tl:SetFont("Arial")
-InfoBox.tl:SetFontHeight(24)
-]]--
 -- ==================
 -- = Region Manager =
 -- ==================
@@ -196,7 +124,7 @@ end
 
 function RemoveRegion(self)
   CloseMenu(self)
-  
+
   ResetRegion(self)
   self:EnableInput(false)
   self:EnableMoving(false)
@@ -204,7 +132,7 @@ function RemoveRegion(self)
   self:Hide()
   self.usable = false
   self.group = nil
-  
+
   table.insert(recycledregions, self.id)
   DPrint(self:Name().." removed")
 end
@@ -225,7 +153,7 @@ function TapperRegion:new(o)
   o = o or {}     -- create object if user does not provide one
   setmetatable(o, self)
   self.__index = self
-  
+
   o = AllocRegion('region','backdrop',UIParent)
 
   return o
@@ -247,7 +175,7 @@ function TapperRegion.Update(self,elapsed)
     self.dx = x - self.oldx
   end
   if y ~= self.oldy then
-    self.dy = y - self.oldy 
+    self.dy = y - self.oldy
   end
   
   if x ~= self.oldx or y ~= self.oldy then
@@ -408,4 +336,11 @@ function TapperRegion.TouchUp(self)
   
   
   TapperRegion.CallEvents("OnTouchUp",self)
+end
+
+function TapperRegion:RaiseToTop()
+  self.r.shadow:MoveToTop()
+  self.r.shadow:SetLayer("LOW")
+  self.r:MoveToTop()
+  self.r:SetLayer("LOW")
 end
