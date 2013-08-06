@@ -49,11 +49,14 @@ end
 
 -- add links to our list
 function linkLayer:Add(r1, r2)
-	if self.list[r1] == nil then
-		self.list[r1] = {r2}
+	
+	if self.list[{r1, 10}] == nil then
+		self.list[{r1, 10}] = {r2}
 	else
-		table.insert(self.list[r1], r2)
+		table.insert(self.list[{r1, 10}], r2)
 	end
+	
+	
 	local menu = newLinkMenu(r1, r2)
 	table.insert(self.menus, menu)
 end
@@ -84,7 +87,7 @@ function linkLayer:Draw()
 	self.links.t:SetBrushSize(8)
 	
 	for sender, receivers in pairs(self.list) do
-		X1, Y1 = sender:Center()
+		X1, Y1 = sender[1]:Center()
 		for _, r in ipairs(receivers) do
 			
 			X2, Y2 = r:Center()
@@ -114,8 +117,10 @@ function linkLayer:ResetPotentialLink()
 end
 
 function linkLayer:SendMessageToReceivers(sender, message)
-	for _, r in pairs(self.list[sender]) do
-		-- sender:message
-		
+	if self.list[sender] ~= nil and message == "OnTouchUp" then
+		for _, r in pairs(self.list[sender]) do
+			--TouchUpWrapper(r)
+			r:TouchUp()
+		end
 	end
 end

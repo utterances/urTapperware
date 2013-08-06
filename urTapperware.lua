@@ -24,6 +24,9 @@ LASSOSEPDISTANCE = 25 -- pixels between each point when drawing selection lasso
 --regions = {}
 --recycledregions = {}
 initialLinkRegion = nil
+finishLinkRegion = nil
+linkEvent = nil
+linkEffect = nil
 startedSelection = false
 -- touch event state machine:
 -- isHoldingRegion = false
@@ -38,9 +41,11 @@ modes = {"EDIT","RELEASE"}
 current_mode = modes[1]
 dofile(DocumentPath("urTapperwareTools.lua"))
 dofile(DocumentPath("urTapperwareMenu.lua"))	-- first!
-dofile(DocumentPath("urTapperwareLink.lua"))	-- needs menu
+--dofile(DocumentPath("urTapperwareLink.lua"))	-- needs menu
 dofile(DocumentPath("urTapperwareGroup.lua"))
-dofile(DocumentPath("urTapperwareRegion.lua"))
+--dofile(DocumentPath("urTapperwareRegion.lua"))
+dofile(DocumentPath("urTapperwareRegionLinks.lua"))
+dofile(DocumentPath("urTapperMenu.lua"))
 -- ============
 -- = Backdrop =
 -- ============
@@ -58,13 +63,13 @@ function TouchUp(self)
 		startedSelection = false
 		local tempSelected = {}
 		for i = 1, #regions do
-			if regions[i].r.usable then
-				x,y = regions[i].r:Center()
+			if regions[i].usable then
+				x,y = regions[i]:Center()
 				if pointInSelectionPolygon(x,y) then
 					table.insert(tempSelected, regions[i])
-					ChangeSelectionStateRegion(regions[i].r, true)
+					ChangeSelectionStateRegion(regions[i], true)
 				else
-					ChangeSelectionStateRegion(regions[i].r, false)
+					ChangeSelectionStateRegion(regions[i], false)
 				end
 			end
 		end
@@ -84,8 +89,8 @@ function TouchUp(self)
 		if x>CREATION_MARGIN and x<ScreenWidth()-CREATION_MARGIN and 
 			y>CREATION_MARGIN and y<ScreenHeight()-CREATION_MARGIN then
 			local region = TapperRegion:new()
-			region.r:Show()
-			region.r:SetAnchor("CENTER",x,y)
+			region:Show()
+			region:SetAnchor("CENTER",x,y)
 			-- DPrint(region:Name().." created, centered at "..x..", "..y)
 		end
 	
@@ -132,7 +137,7 @@ backdrop:EnableInput(true)
 backdrop:SetClipRegion(0,0,ScreenWidth(),ScreenHeight())
 backdrop:EnableClipping(true)
 backdrop.player = {}
-backdrop.t = backdrop:Texture("tw_gridback.jpg")
+backdrop.t = backdrop:Texture("tw_paperback.jpg")
 backdrop.t:SetTexCoord(0,ScreenWidth()/1024.0,1.0,0.0)
 backdrop.t:SetBlendMode("BLEND")
 backdrop:Show()
@@ -213,7 +218,7 @@ function pointInSelectionPolygon(x, y)
 		    or   selectionPoly[j][2]< y and selectionPoly[i][2]>=y)
 		    and  (selectionPoly[i][1]<=x or selectionPoly[j][1]<=x)) then
 			
-      if (selectionPoly[i][1]+(y-selectionPoly[i][2])
+		if (selectionPoly[i][1]+(y-selectionPoly[i][2])
 					/(selectionPoly[j][2]-selectionPoly[i][2])
 					*(selectionPoly[j][1]-selectionPoly[i][1])<x) then
       	oddNodes = not oddNodes
@@ -253,6 +258,7 @@ end
 
 linkLayer:Init()
 
+--To Be Moved To Region
 function HoldToTrigger(self, elapsed) -- for long tap
     x,y = self:Center()
     
@@ -291,7 +297,7 @@ function DeTrigger(self) -- for long tap
     self:Handle("OnUpdate",nil)
     self:Handle("OnUpdate",TapperRegion.Update)
 end
-
+---------------
 function CloseRegionWrapper(self)
 	RemoveRegion(self)
 end
@@ -309,18 +315,18 @@ function SwitchRegionType(self) -- TODO: change method name to reflect
 	self.t:SetTexture("tw_roundrec_slate.png")
 	self.value = 0
 	self.counter = 1
-  self.tl:SetLabel(self.value)
-  self.tl:SetFontHeight(42)
-  self.tl:SetColor(255,255,255,255) 
-  self.tl:SetHorizontalAlign("JUSTIFY")
-  self.tl:SetVerticalAlign("MIDDLE")
-  self.tl:SetShadowColor(10,10,10,255)
-  self.tl:SetShadowOffset(1,1)
-  self.tl:SetShadowBlur(1)
-	
+	self.tl = self:TextLabel()
+	self.tl:SetLabel(self.value)
+	self.tl:SetFontHeight(42)
+	self.tl:SetColor(255,255,255,255) 
+	self.tl:SetHorizontalAlign("JUSTIFY")
+	self.tl:SetVerticalAlign("MIDDLE")
+	self.tl:SetShadowColor(10,10,10,255)
+	self.tl:SetShadowOffset(1,1)
+	self.tl:SetShadowBlur(1)
 	-- TESTING: just for testing counter:
-  table.insert(self.eventlist["OnTouchUp"], AddOneToCounter)
-	
+	table.insert(self.eventlist["OnTouchUp"], AddOneToCounter)
+
 	CloseMenu(self)
 end
 	
@@ -341,23 +347,23 @@ function ChangeSelectionStateRegion(self, select)
 
 	self.isSelected = select
 end
-	
+
 function StartLinkRegion(self, draglet)
 	initialLinkRegion = self
-	
+
 	if draglet ~= nil then
 		-- if we have drag target, try creating a link right away
 		tx, ty = draglet:Center()
 		for i = 1, #regions do
-			if regions[i].r ~= self and regions[i].r.usable then
-				DPrint("try link "..self:Name().." "..regions[i].r:Name())
-				rx, ry = regions[i].r:Center()
+			if regions[i] ~= self and regions[i].usable then
+				DPrint("try link "..self:Name().." "..regions[i]:Name())
+				rx, ry = regions[i]:Center()
 				if math.abs(tx-rx) < INITSIZE and math.abs(ty-ry) < INITSIZE then
 					-- found a match, create a link here
 					DPrint("linked")
 					
 					EndLinkRegion(regions[i])
-					initialLinkRegion = nil
+					--initialLinkRegion = nil
 					return
 				end
 			end
@@ -371,24 +377,63 @@ function StartLinkRegion(self, draglet)
 		DPrint("Tap another region to link")
 	end
 end
+menu = nil
+function finishLink(message)
+	linkEffect = message
+	menu:dismiss()
+	
+	-- add visual link too:
+	linkLayer:Add(initialLinkRegion, finishLinkRegion, 10, 10)
+	linkLayer:ResetPotentialLink()
+	linkLayer:Draw()
+	-- add notification
+	linkIcon:ShowLinked()
+	
+	CloseMenu(initialLinkRegion)
+	initialLinkRegion = nil
+	finishLinkRegion = nil
+end
+
+function chooseEffect(message)
+	linkEvent = message
+	DPrint(linkEvent)
+	
+	menu:dismiss()
+	
+	cmdlist = {{'Counter',finishLink,'Counter'},
+				{'Touch Down',finishLink,'Chose Event Type: OnTouchDown'},
+				{'Move',finishLink,'Chose Event Type: Move'},
+				{'Cancel',dismissMenu,nil}}
+	menu = loadSimpleMenu(cmdlist, 'Choose Event Type')
+	menu:present(x,y)
+end
 
 function EndLinkRegion(self)
 	if initialLinkRegion ~= nil then
 		-- DPrint("linked from "..initialLinkRegion:Name().." to "..self:Name())
 		-- TODO create the link here!
 
-		table.insert(initialLinkRegion.links["OnTouchUp"], {TapperRegion.TouchUp, self.r})
+		--table.insert(initialLinkRegion.links["OnTouchUp"], {TapperRegion.TouchUp, self.r})
 		
+		finishLinkRegion = self
+		cmdlist = {{'Touch Up',chooseEffect,'OnTouchUp'},
+					{'Touch Down',test,'Chose Event Type: OnTouchDown'},
+					{'Move',test,'Chose Event Type: Move'},
+					{'Cancel',dismissMenu,nil}}
+		menu = loadSimpleMenu(cmdlist, 'Choose Event Type')
+		menu:present(x,y)
+		
+		
+		--[[
 		-- add visual link too:
-		linkLayer:Add(initialLinkRegion, self.r)
+		linkLayer:Add(initialLinkRegion, self, 10, 10)
 		linkLayer:ResetPotentialLink()
 		linkLayer:Draw()
 		-- add notification
 		linkIcon:ShowLinked()
 		
 		CloseMenu(initialLinkRegion)
-		initialLinkRegion = nil
-		
+		initialLinkRegion = nil]]--
 	end
 end
 
@@ -404,60 +449,55 @@ function RemoveLinkBetween(r1, r2)
 end
 
 function RaiseToTop(vv)
-	vv.r.shadow:MoveToTop()
-	vv.r.shadow:SetLayer("LOW")
-	vv.r:MoveToTop()
-	vv.r:SetLayer("LOW")
+	vv.shadow:MoveToTop()
+	vv.shadow:SetLayer("LOW")
+	vv:MoveToTop()
+	vv:SetLayer("LOW")
 end
 
 
 function DuplicateRegion(vv, cx, cy)
 	x,y = vv:Center()
 	local copyRegion = TapperRegion:new()
-	copyRegion.r:Show()
+	copyRegion:Show()
 	if cx ~= nil then
-		copyRegion.r:SetAnchor("CENTER", cx, cy)
+		copyRegion:SetAnchor("CENTER", cx, cy)
 	else
-		copyRegion.r:SetAnchor("CENTER",x+INITSIZE+20,y)
+		copyRegion:SetAnchor("CENTER",x+INITSIZE+20,y)
 	end
-	copyRegion.r.counter = vv.counter
-	copyRegion.r.links = vv.links
+	copyRegion.counter = vv.counter
+	copyRegion.links = vv.links
 	
-	list = copyRegion.r.links["OnTouchUp"]
+	list = copyRegion.links["OnTouchUp"]
 	if list ~= nil then
 		for k = 1,#list do
-			linkLayer:Add(copyRegion.r, list[k][2])
+			linkLayer:Add(copyRegion, list[k][2])
 		end
 	end
 	
 	-- TODO: optimize this part: right now it's a messy search for every inbound links
 	for i = 1, #regions do
-		if regions[i].r.usable and (regions[i].r ~= vv or regions[i].r ~= copyRegion.r) then
-			linkList = regions[i].r.links["OnTouchUp"]
+		if regions[i].usable and (regions[i] ~= vv or regions[i] ~= copyRegion) then
+			linkList = regions[i].links["OnTouchUp"]
 			if linkList ~= nil then
 				for k = 1,#linkList do
 					if linkList[k][2] == vv then
-						table.insert(linkList, {TapperRegion.TouchUp, copyRegion.r})
-						linkLayer:Add(regions[i].r, copyRegion.r)
+						table.insert(linkList, {TapperRegion.TouchUp, copyRegion})
+						linkLayer:Add(regions[i], copyRegion)
 					end
 				end
 			end
 		end
 	end
 	
-	if copyRegion.r.counter == 1 then
-		SwitchRegionType(copyRegion.r)
-		copyRegion.r.value = vv.value
-		copyRegion.r.tl:SetLabel(copyRegion.r.value)
+	if copyRegion.counter == 1 then
+		SwitchRegionType(copyRegion)
+		copyRegion.value = vv.value
+		copyRegion.tl:SetLabel(copyRegion.value)
 	end
 	
 	linkLayer:Draw()
 	
--- 	TODO: make this a common function to raise region to top
-	--[[copyRegion.r.shadow:MoveToTop()
-	copyRegion.r.shadow:SetLayer("LOW")
-	copyRegion.r:MoveToTop()
-	copyRegion.r:SetLayer("LOW")]]--
 	RaiseToTop(copyRegion)
 	
 	CloseMenu(vv)
@@ -473,6 +513,10 @@ function RegionOverLap(r1, r2)
 	x2,y2 = r2:Center()
 	return (r1:Width() + r2:Width())/1.8 > math.abs(x1-x2) and 
 				(r1:Height() + r2:Height())/1.8 > math.abs(y1-y2)
+end
+
+function sendEvent(region, event) 
+	region:event()
 end
 
 ----------------- v11.pagebutton -------------------

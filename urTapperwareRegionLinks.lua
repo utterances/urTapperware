@@ -66,13 +66,15 @@ end
 function CreateRegion(ttype,name,parent,id) -- customized initialization of region
 -- add a visual shadow as a second layer
 	local r_s = Region(ttype,"drops"..id,parent)
-	r_s.t = r_s:Texture("tw_shadow.png")
+	--r_s.t = r_s:Texture("urMus-Intro_106.png")
+	
+	r_s.t = r_s:Texture("tw_shadow2.png")
 	r_s.t:SetBlendMode("BLEND")
 	r_s:SetWidth(INITSIZE+70)
 	r_s:SetHeight(INITSIZE+70)
 	--r_s:EnableMoving(true)
 	r_s:SetLayer("LOW")
-	r_s:Show() 
+	r_s:Show()
 
 	local r = Region(ttype,"Region "..id,parent)
 	r.tl = r:TextLabel()
@@ -158,6 +160,11 @@ function TapperRegion:new(o)
 	return o
 end
 
+function TapperRegion:Show()
+	--self.shadow:Show()
+	self:Show()
+end
+
 function TapperRegion.Update(self,elapsed)
 	-- DPrint(elapsed)
 	if self:Alpha() ~= self.alpha then
@@ -182,12 +189,12 @@ function TapperRegion.Update(self,elapsed)
 		linkLayer:Draw()
 		-- also update the rest of the group, if needed: TODO change this later
 		if self.group ~= nil then
-			rx,ry = self.group:Center()
-			self.group:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
+			rx,ry = self.group.r:Center()
+			self.group.r:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
 			
 			for i=1, #self.group.regions do
 				if self.group.regions[i] ~= self then
-					rx,ry = self.group.regions[i]]]:Center()
+					rx,ry = self.group.regions[i]:Center()
 					self.group.regions[i].oldx = rx+self.dx -- FIXME: stopgap
 					self.group.regions[i].oldy = ry+self.dy
 					self.group.regions[i]:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
@@ -257,7 +264,8 @@ function TapperRegion.CallEvents(signal,vv)
 		list[k](vv)
 	end
 	
-	SendMessageToReciversWrapper(vv, signal)
+	linkLayer:SendMessageToReceivers(vv, signal)
+
 -- fire off messages to linked regions
 	--[[list = vv.links[signal]
 	if list ~= nil then
@@ -342,4 +350,146 @@ function TapperRegion:RaiseToTop()
 	self.shadow:SetLayer("LOW")
 	self:MoveToTop()
 	self:SetLayer("LOW")
+end
+-- ===============================
+-- = Visual Links between regions=
+-- ===============================
+
+-- methods and appearances and menus for deleting / editing
+-- assumes urTapperwareMenu.lua is already processed
+linkEventMenu = {}
+linkEventMenu.cmdList = {
+	{"Touch Up", testLink},
+	{"Update Move", testLink}
+}
+
+linkEffectMenu = {}
+linkEffectMenu.cmdList = {
+	{"Normal", testLink},
+	{"Counter", testLink},
+	{"Move", testLink}
+}
+
+
+
+linkLayer = {}
+
+function linkLayer:Init()
+	self.list = {}
+	-- this is actually a dictionary, key = sender, value = {list of receivers}
+	self.potentialLinkList = {}
+	self.menus = {}
+	
+	-- one region for drawing formed links
+	self.links = Region('region', 'backdrop', UIParent)
+	self.links:SetWidth(ScreenWidth())
+	self.links:SetHeight(ScreenHeight())
+	self.links:SetLayer("TOOLTIP")
+	self.links:SetAnchor('BOTTOMLEFT',0,0)
+	self.links.t = self.links:Texture()
+	self.links.t:Clear(0,0,0,0)
+	self.links.t:SetTexCoord(0,ScreenWidth()/1024.0,1.0,0.0)
+	self.links.t:SetBlendMode("BLEND")
+	self.links:EnableInput(false)
+	self.links:EnableMoving(false)
+	
+	self.links:MoveToTop()
+	self.links:Show()
+	
+	-- set up another region for drawing guides or potential links
+	self.linkGuides = Region('region', 'backdrop', UIParent)
+	self.linkGuides:SetWidth(ScreenWidth())
+	self.linkGuides:SetHeight(ScreenHeight())
+	self.linkGuides:SetLayer("TOOLTIP")
+	self.linkGuides:SetAnchor('BOTTOMLEFT',0,0)
+	self.linkGuides.t = self.linkGuides:Texture()
+	self.linkGuides.t:Clear(0,0,0,0)
+	self.linkGuides.t:SetTexCoord(0,ScreenWidth()/1024.0,1.0,0.0)
+	self.linkGuides.t:SetBlendMode("BLEND")
+	self.linkGuides:EnableInput(false)
+	self.linkGuides:EnableMoving(false)
+	
+	self.linkGuides:MoveToTop()
+	self.linkGuides:Show()
+	
+end
+
+-- add links to our list
+function linkLayer:Add(r1, r2, event, effect)
+	
+	if self.list[r1] == nil then
+		self.list[r1] = {r2}
+	else
+		table.insert(self.list[r1], r2)
+	end
+	
+	
+	local menu = newLinkMenu(r1, r2)
+	table.insert(self.menus, menu)
+end
+
+-- remove links
+function linkLayer:Remove(r1, r2)	
+	if self.list[r1] ~= nil then
+		
+		tableRemoveObj( self.list[r1], r2 )
+		
+		--[[for i = 1, #self.list[r1] do
+			if self.list[r1][i] == r2 then
+				table.remove(	self.list[r1], i)
+			end
+		end]]--
+	end
+	
+	for i,menu in ipairs(self.menus) do
+		if menu.sender == r1 and menu.receiver == r2 then
+			table.remove(self.menus, i)
+			deleteLinkMenu(menu)
+		end
+	end
+end
+
+-- draw a line between linked regions, also draws menu
+function linkLayer:Draw()
+	self.links.t:Clear(0,0,0,0)
+	self.links.t:SetBrushColor(100,255,240,200)
+	self.links.t:SetBrushSize(8)
+	
+	for sender, receivers in pairs(self.list) do
+		X1, Y1 = sender:Center()
+		for _, r in ipairs(receivers) do
+			
+			X2, Y2 = r:Center()
+			self.links.t:Line(X1,Y1,X2,Y2)
+		end
+	end
+	
+	-- draw the link menu (close button), it will compute centroid using
+	-- region locations	
+	for _,menu in ipairs(self.menus) do
+		OpenLinkMenu(menu)
+	end	
+end
+
+function linkLayer:DrawPotentialLink(region, draglet)
+	self.linkGuides.t:Clear(0,0,0,0)
+	self.linkGuides.t:SetBrushColor(100,255,240,100)
+	self.linkGuides.t:SetBrushSize(12)
+	
+	rx, ry = region:Center()
+	posx, posy = draglet:Center()
+	self.linkGuides.t:Line(rx,ry,posx,posy)
+end
+
+function linkLayer:ResetPotentialLink()
+	self.linkGuides.t:Clear(0,0,0,0)
+end
+
+function linkLayer:SendMessageToReceivers(sender, message)
+	if self.list[sender] ~= nil and message == "OnTouchUp" then
+		for _, r in pairs(self.list[sender]) do
+			--TouchUpWrapper(r)
+			r:TouchUp()
+		end
+	end
 end
