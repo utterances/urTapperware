@@ -34,10 +34,8 @@ function ResetRegion(r) -- customized parameter initialization of region, events
 	r.h = INITSIZE
 
 -- event handling
-	r.links = {}
-	r.links["OnTouchDown"] = {}
-	r.links["OnTouchUp"] = {}
-	r.links["OnDoubleTap"] = {}
+	r.inlinks = {}
+	r.outlinks = {}
 
 -- initialize for events and signals
 	r.eventlist = {}
@@ -96,6 +94,8 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	r:Handle("OnUpdate",TapperRegion.Update)
 	--r:Handle("OnMove",VDrag)
 	
+
+	
 	return r
 end
 
@@ -150,12 +150,30 @@ end
 -- constructor
 function TapperRegion:new(o)
 	o = o or {}     -- create object if user does not provide one
+	o = AllocRegion('region','backdrop',UIParent)
 	setmetatable(o, self)
 	self.__index = self
-
-	o = AllocRegion('region','backdrop',UIParent)
-
 	return o
+end
+
+function TapperRegion:AddIncomingLink(l)
+	table.insert(self.inlinks,l)
+end
+
+function TapperRegion:RemoveIncomingLink(l)
+	tableRemoveObj(self.inlinks,l)
+end
+
+function TapperRegion:AddOutgoingLink(l)
+	table.insert(self.outlinks,l)
+end
+
+function TapperRegion:RemoveOutgoingLink(l)
+	tableRemoveObj(self.outlinks,l)
+end
+
+function TapperRegion:SendMessage(sender,message)
+-- Respond to incoming message from sender
 end
 
 function TapperRegion.Update(self,elapsed)
@@ -187,7 +205,7 @@ function TapperRegion.Update(self,elapsed)
 			
 			for i=1, #self.group.regions do
 				if self.group.regions[i] ~= self then
-					rx,ry = self.group.regions[i]]]:Center()
+					rx,ry = self.group.regions[i]:Center()
 					self.group.regions[i].oldx = rx+self.dx -- FIXME: stopgap
 					self.group.regions[i].oldy = ry+self.dy
 					self.group.regions[i]:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
@@ -257,7 +275,10 @@ function TapperRegion.CallEvents(signal,vv)
 		list[k](vv)
 	end
 	
-	SendMessageToReciversWrapper(vv, signal)
+	for k,v in pairs(vv.outlinks) do
+		v:SendMessageToReceivers(signal)
+	end
+--	SendMessageToReciversWrapper(vv, signal)
 -- fire off messages to linked regions
 	--[[list = vv.links[signal]
 	if list ~= nil then

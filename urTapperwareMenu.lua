@@ -61,8 +61,9 @@ function DupOnDrag(r)
 	-- DPrint("drag dup")
 end
 
-function DeleteLinkAction(r1, r2)
-	RemoveLinkBetween(r1, r2)
+function DeleteLinkAction(link)
+	link:destroy()
+--	RemoveLinkBetween(r1, r2)
 end
 
 -- radial menu layout:
@@ -173,8 +174,7 @@ function initLinkMenus()
 	r.func = DeleteLinkAction
 	
 	linkMenu.r = r
-	linkMenu.sender = nil
-	linkMenu.receiver = nil
+	linkMenu.link = nil
 	
 	return linkMenu
 end
@@ -328,7 +328,8 @@ function CallLinkFunc(self)
 	-- use this to call function on the link menu button
 	-- because we have reference to the link, not just one region
 	CloseLinkMenu(self)
-	self.func(self.parent.sender, self.parent.receiver)
+	self.func(self.parent.link)
+--	self.func(self.parent.sender, self.parent.receiver)
 end
 
 -- this actually calls all the menu function on the right region(s)
@@ -341,7 +342,7 @@ end
 -- ============================
 -- = public link menu methods =
 -- ============================
-function newLinkMenu(r1, r2)
+function newLinkMenu(l)
 	-- recycling constructor
 	local linkMenu
 	if # recycledLinkMenu > 0 then
@@ -349,28 +350,28 @@ function newLinkMenu(r1, r2)
 	else
 		linkMenu = initLinkMenus()
 	end
-	linkMenu.sender = r1
-	linkMenu.receiver = r2
+	linkMenu.link  = l
 	
 	return linkMenu
 end
 	
 function OpenLinkMenu(menu)
-	-- shows the actual menu
-	menu.r:Show()
-  menu.r:EnableInput(true)
-  menu.r:Handle("OnTouchUp", CallLinkFunc)
-  menu.r:MoveToTop()
+
+	if menu then
+		-- shows the actual menu
+		menu.r:Show()
+		menu.r:EnableInput(true)
+		menu.r:Handle("OnTouchUp", CallLinkFunc)
+		menu.r:MoveToTop()
 	
-	X1,Y1 = menu.sender:Center()
-	X2,Y2 = menu.receiver:Center()
-	menu.r:SetAnchor("CENTER", (X1+X2)/2, (Y1+Y2)/2)	   
+		X1,Y1 = menu.link.sender:Center()
+		X2,Y2 = menu.link.receiver:Center()
+		menu.r:SetAnchor("CENTER", (X1+X2)/2, (Y1+Y2)/2)
+	end
 end
 	
 function deleteLinkMenu(menu)
-	menu.sender = nil
-	menu.receiver = nil
-	-- CloseLinkMenu(menu)
+	--CloseLinkMenu(menu)
 	-- menu = self.parent
 	table.insert(recycledLinkMenu, menu)
 end

@@ -41,10 +41,11 @@ modes = {"EDIT","RELEASE"}
 current_mode = modes[1]
 dofile(DocumentPath("urTapperwareTools.lua"))
 dofile(DocumentPath("urTapperwareMenu.lua"))	-- first!
---dofile(DocumentPath("urTapperwareLink.lua"))	-- needs menu
+dofile(DocumentPath("urTapperwareLink.lua"))	-- needs menu
+dofile(DocumentPath("urTapperwareLinkLayer.lua"))	-- needs menu
 dofile(DocumentPath("urTapperwareGroup.lua"))
---dofile(DocumentPath("urTapperwareRegion.lua"))
-dofile(DocumentPath("urTapperwareRegionLinks.lua"))
+dofile(DocumentPath("urTapperwareRegion.lua"))
+--dofile(DocumentPath("urTapperwareRegionLinks.lua"))
 dofile(DocumentPath("urTapperMenu.lua"))
 -- ============
 -- = Backdrop =
@@ -383,7 +384,10 @@ function finishLink(message)
 	menu:dismiss()
 	
 	-- add visual link too:
-	linkLayer:Add(initialLinkRegion, finishLinkRegion, 10, 10)
+	DPrint("creating link:"..initialLinkRegion:Height().." "..finishLinkRegion:Height())
+	local link = link:new(initialLinkRegion,finishLinkRegion)
+	
+--	linkLayer:Add(initialLinkRegion, finishLinkRegion, 10, 10)
 	linkLayer:ResetPotentialLink()
 	linkLayer:Draw()
 	-- add notification
