@@ -196,6 +196,14 @@ function TapperRegion.Update(self,elapsed)
 	end
 	
 	if x ~= self.oldx or y ~= self.oldy then
+		--DPrint("x and y: "..x.." "..y)
+		--DPrint("From Up: "..self.dx.." "..self.dy)
+		for k,v in pairs(self.outlinks) do
+			if(v.event == "OnUpdate_Move") then
+				v:SendMessageToReceivers({self.dx, self.dy})
+			end
+		end	
+
 		-- moved, draw link
 		linkLayer:Draw()
 		-- also update the rest of the group, if needed: TODO change this later
@@ -276,7 +284,9 @@ function TapperRegion.CallEvents(signal,vv)
 	end
 	
 	for k,v in pairs(vv.outlinks) do
-		v:SendMessageToReceivers(signal)
+		if(v.event == signal) then
+			v:SendMessageToReceivers(signal)
+		end
 	end
 --	SendMessageToReciversWrapper(vv, signal)
 -- fire off messages to linked regions
@@ -364,3 +374,19 @@ function TapperRegion:RaiseToTop()
 	self:MoveToTop()
 	self:SetLayer("LOW")
 end
+
+function move(self, change)
+	x,y = self:Center()
+	DPrint(change[1].." "..change[2])
+	self.oldx = x + change[1]
+	self.oldy = y + change[2]
+	self:SetAnchor('CENTER',x+change[1],y+change[2])
+end
+
+function MoveLeft(self, message)
+	x,y = self:Center()
+	self.oldx = x - 10
+	self.oldy = y
+	self:SetAnchor('CENTER',x-10,y)
+end
+

@@ -53,11 +53,11 @@ dofile(DocumentPath("urTapperMenu.lua"))
 
 function TouchDown(self)
 	local x,y = InputPosition()
-
+	
 	shadow:Show()
 	shadow:SetAnchor('CENTER',x,y)
 end
-	
+
 function TouchUp(self)
 	shadow:Hide()
 	if startedSelection then
@@ -85,15 +85,15 @@ function TouchUp(self)
 	end
 	
 	-- only create if we are not too close to the edge
-  local x,y = InputPosition()
-			
-		if x>CREATION_MARGIN and x<ScreenWidth()-CREATION_MARGIN and 
-			y>CREATION_MARGIN and y<ScreenHeight()-CREATION_MARGIN then
-			local region = TapperRegion:new()
-			region:Show()
-			region:SetAnchor("CENTER",x,y)
-			-- DPrint(region:Name().." created, centered at "..x..", "..y)
-		end
+	local x,y = InputPosition()
+	
+	if x>CREATION_MARGIN and x<ScreenWidth()-CREATION_MARGIN and 
+		y>CREATION_MARGIN and y<ScreenHeight()-CREATION_MARGIN then
+		local region = TapperRegion:new()
+		region:Show()
+		region:SetAnchor("CENTER",x,y)
+		-- DPrint(region:Name().." created, centered at "..x..", "..y)
+	end
 	
 	startedSelection = false
 end
@@ -171,11 +171,11 @@ function selectionLayer:DrawSelectionPoly()
 	self.t:Clear(0,0,0,0)
 	self.t:SetBrushColor(255,255,255,200)
 	self.t:SetBrushSize(3)
-
+	
 	local lastPoint = selectionPoly[#selectionPoly]
 	for i = 2,#selectionPoly do
 		self.t:Line(lastPoint[1], lastPoint[2],
-													selectionPoly[i][1], selectionPoly[i][2])
+			selectionPoly[i][1], selectionPoly[i][2])
 		lastPoint = selectionPoly[i]
 	end
 	
@@ -213,19 +213,19 @@ function pointInSelectionPolygon(x, y)
 	-- simple ray casting algo
 	oddNodes = false
 	j=#selectionPoly
-
-  for i=1, #selectionPoly do		
+	
+	for i=1, #selectionPoly do		
 		if ((selectionPoly[i][2] < y and selectionPoly[j][2] >=y
-		    or   selectionPoly[j][2]< y and selectionPoly[i][2]>=y)
-		    and  (selectionPoly[i][1]<=x or selectionPoly[j][1]<=x)) then
+					or   selectionPoly[j][2]< y and selectionPoly[i][2]>=y)
+				and  (selectionPoly[i][1]<=x or selectionPoly[j][1]<=x)) then
 			
-		if (selectionPoly[i][1]+(y-selectionPoly[i][2])
+			if (selectionPoly[i][1]+(y-selectionPoly[i][2])
 					/(selectionPoly[j][2]-selectionPoly[i][2])
 					*(selectionPoly[j][1]-selectionPoly[i][1])<x) then
-      	oddNodes = not oddNodes
+				oddNodes = not oddNodes
 			end
 		end
-    j=i
+		j=i
 	end
 	return oddNodes
 end
@@ -261,42 +261,42 @@ linkLayer:Init()
 
 --To Be Moved To Region
 function HoldToTrigger(self, elapsed) -- for long tap
-    x,y = self:Center()
-    
-    if self.holdtime <= 0 then
-        self.x = x 
-        self.y = y
-
-				if self.menu == nil then
-					OpenRegionMenu(self)
-				else
-					CloseMenu(self)
-				end
-        self:Handle("OnUpdate",nil)
-    else 
-        if math.abs(self.x - x) > 10 or math.abs(self.y - y) > 10 then
-            self:Handle("OnUpdate",nil)
-            self:Handle("OnUpdate",TapperRegion.Update)
-        end
-				if self.holdtime < MENUHOLDWAIT/2 then
-					DPrint("hold for menu")
-				end
-        self.holdtime = self.holdtime - elapsed
-    end
+	x,y = self:Center()
+	
+	if self.holdtime <= 0 then
+		self.x = x 
+		self.y = y
+		
+		if self.menu == nil then
+			OpenRegionMenu(self)
+		else
+			CloseMenu(self)
+		end
+		self:Handle("OnUpdate",nil)
+	else 
+		if math.abs(self.x - x) > 10 or math.abs(self.y - y) > 10 then
+			self:Handle("OnUpdate",nil)
+			self:Handle("OnUpdate",TapperRegion.Update)
+		end
+		if self.holdtime < MENUHOLDWAIT/2 then
+			DPrint("hold for menu")
+		end
+		self.holdtime = self.holdtime - elapsed
+	end
 end
 
 function HoldTrigger(self) -- for long tap
-    self.holdtime = MENUHOLDWAIT
-    self.x,self.y = self:Center()
-    self:Handle("OnUpdate",nil)
-    self:Handle("OnUpdate",HoldToTrigger)
-    self:Handle("OnLeave",DeTrigger)
+	self.holdtime = MENUHOLDWAIT
+	self.x,self.y = self:Center()
+	self:Handle("OnUpdate",nil)
+	self:Handle("OnUpdate",HoldToTrigger)
+	self:Handle("OnLeave",DeTrigger)
 end
 
 function DeTrigger(self) -- for long tap
-    self.eventlist["OnUpdate"].currentevent = nil
-    self:Handle("OnUpdate",nil)
-    self:Handle("OnUpdate",TapperRegion.Update)
+	self.eventlist["OnUpdate"].currentevent = nil
+	self:Handle("OnUpdate",nil)
+	self:Handle("OnUpdate",TapperRegion.Update)
 end
 ---------------
 function CloseRegionWrapper(self)
@@ -326,11 +326,11 @@ function SwitchRegionType(self) -- TODO: change method name to reflect
 	self.tl:SetShadowOffset(1,1)
 	self.tl:SetShadowBlur(1)
 	-- TESTING: just for testing counter:
-	table.insert(self.eventlist["OnTouchUp"], AddOneToCounter)
-
+	--table.insert(self.eventlist["OnTouchUp"], AddOneToCounter)
+	
 	CloseMenu(self)
 end
-	
+
 function ChangeSelectionStateRegion(self, select)
 	if select ~= self.isSelected then
 		if select then
@@ -345,13 +345,13 @@ function ChangeSelectionStateRegion(self, select)
 			end
 		end
 	end
-
+	
 	self.isSelected = select
 end
 
 function StartLinkRegion(self, draglet)
 	initialLinkRegion = self
-
+	
 	if draglet ~= nil then
 		-- if we have drag target, try creating a link right away
 		tx, ty = draglet:Center()
@@ -363,13 +363,13 @@ function StartLinkRegion(self, draglet)
 					-- found a match, create a link here
 					DPrint("linked")
 					
-					EndLinkRegion(regions[i])
+				EndLinkRegion(regions[i])
 					--initialLinkRegion = nil
 					return
 				end
 			end
 		end
-
+		
 		initialLinkRegion = nil
 		CloseMenu(self)
 		OpenRegionMenu(self)
@@ -385,9 +385,9 @@ function finishLink(message)
 	
 	-- add visual link too:
 	DPrint("creating link:"..initialLinkRegion:Height().." "..finishLinkRegion:Height())
-	local link = link:new(initialLinkRegion,finishLinkRegion)
+	local link = link:new(initialLinkRegion,finishLinkRegion,linkEvent,linkEffect)
 	
---	linkLayer:Add(initialLinkRegion, finishLinkRegion, 10, 10)
+	--	linkLayer:Add(initialLinkRegion, finishLinkRegion, 10, 10)
 	linkLayer:ResetPotentialLink()
 	linkLayer:Draw()
 	-- add notification
@@ -404,11 +404,11 @@ function chooseEffect(message)
 	
 	menu:dismiss()
 	
-	cmdlist = {{'Counter',finishLink,'Counter'},
-				{'Touch Down',finishLink,'Chose Event Type: OnTouchDown'},
-				{'Move',finishLink,'Chose Event Type: Move'},
-				{'Cancel',dismissMenu,nil}}
-	menu = loadSimpleMenu(cmdlist, 'Choose Event Type')
+	cmdlist = {{'Counter',finishLink,AddOneToCounter},
+		{'Move Left',finishLink,MoveLeft},
+		{'Move',finishLink,move},
+		{'Cancel',dismissMenu,nil}}
+	menu = loadSimpleMenu(cmdlist, 'Choose Effect Type')
 	menu:present(x,y)
 end
 
@@ -416,14 +416,14 @@ function EndLinkRegion(self)
 	if initialLinkRegion ~= nil then
 		-- DPrint("linked from "..initialLinkRegion:Name().." to "..self:Name())
 		-- TODO create the link here!
-
+		
 		--table.insert(initialLinkRegion.links["OnTouchUp"], {TapperRegion.TouchUp, self.r})
 		
 		finishLinkRegion = self
 		cmdlist = {{'Touch Up',chooseEffect,'OnTouchUp'},
-					{'Touch Down',test,'Chose Event Type: OnTouchDown'},
-					{'Move',test,'Chose Event Type: Move'},
-					{'Cancel',dismissMenu,nil}}
+			{'Touch Down',chooseEffect,'OnTouchDown'},
+			{'Move',chooseEffect,'OnUpdate_Move'},
+			{'Cancel',dismissMenu,nil}}
 		menu = loadSimpleMenu(cmdlist, 'Choose Event Type')
 		menu:present(x,y)
 		
@@ -516,7 +516,7 @@ function RegionOverLap(r1, r2)
 	x1,y1 = r1:Center()
 	x2,y2 = r2:Center()
 	return (r1:Width() + r2:Width())/1.8 > math.abs(x1-x2) and 
-				(r1:Height() + r2:Height())/1.8 > math.abs(y1-y2)
+	(r1:Height() + r2:Height())/1.8 > math.abs(y1-y2)
 end
 
 function sendEvent(region, event) 
@@ -538,3 +538,4 @@ pagebutton.texture:SetBlendMode("BLEND")
 pagebutton.texture:SetTexCoord(0,1.0,0,1.0)
 pagebutton:EnableInput(true)
 pagebutton:Show()
+

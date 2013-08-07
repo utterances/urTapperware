@@ -8,12 +8,14 @@
 
 link = {}
 
-function link:new(initialLinkRegion,finishLinkRegion)
+function link:new(initialLinkRegion,finishLinkRegion,event,action)
 	o = {}
 	setmetatable(o,self)
 	self.__index = self
 	o:AddSender(initialLinkRegion)
 	o:AddReceiver(finishLinkRegion)
+	o.event = event
+	o.action = action
 	o.menu = newLinkMenu(o)
 	linkLayer:Add(o)	
 	return o
@@ -55,6 +57,6 @@ end
 
 function link:SendMessageToReceivers(message)
 	if self.sender and self.receiver then
-		self.receiver:SendMessage(self.sender, message)
+		self.action(self.receiver, message)
 	end
 end
