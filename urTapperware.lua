@@ -406,6 +406,7 @@ function chooseEffect(message)
 	
 	cmdlist = {{'Counter',finishLink,AddOneToCounter},
 		{'Move Left',finishLink,MoveLeft},
+		{'Move Right',finishLink,MoveRight},
 		{'Move',finishLink,move},
 		{'Cancel',dismissMenu,nil}}
 	menu = loadSimpleMenu(cmdlist, 'Choose Effect Type')
@@ -538,4 +539,3 @@ pagebutton.texture:SetBlendMode("BLEND")
 pagebutton.texture:SetTexCoord(0,1.0,0,1.0)
 pagebutton:EnableInput(true)
 pagebutton:Show()
-

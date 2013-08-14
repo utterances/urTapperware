@@ -57,6 +57,7 @@ end
 
 function link:SendMessageToReceivers(message)
 	if self.sender and self.receiver then
+	--DPrint("From Link: "..message[1].." "..message[2])
 		self.action(self.receiver, message)
 	end
 end

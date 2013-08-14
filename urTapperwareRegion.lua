@@ -92,6 +92,7 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	r:Handle("OnTouchUp",TapperRegion.TouchUp)
 	--r:Handle("OnDragStop",VDrag)
 	r:Handle("OnUpdate",TapperRegion.Update)
+	r:Handle("OnDragging",TapperRegion.Move)
 	--r:Handle("OnMove",VDrag)
 	
 
@@ -176,6 +177,34 @@ function TapperRegion:SendMessage(sender,message)
 -- Respond to incoming message from sender
 end
 
+function TapperRegion.Move(self,x,y,dx,dy)
+	for k,v in pairs(self.outlinks) do
+		if(v.event == "OnUpdate_Move") then
+			v:SendMessageToReceivers({dx, dy})
+		end
+	end	
+
+	linkLayer:Draw()
+		-- also update the rest of the group, if needed: TODO change this later
+	if self.group ~= nil then
+		--DPrint("From Up Group"..self.id..": "..self.dx.." "..self.dy)
+		rx,ry = self.group.r:Center()
+		self.group.r:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
+		
+		for i=1, #self.group.regions do
+			if self.group.regions[i] ~= self then
+				rx,ry = self.group.regions[i]:Center()
+				self.group.regions[i].oldx = rx+self.dx -- FIXME: stopgap
+				self.group.regions[i].oldy = ry+self.dy
+				self.group.regions[i]:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
+			end
+		end
+	end
+
+	self.oldx = x
+	self.oldy = y
+end
+
 function TapperRegion.Update(self,elapsed)
 	-- DPrint(elapsed)
 	if self:Alpha() ~= self.alpha then
@@ -186,42 +215,8 @@ function TapperRegion.Update(self,elapsed)
 		end
 		self.shadow:SetAlpha(self:Alpha())
 	end
-
 	x,y = self:Center()
-	if x ~= self.oldx then
-		self.dx = x - self.oldx
-	end
-	if y ~= self.oldy then
-		self.dy = y - self.oldy
-	end
-	
-	if x ~= self.oldx or y ~= self.oldy then
-		--DPrint("x and y: "..x.." "..y)
-		--DPrint("From Up: "..self.dx.." "..self.dy)
-		for k,v in pairs(self.outlinks) do
-			if(v.event == "OnUpdate_Move") then
-				v:SendMessageToReceivers({self.dx, self.dy})
-			end
-		end	
 
-		-- moved, draw link
-		linkLayer:Draw()
-		-- also update the rest of the group, if needed: TODO change this later
-		if self.group ~= nil then
-			rx,ry = self.group:Center()
-			self.group:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
-			
-			for i=1, #self.group.regions do
-				if self.group.regions[i] ~= self then
-					rx,ry = self.group.regions[i]:Center()
-					self.group.regions[i].oldx = rx+self.dx -- FIXME: stopgap
-					self.group.regions[i].oldy = ry+self.dy
-					self.group.regions[i]:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
-				end       
-			end
-		end
-	end
-	
 -- move if we have none zero speed
 	newx = x
 	newy = y
@@ -288,14 +283,6 @@ function TapperRegion.CallEvents(signal,vv)
 			v:SendMessageToReceivers(signal)
 		end
 	end
---	SendMessageToReciversWrapper(vv, signal)
--- fire off messages to linked regions
-	--[[list = vv.links[signal]
-	if list ~= nil then
-		for k = 1,#list do
-			list[k][1](list[k][2])
-		end
-	end]]--
 end
 
 function TapperRegion.TouchDown(self)
@@ -375,12 +362,13 @@ function TapperRegion:RaiseToTop()
 	self:SetLayer("LOW")
 end
 
-function move(self, change)
+function move(self, message)
 	x,y = self:Center()
-	DPrint(change[1].." "..change[2])
-	self.oldx = x + change[1]
-	self.oldy = y + change[2]
-	self:SetAnchor('CENTER',x+change[1],y+change[2])
+	dx,dy = unpack(message)
+	DPrint(dx.." "..dy.." "..x.." "..y)
+	self.oldx = x + dx
+	self.oldy = y + dy
+	self:SetAnchor('CENTER',self.oldx,self.oldy)
 end
 
 function MoveLeft(self, message)
@@ -388,5 +376,19 @@ function MoveLeft(self, message)
 	self.oldx = x - 10
 	self.oldy = y
 	self:SetAnchor('CENTER',x-10,y)
+	linkLayer:Draw()
+end
+function MoveRight(self, message)
+	x,y = self:Center()
+	self.oldx = x + 10
+	self.oldy = y
+	self:SetAnchor('CENTER',x+10,y)
+	linkLayer:Draw()
+end
+
+function ControllerTouchDownLeft(self) -- event for OnTouchDown of the controller
+    ControllerTouchDown(self)
+    MoveLeft(self)
+    self:Handle("OnUpdate",TriggerLeft)
 end
 
