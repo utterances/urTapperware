@@ -13,7 +13,7 @@
 
 CREATION_MARGIN = 40	-- margin for creating via tapping
 INITSIZE = 140	-- initial size for regions
-MENUHOLDWAIT = 0.5 -- seconds to wait for hold to menu
+MENUHOLDWAIT = 0.3 -- seconds to wait for hold to menu
 
 FADEINTIME = .2 -- seconds for things to fade in, TESTING for now
 EPSILON = 0.001	--small number for rounding
@@ -39,14 +39,15 @@ FreeAllRegions()
 
 modes = {"EDIT","RELEASE"}
 current_mode = modes[1]
+
 dofile(DocumentPath("urTapperwareTools.lua"))
+dofile(DocumentPath("urTWMenu.lua"))
 dofile(DocumentPath("urTapperwareMenu.lua"))	-- first!
 dofile(DocumentPath("urTapperwareLink.lua"))	-- needs menu
 dofile(DocumentPath("urTapperwareLinkLayer.lua"))	-- needs menu
 dofile(DocumentPath("urTapperwareGroup.lua"))
-dofile(DocumentPath("urTapperwareRegion.lua"))
---dofile(DocumentPath("urTapperwareRegionLinks.lua"))
-dofile(DocumentPath("urTapperMenu.lua"))
+dofile(DocumentPath("urTWRegion.lua"))
+
 -- ============
 -- = Backdrop =
 -- ============

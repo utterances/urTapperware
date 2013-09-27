@@ -92,7 +92,7 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	r:Handle("OnTouchUp",TapperRegion.TouchUp)
 	--r:Handle("OnDragStop",VDrag)
 	r:Handle("OnUpdate",TapperRegion.Update)
-	r:Handle("OnDragging",TapperRegion.Move)
+	-- r:Handle("OnDragging",TapperRegion.Move)
 	--r:Handle("OnMove",VDrag)
 	
 

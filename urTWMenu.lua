@@ -1,5 +1,9 @@
 ------------- Simple menu --------------
 
+-- simple list menu used as a last resort to pick from a few options
+
+------------- Simple menu --------------
+
 -- geometry constants:
 MENUITEMHEIGHT = 44
 MENUFONTSIZE = 26
