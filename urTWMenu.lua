@@ -103,6 +103,7 @@ function SimpleMenu:setCommandList(cmdlist)
 		label:Handle("OnLeave", MenuLeave)
 		label.func = cmdlist[i][2]
 		label.arg = cmdlist[i][3]
+		label.parent = self
 		
 		table.insert(self.cmdLabels, label)
 	end
@@ -136,7 +137,12 @@ end
 -- this actually calls all the menu function on the right region(s)
 function CallFunc(self)
 	self.t:Clear(235,235,235,0)
-	self.func(self.arg)
+	
+	if self.func ~= nil then	-- if func is nil always dimiss parent menu
+		self.func(self.arg)
+	else
+		self.parent:dismiss()
+	end
 end
 
 function MenuDown(self)

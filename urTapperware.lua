@@ -13,7 +13,7 @@
 
 CREATION_MARGIN = 40	-- margin for creating via tapping
 INITSIZE = 140	-- initial size for regions
-MENUHOLDWAIT = 0.3 -- seconds to wait for hold to menu
+MENUHOLDWAIT = 0.4 -- seconds to wait for hold to menu
 
 FADEINTIME = .2 -- seconds for things to fade in, TESTING for now
 EPSILON = 0.001	--small number for rounding
@@ -37,8 +37,8 @@ selectedRegions = {}
 
 FreeAllRegions()
 
-modes = {"EDIT","RELEASE"}
-current_mode = modes[1]
+-- modes = {"EDIT","RELEASE"}
+-- current_mode = modes[1]
 
 dofile(DocumentPath("urTapperwareTools.lua"))
 dofile(DocumentPath("urTWMenu.lua"))
@@ -90,10 +90,10 @@ function TouchUp(self)
 	
 	if x>CREATION_MARGIN and x<ScreenWidth()-CREATION_MARGIN and 
 		y>CREATION_MARGIN and y<ScreenHeight()-CREATION_MARGIN then
-		local region = TapperRegion:new()
+		local region = TWRegion:new(nil,updateEnv)		
 		region:Show()
 		region:SetAnchor("CENTER",x,y)
-		-- DPrint(region:Name().." created, centered at "..x..", "..y)
+		-- DPrint(region:Name().." created at "..x..", "..y)
 	end
 	
 	startedSelection = false
@@ -240,7 +240,6 @@ linkIcon.t:SetTexCoord(0,160/256,160/256,0)
 linkIcon:SetWidth(100)
 linkIcon:SetHeight(100)
 linkIcon:SetAnchor('CENTER',ScreenWidth()/2,ScreenHeight()/2)
--- linkIcon:Handle(OnUpdate, IconUpdate)
 
 function linkIcon:ShowLinked(x,y)
 	self:Show()
@@ -267,7 +266,7 @@ function HoldToTrigger(self, elapsed) -- for long tap
 	if self.holdtime <= 0 then
 		self.x = x 
 		self.y = y
-		
+		DPrint("trying menu")
 		if self.menu == nil then
 			OpenRegionMenu(self)
 		else
@@ -276,8 +275,8 @@ function HoldToTrigger(self, elapsed) -- for long tap
 		self:Handle("OnUpdate",nil)
 	else 
 		if math.abs(self.x - x) > 10 or math.abs(self.y - y) > 10 then
-			self:Handle("OnUpdate",nil)
-			self:Handle("OnUpdate",TapperRegion.Update)
+			self:Handle("OnUpdate", nil)
+			self:Handle("OnUpdate", self.Update)
 		end
 		if self.holdtime < MENUHOLDWAIT/2 then
 			DPrint("hold for menu")
@@ -287,17 +286,18 @@ function HoldToTrigger(self, elapsed) -- for long tap
 end
 
 function HoldTrigger(self) -- for long tap
+	DPrint("starting hold")
 	self.holdtime = MENUHOLDWAIT
 	self.x,self.y = self:Center()
-	self:Handle("OnUpdate",nil)
-	self:Handle("OnUpdate",HoldToTrigger)
-	self:Handle("OnLeave",DeTrigger)
+	self:Handle("OnUpdate", nil)
+	self:Handle("OnUpdate", HoldToTrigger)
+	self:Handle("OnLeave", DeTrigger)
 end
 
 function DeTrigger(self) -- for long tap
 	self.eventlist["OnUpdate"].currentevent = nil
-	self:Handle("OnUpdate",nil)
-	self:Handle("OnUpdate",TapperRegion.Update)
+	self:Handle("OnUpdate", nil)
+	self:Handle("OnUpdate", self.Update)
 end
 ---------------
 function CloseRegionWrapper(self)
@@ -379,7 +379,53 @@ function StartLinkRegion(self, draglet)
 		DPrint("Tap another region to link")
 	end
 end
+
 menu = nil
+
+function EndLinkRegion(self)
+	if initialLinkRegion ~= nil then
+		-- DPrint("linked from "..initialLinkRegion:Name().." to "..self:Name())
+		-- TODO create the link here!
+		
+		--table.insert(initialLinkRegion.links["OnTouchUp"], {TapperRegion.TouchUp, self.r})
+		
+		finishLinkRegion = self
+		cmdlist = {{'Touch Up',chooseEffect,'OnTouchUp'},
+			{'Touch Down',chooseEffect,'OnTouchDown'},
+			{'Move',chooseEffect,'OnUpdate_Move'},
+			{'Cancel',nil,nil}}
+		menu = loadSimpleMenu(cmdlist, 'Choose Event Type')
+		x,y = initialLinkRegion:Center()
+		menu:present(x,y)
+		
+		--[[
+		-- add visual link too:
+		linkLayer:Add(initialLinkRegion, self, 10, 10)
+		linkLayer:ResetPotentialLink()
+		linkLayer:Draw()
+		-- add notification
+		linkIcon:ShowLinked()
+		
+		CloseMenu(initialLinkRegion)
+		initialLinkRegion = nil]]--
+	end
+end
+
+function chooseEffect(message)
+	linkEvent = message
+	DPrint(linkEvent)
+	
+	menu:dismiss()
+	
+	cmdlist = {{'Counter',finishLink,AddOneToCounter},
+		{'Move Left', finishLink, MoveLeft},
+		{'Move Right', finishLink, MoveRight},
+		{'Move', finishLink, move},
+		{'Cancel', nil, nil}}
+	menu = loadSimpleMenu(cmdlist, 'Choose Effect Type')
+	menu:present(x,y)
+end
+
 function finishLink(message)
 	linkEffect = message
 	menu:dismiss()
@@ -399,50 +445,6 @@ function finishLink(message)
 	finishLinkRegion = nil
 end
 
-function chooseEffect(message)
-	linkEvent = message
-	DPrint(linkEvent)
-	
-	menu:dismiss()
-	
-	cmdlist = {{'Counter',finishLink,AddOneToCounter},
-		{'Move Left',finishLink,MoveLeft},
-		{'Move Right',finishLink,MoveRight},
-		{'Move',finishLink,move},
-		{'Cancel',dismissMenu,nil}}
-	menu = loadSimpleMenu(cmdlist, 'Choose Effect Type')
-	menu:present(x,y)
-end
-
-function EndLinkRegion(self)
-	if initialLinkRegion ~= nil then
-		-- DPrint("linked from "..initialLinkRegion:Name().." to "..self:Name())
-		-- TODO create the link here!
-		
-		--table.insert(initialLinkRegion.links["OnTouchUp"], {TapperRegion.TouchUp, self.r})
-		
-		finishLinkRegion = self
-		cmdlist = {{'Touch Up',chooseEffect,'OnTouchUp'},
-			{'Touch Down',chooseEffect,'OnTouchDown'},
-			{'Move',chooseEffect,'OnUpdate_Move'},
-			{'Cancel',dismissMenu,nil}}
-		menu = loadSimpleMenu(cmdlist, 'Choose Event Type')
-		menu:present(x,y)
-		
-		
-		--[[
-		-- add visual link too:
-		linkLayer:Add(initialLinkRegion, self, 10, 10)
-		linkLayer:ResetPotentialLink()
-		linkLayer:Draw()
-		-- add notification
-		linkIcon:ShowLinked()
-		
-		CloseMenu(initialLinkRegion)
-		initialLinkRegion = nil]]--
-	end
-end
-
 function RemoveLinkBetween(r1, r2)
 	linkLayer:Remove(r1, r2)
 	linkLayer:Draw()
@@ -454,17 +456,9 @@ function RemoveLinkBetween(r1, r2)
 	end
 end
 
-function RaiseToTop(vv)
-	vv.shadow:MoveToTop()
-	vv.shadow:SetLayer("LOW")
-	vv:MoveToTop()
-	vv:SetLayer("LOW")
-end
-
-
 function DuplicateRegion(vv, cx, cy)
 	x,y = vv:Center()
-	local copyRegion = TapperRegion:new()
+	local copyRegion = TWRegion:new(nil,updateEnv)
 	copyRegion:Show()
 	if cx ~= nil then
 		copyRegion:SetAnchor("CENTER", cx, cy)
@@ -523,6 +517,10 @@ end
 
 function sendEvent(region, event) 
 	region:event()
+end
+
+function updateEnv()
+	linkLayer:Draw()
 end
 
 ----------------- v11.pagebutton -------------------

@@ -15,48 +15,48 @@ recycledregions = {}  -- Removed Regions
 heldRegions = {}
 
 -- Reset region to initial state
-function ResetRegion(r) -- customized parameter initialization of region, events are initialized in VRegion()
-	r.alpha = 1 --target alpha for animation
-	r.menu = nil  --contextual menu
-	r.counter = 0 --if this is a counter
-	r.isHeld = false -- if the r is held by tap currently
-	r.isSelected = false
-	r.group = nil
+function ResetRegion(self) -- customized parameter initialization of region, events are initialized in VRegion()
+	self.alpha = 1 --target alpha for animation
+	self.menu = nil  --contextual menu
+	self.counter = 0 --if this is a counter
+	self.isHeld = false -- if the r is held by tap currently
+	self.isSelected = false
+	self.group = nil
 
-	r.dx = 0  -- compute storing current movement speed, for gesture detection
-	r.dy = 0
-	x,y = r:Center()
-	r.oldx = x
-	r.oldy = y
-	r.sx = 0
-	r.sy = 0
-	r.w = INITSIZE
-	r.h = INITSIZE
+	self.dx = 0  -- compute storing current movement speed, for gesture detection
+	self.dy = 0
+	x,y = self:Center()
+	self.oldx = x
+	self.oldy = y
+	self.sx = 0
+	self.sy = 0
+	self.w = INITSIZE
+	self.h = INITSIZE
 
 -- event handling
-	r.inlinks = {}
-	r.outlinks = {}
+	self.inlinks = {}
+	self.outlinks = {}
 
 -- initialize for events and signals
-	r.eventlist = {}
-	r.eventlist["OnTouchDown"] = {HoldTrigger}
-	r.eventlist["OnTouchUp"] = {DeTrigger} 
-	r.eventlist["OnDoubleTap"] = {} --{CloseSharedStuff,OpenOrCloseKeyboard} 
-	r.eventlist["OnUpdate"] = {} 
-	r.eventlist["OnUpdate"].currentevent = nil
+	self.eventlist = {}
+	-- self.eventlist["OnTouchDown"] = {HoldTrigger}
+	-- self.eventlist["OnTouchUp"] = {DeTrigger}
+	self.eventlist["OnDoubleTap"] = {}
+	self.eventlist["OnUpdate"] = {} 
+	self.eventlist["OnUpdate"].currentevent = nil
  
-	r.t:SetBlendMode("BLEND")
-	r.tl:SetLabel(r:Name())
-	r.tl:SetFontHeight(16)
-	r.tl:SetFont("Ariel.ttf")
-	r.tl:SetColor(0,0,0,255) 
-	r.tl:SetHorizontalAlign("JUSTIFY")
-	r.tl:SetVerticalAlign("MIDDLE")
-	r.tl:SetShadowColor(100,100,100,255)
-	r.tl:SetShadowOffset(1,1)
-	r.tl:SetShadowBlur(1)
-	r:SetWidth(50)
-	r:SetHeight(50)
+	self.t:SetBlendMode("BLEND")
+	self.tl:SetLabel(self:Name())
+	self.tl:SetFontHeight(16)
+	self.tl:SetFont("Avenir Next")
+	self.tl:SetColor(0,0,0,255)
+	self.tl:SetHorizontalAlign("JUSTIFY")
+	self.tl:SetVerticalAlign("MIDDLE")
+	-- self.tl:SetShadowColor(100,100,100,255)
+	-- self.tl:SetShadowOffset(1,1)
+	-- self.tl:SetShadowBlur(10)
+	self:SetWidth(50)
+	self:SetHeight(50)
 
 end
 
@@ -82,20 +82,17 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	r.usable = 1
 	r.id = id
 	ResetRegion(r)
-
+	
 	r:EnableMoving(true)
 	r:EnableResizing(true)
 	r:EnableInput(true)
 
-	r:Handle("OnDoubleTap",TapperRegion.DoubleTap)
-	r:Handle("OnTouchDown",TapperRegion.TouchDown)
-	r:Handle("OnTouchUp",TapperRegion.TouchUp)
-	--r:Handle("OnDragStop",VDrag)
-	r:Handle("OnUpdate",TapperRegion.Update)
-	-- r:Handle("OnDragging",TapperRegion.Move)
-	--r:Handle("OnMove",VDrag)
-	
-
+	r:Handle("OnDoubleTap", TWRegion.DoubleTap)
+	r:Handle("OnTouchDown", TWRegion.TouchDown)
+	r:Handle("OnTouchUp", TWRegion.TouchUp)
+	r:Handle("OnUpdate", TWRegion.Update)
+	--r:Handle("OnDragging", TWRegion.Move)
+	--r:Handle("OnMove", )
 	
 	return r
 end
@@ -124,7 +121,8 @@ end
 
 function RemoveRegion(self)
 	CloseMenu(self)
-
+	
+	-- might need to check if links need to be removed TODO:
 	ResetRegion(self)
 	self:EnableInput(false)
 	self:EnableMoving(false)
@@ -141,50 +139,57 @@ end
 -- = Region Object =
 -- =================
 
-TapperRegion = {}
+TWRegion = {}
 
-function TapperRegion.check(self)
+function TWRegion.check(self)
 	DPrint(self.id)
 	toDelete = self.id
 end
 
 -- constructor
-function TapperRegion:new(o)
-	o = o or {}     -- create object if user does not provide one
-	o = AllocRegion('region','backdrop',UIParent)
+function TWRegion:new(o, updateEnv)
+	o = o or AllocRegion('region','backdrop',UIParent)
 	setmetatable(o, self)
 	self.__index = self
+	o.updateEnv = updateEnv
 	return o
 end
 
-function TapperRegion:AddIncomingLink(l)
+function TWRegion:AddIncomingLink(l)
 	table.insert(self.inlinks,l)
 end
 
-function TapperRegion:RemoveIncomingLink(l)
+function TWRegion:RemoveIncomingLink(l)
 	tableRemoveObj(self.inlinks,l)
 end
 
-function TapperRegion:AddOutgoingLink(l)
+function TWRegion:AddOutgoingLink(l)
 	table.insert(self.outlinks,l)
 end
 
-function TapperRegion:RemoveOutgoingLink(l)
+function TWRegion:RemoveOutgoingLink(l)
 	tableRemoveObj(self.outlinks,l)
 end
 
-function TapperRegion:SendMessage(sender,message)
+function TWRegion:SendMessage(sender,message)
 -- Respond to incoming message from sender
 end
 
-function TapperRegion.Move(self,x,y,dx,dy)
+function TWRegion:RaiseToTop()
+	self.shadow:MoveToTop()
+	self.shadow:SetLayer("LOW")
+	self:MoveToTop()
+	self:SetLayer("LOW")
+end
+
+function TWRegion:Move(x,y,dx,dy)
 	for k,v in pairs(self.outlinks) do
 		if(v.event == "OnUpdate_Move") then
 			v:SendMessageToReceivers({dx, dy})
 		end
 	end	
 
-	linkLayer:Draw()
+	self.updateEnv()
 		-- also update the rest of the group, if needed: TODO change this later
 	if self.group ~= nil then
 		--DPrint("From Up Group"..self.id..": "..self.dx.." "..self.dy)
@@ -205,7 +210,7 @@ function TapperRegion.Move(self,x,y,dx,dy)
 	self.oldy = y
 end
 
-function TapperRegion.Update(self,elapsed)
+function TWRegion:Update(elapsed)
 	-- DPrint(elapsed)
 	if self:Alpha() ~= self.alpha then
 		if math.abs(self:Alpha() - self.alpha) < EPSILON then -- just set if it's close enough
@@ -241,8 +246,6 @@ function TapperRegion.Update(self,elapsed)
 		self:EnableInput(true)
 	end
 
-	self.oldx = x
-	self.oldy = y
 
 -- animate size if needed:
 	if self.w ~= self:Width() then
@@ -264,34 +267,43 @@ function TapperRegion.Update(self,elapsed)
 		self.tl:SetHorizontalAlign("JUSTIFY")
 	self.tl:SetVerticalAlign("MIDDLE")
 	end
-end
-
-function TapperRegion.CallEvents(signal,vv)
-	local list = {}
-
-	if current_mode == modes[1] then
-		list = vv.eventlist[signal]
-	else
-		list = vv.reventlist[signal]
-	end
-	for k = 1,#list do
-		list[k](vv)
+	-- self:CallEvents("OnUpdate")
+	
+	
+	if self.oldx ~= x or self.oldy ~= y then
+		-- if we moved:
+		self.updateEnv()
 	end
 	
-	for k,v in pairs(vv.outlinks) do
+	self.oldx = x
+	self.oldy = y
+end
+
+function TWRegion:CallEvents(signal)
+	local list = {}
+
+	-- if current_mode == modes[1] then
+	list = self.eventlist[signal]
+	-- else
+	-- 	list = vv.reventlist[signal]
+	-- end
+	
+	DPrint(signal, list)
+	for k = 1,#list do
+		list[k](self)
+	end
+	
+	for k,v in pairs(self.outlinks) do
 		if(v.event == signal) then
 			v:SendMessageToReceivers(signal)
 		end
 	end
 end
 
-function TapperRegion.TouchDown(self)
-	TapperRegion.CallEvents("OnTouchDown",self)
+function TWRegion:TouchDown()
+	self:CallEvents("OnTouchDown")
 	-- DPrint("hold for menu")
-	self.shadow:MoveToTop()
-	self.shadow:SetLayer("LOW")
-	self:MoveToTop()
-	self:SetLayer("LOW")
+	self:RaiseToTop()
 	self.alpha = .4
 	-- isHoldingRegion = true
 	table.insert(heldRegions, self)
@@ -302,12 +314,12 @@ function TapperRegion.TouchDown(self)
 	end
 end
 
-function TapperRegion.DoubleTap(self)
+function TWRegion:DoubleTap()
 	DPrint("double tapped")
-	TapperRegion.CallEvents("OnDoubleTap",self)
+	self:CallEvents("OnDoubleTap")
 end
 
-function TapperRegion:TouchUp()
+function TWRegion:TouchUp()
 	self.alpha = 1
 	if initialLinkRegion == nil then
 		--DPrint("")
@@ -320,7 +332,7 @@ function TapperRegion:TouchUp()
 					EndLinkRegion(heldRegions[i])
 					initialLinkRegion = nil
 					
-					-- initialize bounce back animation, it runs in TapperRegion.Update later
+					-- initialize bounce back animation, it runs in TWRegion.Update later
 					x1,y1 = self:Center()
 					x2,y2 = heldRegions[i]:Center()
 					EXRATE = 150000
@@ -352,10 +364,10 @@ function TapperRegion:TouchUp()
 		initialLinkRegion = nil
 	end
 	
-	TapperRegion.CallEvents("OnTouchUp",self)
+	self:CallEvents("OnTouchUp")
 end
 
-function TapperRegion:RaiseToTop()
+function TWRegion:RaiseToTop()
 	self.shadow:MoveToTop()
 	self.shadow:SetLayer("LOW")
 	self:MoveToTop()

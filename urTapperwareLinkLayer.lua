@@ -75,7 +75,7 @@ end
 -- draw a line between linked regions, also draws menu
 function linkLayer:Draw()
 	self.links.t:Clear(0,0,0,0)
-	self.links.t:SetBrushColor(100,255,240,200)
+	self.links.t:SetBrushColor(100,120,120,200)
 	self.links.t:SetBrushSize(8)
 	
 	for _, link in pairs(self.list) do
@@ -90,7 +90,7 @@ end
 
 function linkLayer:DrawPotentialLink(region, draglet)
 	self.linkGuides.t:Clear(0,0,0,0)
-	self.linkGuides.t:SetBrushColor(100,255,240,100)
+	self.linkGuides.t:SetBrushColor(195,240,240,150)
 	self.linkGuides.t:SetBrushSize(12)
 	
 	rx, ry = region:Center()
