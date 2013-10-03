@@ -21,6 +21,8 @@ EPSILON = 0.001	--small number for rounding
 -- selection param
 LASSOSEPDISTANCE = 25 -- pixels between each point when drawing selection lasso
 
+FreeAllRegions()
+
 --regions = {}
 --recycledregions = {}
 initialLinkRegion = nil
@@ -35,7 +37,6 @@ heldRegions = {}
 selectionPoly = {}
 selectedRegions = {}
 
-FreeAllRegions()
 
 -- modes = {"EDIT","RELEASE"}
 -- current_mode = modes[1]
@@ -260,6 +261,15 @@ end
 linkLayer:Init()
 
 --To Be Moved To Region
+
+function ToggleMenu(self)
+	if self.menu == nil then
+		OpenRegionMenu(self)
+	else
+		CloseMenu(self)
+	end
+end
+
 function HoldToTrigger(self, elapsed) -- for long tap
 	x,y = self:Center()
 	
@@ -395,8 +405,7 @@ function EndLinkRegion(self)
 			{'Move',chooseEffect,'OnUpdate_Move'},
 			{'Cancel',nil,nil}}
 		menu = loadSimpleMenu(cmdlist, 'Choose Event Type')
-		x,y = initialLinkRegion:Center()
-		menu:present(x,y)
+		menu:present(initialLinkRegion:Center())
 		
 		--[[
 		-- add visual link too:
@@ -423,7 +432,7 @@ function chooseEffect(message)
 		{'Move', finishLink, move},
 		{'Cancel', nil, nil}}
 	menu = loadSimpleMenu(cmdlist, 'Choose Effect Type')
-	menu:present(x,y)
+	menu:present(finishLinkRegion:Center())
 end
 
 function finishLink(message)
@@ -431,7 +440,7 @@ function finishLink(message)
 	menu:dismiss()
 	
 	-- add visual link too:
-	DPrint("creating link:"..initialLinkRegion:Height().." "..finishLinkRegion:Height())
+	-- DPrint("creating link:"..initialLinkRegion:Height().." "..finishLinkRegion:Height())
 	local link = link:new(initialLinkRegion,finishLinkRegion,linkEvent,linkEffect)
 	
 	--	linkLayer:Add(initialLinkRegion, finishLinkRegion, 10, 10)
@@ -445,60 +454,58 @@ function finishLink(message)
 	finishLinkRegion = nil
 end
 
-function RemoveLinkBetween(r1, r2)
-	linkLayer:Remove(r1, r2)
-	linkLayer:Draw()
-	
-	for i,v in ipairs(r1.links["OnTouchUp"]) do
-		if v[2] == r2 then
-			table.remove(r1.links["OnTouchUp"], i)
-		end
-	end
-end
-
 function DuplicateRegion(vv, cx, cy)
 	x,y = vv:Center()
-	local copyRegion = TWRegion:new(nil,updateEnv)
-	copyRegion:Show()
+	local newRegion = TWRegion:new(nil, updateEnv)
+	newRegion:Show()
 	if cx ~= nil then
-		copyRegion:SetAnchor("CENTER", cx, cy)
+		newRegion:SetAnchor("CENTER", cx, cy)
 	else
-		copyRegion:SetAnchor("CENTER",x+INITSIZE+20,y)
+		newRegion:SetAnchor("CENTER",x+INITSIZE+20,y)
 	end
-	copyRegion.counter = vv.counter
-	copyRegion.links = vv.links
-	
-	list = copyRegion.links["OnTouchUp"]
-	if list ~= nil then
-		for k = 1,#list do
-			linkLayer:Add(copyRegion, list[k][2])
-		end
+	newRegion.counter = vv.counter
+
+	for _,v in ipairs(vv.inlinks["OnTouchUp"]) do
+		
+		
+			table.remove(r1.links["OnTouchUp"], i)
 	end
+		
+	-- newRegion.counter = vv.counter
+	-- newRegion.counter = vv.counter
 	
-	-- TODO: optimize this part: right now it's a messy search for every inbound links
-	for i = 1, #regions do
-		if regions[i].usable and (regions[i] ~= vv or regions[i] ~= copyRegion) then
-			linkList = regions[i].links["OnTouchUp"]
-			if linkList ~= nil then
-				for k = 1,#linkList do
-					if linkList[k][2] == vv then
-						table.insert(linkList, {TapperRegion.TouchUp, copyRegion})
-						linkLayer:Add(regions[i], copyRegion)
-					end
-				end
-			end
-		end
-	end
 	
-	if copyRegion.counter == 1 then
-		SwitchRegionType(copyRegion)
-		copyRegion.value = vv.value
-		copyRegion.tl:SetLabel(copyRegion.value)
+	-- list = newRegion.links["OnTouchUp"]
+	-- if list ~= nil then
+	-- 	for k = 1,#list do
+	-- 		linkLayer:Add(newRegion, list[k][2])
+	-- 	end
+	-- end
+	-- 
+	-- -- TODO: optimize this part: right now it's a messy search for every inbound links
+	-- for i = 1, #regions do
+	-- 	if regions[i].usable and (regions[i] ~= vv or regions[i] ~= newRegion) then
+	-- 		linkList = regions[i].links["OnTouchUp"]
+	-- 		if linkList ~= nil then
+	-- 			for k = 1,#linkList do
+	-- 				if linkList[k][2] == vv then
+	-- 					table.insert(linkList, {TapperRegion.TouchUp, newRegion})
+	-- 					linkLayer:Add(regions[i], newRegion)
+	-- 				end
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
+	
+	if newRegion.counter == 1 then
+		SwitchRegionType(newRegion)
+		newRegion.value = vv.value
+		newRegion.tl:SetLabel(newRegion.value)
 	end
 	
 	linkLayer:Draw()
 	
-	RaiseToTop(copyRegion)
+	RaiseToTop(newRegion)
 	
 	CloseMenu(vv)
 	OpenRegionMenu(vv)

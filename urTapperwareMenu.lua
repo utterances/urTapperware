@@ -1,7 +1,3 @@
-------------- menu functions --------------
--- called by menu option, named starting with Menu-
--- arguments (opt,vv): opt is menu option region, vv is the region that functions should be implemented on
-
 -- ============================
 -- = Menus, contextual mostly =
 -- ============================

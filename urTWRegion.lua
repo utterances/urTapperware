@@ -40,7 +40,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 -- initialize for events and signals
 	self.eventlist = {}
 	-- self.eventlist["OnTouchDown"] = {HoldTrigger}
-	-- self.eventlist["OnTouchUp"] = {DeTrigger}
+	self.eventlist["OnTouchUp"] = {ToggleMenu}
 	self.eventlist["OnDoubleTap"] = {}
 	self.eventlist["OnUpdate"] = {} 
 	self.eventlist["OnUpdate"].currentevent = nil
@@ -55,9 +55,8 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	-- self.tl:SetShadowColor(100,100,100,255)
 	-- self.tl:SetShadowOffset(1,1)
 	-- self.tl:SetShadowBlur(10)
-	self:SetWidth(50)
-	self:SetHeight(50)
-
+	self:SetWidth(INITSIZE/3)
+	self:SetHeight(INITSIZE/3)
 end
 
 -- Initialize a new region
@@ -66,8 +65,8 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	local r_s = Region(ttype,"drops"..id,parent)
 	r_s.t = r_s:Texture("tw_shadow.png")
 	r_s.t:SetBlendMode("BLEND")
-	r_s:SetWidth(INITSIZE+70)
-	r_s:SetHeight(INITSIZE+70)
+	r_s:SetWidth(INITSIZE + 60)
+	r_s:SetHeight(INITSIZE + 60)
 	--r_s:EnableMoving(true)
 	r_s:SetLayer("LOW")
 	r_s:Show() 
@@ -93,6 +92,7 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	r:Handle("OnUpdate", TWRegion.Update)
 	--r:Handle("OnDragging", TWRegion.Move)
 	--r:Handle("OnMove", )
+	r:Handle("OnSizeChanged", TWRegion.SizeChanged)
 	
 	return r
 end
@@ -223,28 +223,28 @@ function TWRegion:Update(elapsed)
 	x,y = self:Center()
 
 -- move if we have none zero speed
-	newx = x
-	newy = y
-	if self.sx ~= 0 then
-		newx = x + self.sx*elapsed
-		self.sx = self.sx*0.9
-		if self.sx < 2 then
-			self.sx = 0
-		end
-	end
-
-	if self.sy ~= 0 then
-		newy = y + self.sy*elapsed
-		self.sy = self.sy*0.9
-		if self.sy < 2 then
-			self.sy = 0
-		end
-	end
-	if self.sy ~= 0 or self.sx ~= 0 then
-		-- DPrint(self:Name().." bounced "..self.sx.." "..self.sy)
-		self:SetAnchor('CENTER', newx, newy)
-		self:EnableInput(true)
-	end
+	-- newx = x
+	-- newy = y
+	-- if self.sx ~= 0 then
+	-- 	newx = x + self.sx*elapsed
+	-- 	self.sx = self.sx*0.9
+	-- 	if self.sx < 2 then
+	-- 		self.sx = 0
+	-- 	end
+	-- end
+	-- 
+	-- if self.sy ~= 0 then
+	-- 	newy = y + self.sy*elapsed
+	-- 	self.sy = self.sy*0.9
+	-- 	if self.sy < 2 then
+	-- 		self.sy = 0
+	-- 	end
+	-- end
+	-- if self.sy ~= 0 or self.sx ~= 0 then
+	-- 	-- DPrint(self:Name().." bounced "..self.sx.." "..self.sy)
+	-- 	self:SetAnchor('CENTER', newx, newy)
+	-- 	self:EnableInput(true)
+	-- end
 
 
 -- animate size if needed:
@@ -255,9 +255,9 @@ function TWRegion:Update(elapsed)
 			self:SetWidth(self:Width() + (self.w-self:Width()) * elapsed/FADEINTIME)
 		end
 		self.tl:SetHorizontalAlign("JUSTIFY")
-	self.tl:SetVerticalAlign("MIDDLE")
+		self.tl:SetVerticalAlign("MIDDLE")
 	end
-
+	
 	if self.h ~= self:Height() then
 		if math.abs(self:Height() - self.h) < EPSILON then  -- close enough
 			self:SetHeight(self.h)
@@ -265,10 +265,10 @@ function TWRegion:Update(elapsed)
 			self:SetHeight(self:Height() + (self.h-self:Height()) * elapsed/FADEINTIME)
 		end
 		self.tl:SetHorizontalAlign("JUSTIFY")
-	self.tl:SetVerticalAlign("MIDDLE")
+		self.tl:SetVerticalAlign("MIDDLE")
 	end
-	-- self:CallEvents("OnUpdate")
 	
+	self:CallEvents("OnUpdate")
 	
 	if self.oldx ~= x or self.oldy ~= y then
 		-- if we moved:
@@ -288,9 +288,11 @@ function TWRegion:CallEvents(signal)
 	-- 	list = vv.reventlist[signal]
 	-- end
 	
-	DPrint(signal, list)
-	for k = 1,#list do
-		list[k](self)
+	-- DPrint(signal, list)
+	if list~=nil then
+		for k = 1,#list do
+			list[k](self)
+		end
 	end
 	
 	for k,v in pairs(self.outlinks) do
@@ -304,7 +306,7 @@ function TWRegion:TouchDown()
 	self:CallEvents("OnTouchDown")
 	-- DPrint("hold for menu")
 	self:RaiseToTop()
-	self.alpha = .4
+	self.alpha = .6
 	-- isHoldingRegion = true
 	table.insert(heldRegions, self)
 
@@ -373,6 +375,15 @@ function TWRegion:RaiseToTop()
 	self:MoveToTop()
 	self:SetLayer("LOW")
 end
+
+function TWRegion:SizeChanged()
+	-- the user changed the size, so let's fix it 
+	self.w = self:Width()
+	self.h = self:Height()
+end
+
+-- #################################################################
+-- #################################################################
 
 function move(self, message)
 	x,y = self:Center()

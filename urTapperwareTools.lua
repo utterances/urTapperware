@@ -20,3 +20,11 @@ function tableHasObj( t, obj )
 	end
 	return false
 end
+
+-- check if table is empty
+function tableIsEmpty (self)
+    for _, _ in pairs(self) do
+        return false
+    end
+    return true
+end

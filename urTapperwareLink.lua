@@ -52,6 +52,7 @@ function link:destroy()
 	self:RemoveSender()
 	self:RemoveReceiver()
 	linkLayer:Remove(self)
+	linkLayer:Draw()
 	self = nil
 end
 
