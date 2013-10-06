@@ -13,7 +13,7 @@
 
 RTYPE_BLANK = 0
 RTYPE_VAR = 1
-RTYPE_SOUND = 2
+RTYPE_GROUP = 2
 
 -- ==================
 -- = Region Manager =
@@ -235,29 +235,28 @@ end
 function TWRegion:Move(x,y,dx,dy)
 	DPrint('moving'..x..y)
 	
-	
 	for k,v in pairs(self.outlinks) do
 		if(v.event == "_Move") then
 			v:SendMessageToReceivers({dx, dy})
 		end
 	end	
 
-	self.updateEnv()
+	-- self.updateEnv()
 		-- also update the rest of the group, if needed: TODO change this later
-	if self.group ~= nil then
-		--DPrint("From Up Group"..self.id..": "..self.dx.." "..self.dy)
-		rx,ry = self.group.r:Center()
-		self.group.r:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
-		
-		for i=1, #self.group.regions do
-			if self.group.regions[i] ~= self then
-				rx,ry = self.group.regions[i]:Center()
-				self.group.regions[i].oldx = rx+self.dx -- FIXME: stopgap
-				self.group.regions[i].oldy = ry+self.dy
-				self.group.regions[i]:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
-			end
-		end
-	end
+	-- if self.group ~= nil then
+	-- 	--DPrint("From Up Group"..self.id..": "..self.dx.." "..self.dy)
+	-- 	rx,ry = self.group.r:Center()
+	-- 	self.group.r:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
+	-- 	
+	-- 	for i=1, #self.group.regions do
+	-- 		if self.group.regions[i] ~= self then
+	-- 			rx,ry = self.group.regions[i]:Center()
+	-- 			self.group.regions[i].oldx = rx+self.dx -- FIXME: stopgap
+	-- 			self.group.regions[i].oldy = ry+self.dy
+	-- 			self.group.regions[i]:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
+	-- 		end
+	-- 	end
+	-- end
 
 	self.oldx = x
 	self.oldy = y
@@ -326,10 +325,10 @@ function TWRegion:Update(elapsed)
 		self:CallEvents("OnTapAndHold", elapsed)
 	end
 	
-	if self.oldx ~= x or self.oldy ~= y then
-		-- if we moved:
-		self.updateEnv()
-	end
+	-- if self.oldx ~= x or self.oldy ~= y then
+	-- 	-- if we moved:
+	-- 	self.updateEnv()
+	-- end
 	
 	self.oldx = x
 	self.oldy = y
@@ -374,8 +373,9 @@ function TWRegion:TouchDown()
 end
 
 function TWRegion:DoubleTap()
-	-- DPrint("double tapped")
-	self:CallEvents("OnDoubleTap")
+	if self.regionType ~= RTYPE_GROUP then
+		self:CallEvents("OnDoubleTap")
+	end
 end
 
 function TWRegion:TouchUp()
@@ -445,6 +445,9 @@ function TWRegion:SizeChanged()
 end
 
 function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
+	if self.regionType == RTYPE_GROUP then
+		return
+	end
 	
 	if self.regionType == RTYPE_BLANK then
 		-- switch from normal region to a counter

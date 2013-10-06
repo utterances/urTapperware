@@ -49,7 +49,7 @@ dofile(DocumentPath("urTWLink.lua"))	-- needs menu
 dofile(DocumentPath("urTWRegion.lua"))
 
 dofile(DocumentPath("urTapperwareLinkLayer.lua"))	-- needs menu
-dofile(DocumentPath("urTapperwareGroup.lua"))
+dofile(DocumentPath("urTapperwareGroup.lua"))	-- needs TWRegion
 
 -- ============
 -- = Backdrop =
@@ -239,7 +239,6 @@ end
 -- end
 
 function pointInSelectionPolygon(x, y)
-	-- find if a point is in our selection
 	-- adapted from C code: http://alienryderflex.com/polygon/
 	-- simple ray casting algo
 	oddNodes = false
@@ -377,7 +376,7 @@ function StartLinkRegion(self, draglet)
 		tx, ty = draglet:Center()
 		for i = 1, #regions do
 			if regions[i] ~= self and regions[i].usable then
-				DPrint("try link "..self:Name().." "..regions[i]:Name())
+				DPrint("try link "..self:Name().." to "..regions[i]:Name())
 				rx, ry = regions[i]:Center()
 				if math.abs(tx-rx) < INITSIZE and math.abs(ty-ry) < INITSIZE then
 					-- found a match, create a link here

@@ -66,9 +66,9 @@ end
 function OpenGroupMenu(menu, x, y, selectedRegions)
 	-- shows the actual menu
 	menu.item:Show()
-  menu.item:EnableInput(true)
-  menu.item:Handle("OnTouchUp", CallGroupFunc)
-  menu.item:MoveToTop()
+	menu.item:EnableInput(true)
+	menu.item:Handle("OnTouchUp", CallGroupFunc)
+	menu.item:MoveToTop()
 	menu.selectedRegions = selectedRegions
 	menu.item:SetAnchor("CENTER", x, y)	   
 end
@@ -102,15 +102,27 @@ function Group:new(o)
 	self.__index = self
 	 
 	o.menu = newGroupMenu()
-	o.r = Region('region', 'backdrop', UIParent)
+	o.r = TWRegion:new()
+	o.r.type = RTYPE_GROUP
 	o.r.t = o.r:Texture()
 	o.r.t:Clear(0,0,0,100)
 	o.r.t:SetBlendMode("BLEND")
-	o.r:EnableInput(false)
-	o.r:EnableMoving(false)
+	o.r.tl:SetLabel("")
+	o.r.shadow:Hide()
+	
+	o.r:Handle("OnDoubleTap", nil)
+	o.r:Handle("OnTouchDown", nil)
+	o.r:Handle("OnTouchUp", nil)
+	o.r:Handle("OnLeave", nil)
+	o.r:Handle("OnMove", nil)
+	o.r:Handle("OnSizeChanged", nil)
+	
+	o.r:EnableInput(true)
+	o.r:EnableMoving(true)
+	o.r:EnableResizing(false)
 	o.r:Hide()
 	o.regions = {}
-
+	
 	table.insert(groups, o)
 	return o
 end
@@ -126,6 +138,7 @@ end
 
 function Group:Draw()
 	-- find out how big the group region needs to be, then resize and draw
+	-- we need to anchor the regions to the group to enforce spatial unity
 	minX = -1
 	minY = -1
 	maxX = -1
@@ -145,10 +158,22 @@ function Group:Draw()
 		maxX = math.max(maxX, x + w/2)
 		maxY = math.max(maxY, y + h/2)
 	end
-	-- self.r.t:Rect(minX, minY, maxX - minX, maxY - minY)
-	self.r:SetWidth(maxX - minX)
-	self.r:SetHeight(maxY - minY)	
+	self.r.w = maxX - minX
+	self.r.h = maxY - minY
+	self.r:SetWidth(self.r.w)
+	self.r:SetHeight(self.r.h)	
+	
 	self.r:SetAnchor('CENTER', (maxX+minX)/2, (maxY+minY)/2)
+	self.r:SetLayer("LOW")
+	self.r:MoveToTop()
+	for i = 1, #self.regions do
+		r = self.regions[i]
+		x,y = r:Center()
+		r:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', x - minX, y - minY)
+		r:EnableMoving(false)
+		r:MoveToTop()
+	end
+	
 	-- now show everything
 	self.r:Show()
 	OpenGroupMenu(self.menu, minX, minY, nil) -- TODO: self.regions functionality
