@@ -111,7 +111,6 @@ linkReceiverMenu.cmdList = {
 }
 
 function initMenus(menuObj)
-	DPrint("Made Menu")
 	menuObj.items = {}
 
 	for _,item in pairs(menuObj.cmdList) do

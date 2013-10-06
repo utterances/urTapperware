@@ -6,6 +6,15 @@
 
 -- using the prototype facility in lua to do OO, a bit painful yes:
 
+
+-- ==================
+-- = Region Types   =
+-- ==================
+
+RTYPE_BLANK = 0
+RTYPE_VAR = 1
+RTYPE_SOUND = 2
+
 -- ==================
 -- = Region Manager =
 -- ==================
@@ -18,7 +27,8 @@ heldRegions = {}
 function ResetRegion(self) -- customized parameter initialization of region, events are initialized in VRegion()
 	self.alpha = 1 --target alpha for animation
 	self.menu = nil  --contextual menu
-	self.counter = 0 --if this is a counter
+	self.regionType = RTYPE_BLANK	--default blank type
+	self.value = 0
 	self.isHeld = false -- if the r is held by tap currently
 	self.isSelected = false
 	self.group = nil
@@ -40,11 +50,11 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 -- initialize for events and signals
 	self.eventlist = {}
 	-- self.eventlist["OnTouchDown"] = {HoldTrigger}
-	self.eventlist["OnTouchUp"] = {ToggleMenu}
-	self.eventlist["OnDoubleTap"] = {}
+	self.eventlist["OnTouchUp"] = {}
+	self.eventlist["OnDoubleTap"] = {ToggleMenu}
 	self.eventlist["OnUpdate"] = {} 
 	self.eventlist["OnUpdate"].currentevent = nil
- 
+	
 	self.t:SetBlendMode("BLEND")
 	self.tl:SetLabel(self:Name())
 	self.tl:SetFontHeight(16)
@@ -85,13 +95,15 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	r:EnableMoving(true)
 	r:EnableResizing(true)
 	r:EnableInput(true)
+	r:EnableClamping()
+	
 
 	r:Handle("OnDoubleTap", TWRegion.DoubleTap)
 	r:Handle("OnTouchDown", TWRegion.TouchDown)
 	r:Handle("OnTouchUp", TWRegion.TouchUp)
 	r:Handle("OnUpdate", TWRegion.Update)
-	--r:Handle("OnDragging", TWRegion.Move)
-	--r:Handle("OnMove", )
+	--r:Handle("OnDragging", TWRegion.Drag)
+	r:Handle("OnMove", TWRegion.Move)
 	r:Handle("OnSizeChanged", TWRegion.SizeChanged)
 	
 	return r
@@ -182,9 +194,48 @@ function TWRegion:RaiseToTop()
 	self:SetLayer("LOW")
 end
 
+function TWRegion:Copy()
+	-- return a copy
+	local newRegion = TWRegion:new(nil, updateEnv)
+	newRegion:Show()	
+	
+	if cx ~= nil then
+		newRegion:SetAnchor("CENTER", cx, cy)
+	else
+		newRegion:SetAnchor("CENTER",x+INITSIZE+20,y)
+	end
+	
+	for _,v in ipairs(self.inlinks) do
+		DPrint(v.sender:Name())
+		
+		local link = link:new(v.sender, newRegion, v.event, v.action)
+		
+			-- table.remove(r1.links["OnTouchUp"], i)
+	end
+	
+	for _,v in ipairs(self.outlinks) do
+		DPrint(v.receiver:Name())
+		
+		local link = link:new(newRegion, v.receiver, v.event, v.action)
+	end
+	
+	newRegion.type = self.type
+	
+	if newRegion.type == RTYPE_VAR then
+		newRegion:SwitchRegionType()
+		newRegion.value = self.value
+		newRegion.tl:SetLabel(newRegion.value)
+	end
+	
+	return newRegion
+end
+
 function TWRegion:Move(x,y,dx,dy)
+	DPrint('moving'..x..y)
+	
+	
 	for k,v in pairs(self.outlinks) do
-		if(v.event == "OnUpdate_Move") then
+		if(v.event == "_Move") then
 			v:SendMessageToReceivers({dx, dy})
 		end
 	end	
@@ -304,7 +355,6 @@ end
 
 function TWRegion:TouchDown()
 	self:CallEvents("OnTouchDown")
-	-- DPrint("hold for menu")
 	self:RaiseToTop()
 	self.alpha = .6
 	-- isHoldingRegion = true
@@ -317,7 +367,7 @@ function TWRegion:TouchDown()
 end
 
 function TWRegion:DoubleTap()
-	DPrint("double tapped")
+	-- DPrint("double tapped")
 	self:CallEvents("OnDoubleTap")
 end
 
@@ -380,6 +430,42 @@ function TWRegion:SizeChanged()
 	-- the user changed the size, so let's fix it 
 	self.w = self:Width()
 	self.h = self:Height()
+end
+
+function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
+	
+	if self.regionType == RTYPE_BLANK then
+		-- switch from normal region to a counter
+		self.t:SetTexture("tw_roundrec_slate.png")
+		-- self.tl = self:TextLabel()
+		self.tl:SetLabel(self.value)
+		self.tl:SetFontHeight(42)
+		self.tl:SetColor(255,255,255,255) 
+		self.tl:SetHorizontalAlign("JUSTIFY")
+		self.tl:SetVerticalAlign("MIDDLE")
+		-- self.tl:SetShadowColor(10,10,10,255)
+		-- self.tl:SetShadowOffset(1,1)
+		-- self.tl:SetShadowBlur(1)
+		self:EnableResizing(false)
+		self.w = INITSIZE
+		self.h = INITSIZE
+		self.regionType = RTYPE_VAR
+		
+	elseif self.regionType == RTYPE_VAR then
+		
+		self.tl:SetLabel(self:Name())		
+		self.t:SetTexture("tw_roundrec.png")
+		self.tl:SetFontHeight(16)
+		self.tl:SetColor(0,0,0,255)
+		self.tl:SetHorizontalAlign("JUSTIFY")
+		self.tl:SetVerticalAlign("MIDDLE")
+		
+		self.regionType = RTYPE_BLANK
+	end
+	
+
+	
+	CloseMenu(self)
 end
 
 -- #################################################################

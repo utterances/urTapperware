@@ -41,13 +41,15 @@ selectedRegions = {}
 -- modes = {"EDIT","RELEASE"}
 -- current_mode = modes[1]
 
-dofile(DocumentPath("urTapperwareTools.lua"))
-dofile(DocumentPath("urTWMenu.lua"))
+dofile(DocumentPath("urTWTools.lua"))
+
 dofile(DocumentPath("urTapperwareMenu.lua"))	-- first!
-dofile(DocumentPath("urTapperwareLink.lua"))	-- needs menu
+dofile(DocumentPath("urTWMenu.lua"))
+dofile(DocumentPath("urTWLink.lua"))	-- needs menu
+dofile(DocumentPath("urTWRegion.lua"))
+
 dofile(DocumentPath("urTapperwareLinkLayer.lua"))	-- needs menu
 dofile(DocumentPath("urTapperwareGroup.lua"))
-dofile(DocumentPath("urTWRegion.lua"))
 
 -- ============
 -- = Backdrop =
@@ -136,6 +138,8 @@ backdrop:Handle("OnDoubleTap", DoubleTap)
 backdrop:Handle("OnEnter", Enter)
 backdrop:Handle("OnLeave", Leave)
 backdrop:Handle("OnMove", Move)
+backdrop:Handle("OnPageEntered", visdown)
+
 backdrop:EnableInput(true)
 backdrop:SetClipRegion(0,0,ScreenWidth(),ScreenHeight())
 backdrop:EnableClipping(true)
@@ -155,7 +159,6 @@ shadow.t:SetBlendMode("BLEND")
 selectionLayer = Region('region', 'selection', UIParent)
 selectionLayer:SetLayer("BACKGROUND")
 selectionLayer:SetWidth(ScreenWidth())
-selectionLayer:SetWidth(ScreenWidth())
 selectionLayer:SetHeight(ScreenHeight())
 selectionLayer:SetAnchor('BOTTOMLEFT',0,0)
 selectionLayer:EnableInput(false)
@@ -164,6 +167,32 @@ selectionLayer.t:Clear(0,0,0,0)
 selectionLayer.t:SetTexCoord(0,ScreenWidth()/1024.0,1.0,0.0)
 selectionLayer.t:SetBlendMode("BLEND")
 selectionLayer:Show()
+
+-- tapVisLayer = Region()
+-- tapVisLayer:SetLayer("TOOLTIP")
+-- tapVisLayer:SetWidth(ScreenWidth())
+-- tapVisLayer:SetHeight(ScreenHeight())
+-- tapVisLayer:SetAnchor('BOTTOMLEFT',0,0)
+-- tapVisLayer:EnableInput(false)
+-- tapVisLayer.t = tapVisLayer:Texture()
+-- tapVisLayer.t:Clear(0,0,0,0)
+-- tapVisLayer.t:SetTexCoord(0,ScreenWidth()/1024.0,1.0,0.0)
+-- tapVisLayer.t:SetBlendMode("BLEND")
+-- tapVisLayer:Show()
+
+-- tapVisLayer:Handle("OnPageEntered", visdown)
+
+-- function visdown()
+-- 	local x,y = InputPosition()
+-- 	DPrint('down '..x..' '..y)
+-- 	tapVisLayer.t:SetBrushColor(255,100,100,200)
+-- 	tapVisLayer.t:Ellipse(x,y,w,h)
+-- end
+-- 
+-- function visup()
+-- 	local x,y = InputPosition()
+-- 	DPrint('up '..x..' '..y)
+-- end
 
 function selectionLayer:DrawSelectionPoly()
 	if #selectionPoly < 2 then	-- need at least two points to draw
@@ -187,8 +216,8 @@ function selectionLayer:DrawSelectionPoly()
 		if regions[i].usable then
 			x,y = regions[i]:Center()
 			if pointInSelectionPolygon(x,y) then
-				w = regions[i]:Width()
-				h = regions[i]:Height()
+				w = regions[i]:Width()/1.5
+				h = regions[i]:Height()/1.5
 				self.t:SetBrushColor(255,100,100,200)
 				self.t:Ellipse(x,y,w,h)
 			end
@@ -322,26 +351,6 @@ function AddOneToCounter(self)
 	end
 end
 
-function SwitchRegionType(self) -- TODO: change method name to reflect
-	-- switch from normal region to a counter
-	self.t:SetTexture("tw_roundrec_slate.png")
-	self.value = 0
-	self.counter = 1
-	self.tl = self:TextLabel()
-	self.tl:SetLabel(self.value)
-	self.tl:SetFontHeight(42)
-	self.tl:SetColor(255,255,255,255) 
-	self.tl:SetHorizontalAlign("JUSTIFY")
-	self.tl:SetVerticalAlign("MIDDLE")
-	self.tl:SetShadowColor(10,10,10,255)
-	self.tl:SetShadowOffset(1,1)
-	self.tl:SetShadowBlur(1)
-	-- TESTING: just for testing counter:
-	--table.insert(self.eventlist["OnTouchUp"], AddOneToCounter)
-	
-	CloseMenu(self)
-end
-
 function ChangeSelectionStateRegion(self, select)
 	if select ~= self.isSelected then
 		if select then
@@ -372,10 +381,7 @@ function StartLinkRegion(self, draglet)
 				rx, ry = regions[i]:Center()
 				if math.abs(tx-rx) < INITSIZE and math.abs(ty-ry) < INITSIZE then
 					-- found a match, create a link here
-					DPrint("linked")
-					
-				EndLinkRegion(regions[i])
-					--initialLinkRegion = nil
+					ChooseEvent(regions[i])
 					return
 				end
 			end
@@ -392,58 +398,41 @@ end
 
 menu = nil
 
-function EndLinkRegion(self)
+function ChooseEvent(self)
 	if initialLinkRegion ~= nil then
 		-- DPrint("linked from "..initialLinkRegion:Name().." to "..self:Name())
-		-- TODO create the link here!
-		
-		--table.insert(initialLinkRegion.links["OnTouchUp"], {TapperRegion.TouchUp, self.r})
 		
 		finishLinkRegion = self
-		cmdlist = {{'Touch Up',chooseEffect,'OnTouchUp'},
-			{'Touch Down',chooseEffect,'OnTouchDown'},
-			{'Move',chooseEffect,'OnUpdate_Move'},
-			{'Cancel',nil,nil}}
-		menu = loadSimpleMenu(cmdlist, 'Choose Event Type')
+		cmdlist = {{'Tap', ChooseAction, 'OnTouchUp'},
+			{'Tap & Hold', ChooseAction, 'OnTouchDown'},
+			{'Move', ChooseAction, 'OnUpdate_Move'},
+			{'Cancel', nil, nil}}
+		menu = loadSimpleMenu(cmdlist, 'Choose Event:')
 		menu:present(initialLinkRegion:Center())
-		
-		--[[
-		-- add visual link too:
-		linkLayer:Add(initialLinkRegion, self, 10, 10)
-		linkLayer:ResetPotentialLink()
-		linkLayer:Draw()
-		-- add notification
-		linkIcon:ShowLinked()
-		
-		CloseMenu(initialLinkRegion)
-		initialLinkRegion = nil]]--
 	end
 end
 
-function chooseEffect(message)
+function ChooseAction(message)
 	linkEvent = message
 	DPrint(linkEvent)
 	
 	menu:dismiss()
 	
-	cmdlist = {{'Counter',finishLink,AddOneToCounter},
-		{'Move Left', finishLink, MoveLeft},
-		{'Move Right', finishLink, MoveRight},
-		{'Move', finishLink, move},
+	cmdlist = {{'Counter',FinishLink,AddOneToCounter},
+		{'Move Left', FinishLink, MoveLeft},
+		{'Move Right', FinishLink, MoveRight},
+		{'Move', FinishLink, move},
 		{'Cancel', nil, nil}}
-	menu = loadSimpleMenu(cmdlist, 'Choose Effect Type')
+	menu = loadSimpleMenu(cmdlist, 'Choose Action to respond')
 	menu:present(finishLinkRegion:Center())
 end
 
-function finishLink(message)
+function FinishLink(message)
 	linkEffect = message
 	menu:dismiss()
 	
-	-- add visual link too:
-	-- DPrint("creating link:"..initialLinkRegion:Height().." "..finishLinkRegion:Height())
 	local link = link:new(initialLinkRegion,finishLinkRegion,linkEvent,linkEffect)
 	
-	--	linkLayer:Add(initialLinkRegion, finishLinkRegion, 10, 10)
 	linkLayer:ResetPotentialLink()
 	linkLayer:Draw()
 	-- add notification
@@ -454,61 +443,21 @@ function finishLink(message)
 	finishLinkRegion = nil
 end
 
-function DuplicateRegion(vv, cx, cy)
-	x,y = vv:Center()
-	local newRegion = TWRegion:new(nil, updateEnv)
-	newRegion:Show()
-	if cx ~= nil then
-		newRegion:SetAnchor("CENTER", cx, cy)
-	else
-		newRegion:SetAnchor("CENTER",x+INITSIZE+20,y)
-	end
-	newRegion.counter = vv.counter
-
-	for _,v in ipairs(vv.inlinks["OnTouchUp"]) do
-		
-		
-			table.remove(r1.links["OnTouchUp"], i)
-	end
-		
-	-- newRegion.counter = vv.counter
-	-- newRegion.counter = vv.counter
+function DuplicateRegion(r, cx, cy)
+	x,y = r:Center()
 	
-	
-	-- list = newRegion.links["OnTouchUp"]
-	-- if list ~= nil then
-	-- 	for k = 1,#list do
-	-- 		linkLayer:Add(newRegion, list[k][2])
-	-- 	end
-	-- end
-	-- 
-	-- -- TODO: optimize this part: right now it's a messy search for every inbound links
-	-- for i = 1, #regions do
-	-- 	if regions[i].usable and (regions[i] ~= vv or regions[i] ~= newRegion) then
-	-- 		linkList = regions[i].links["OnTouchUp"]
-	-- 		if linkList ~= nil then
-	-- 			for k = 1,#linkList do
-	-- 				if linkList[k][2] == vv then
-	-- 					table.insert(linkList, {TapperRegion.TouchUp, newRegion})
-	-- 					linkLayer:Add(regions[i], newRegion)
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
-	
-	if newRegion.counter == 1 then
-		SwitchRegionType(newRegion)
-		newRegion.value = vv.value
-		newRegion.tl:SetLabel(newRegion.value)
-	end
+	local newRegion = r:Copy()
 	
 	linkLayer:Draw()
 	
-	RaiseToTop(newRegion)
+	newRegion:RaiseToTop()
 	
-	CloseMenu(vv)
-	OpenRegionMenu(vv)
+	CloseMenu(r)
+	OpenRegionMenu(r)
+end
+
+function SwitchRegionType(self)
+	self:SwitchRegionType()
 end
 
 function ShowPotentialLink(region, draglet)
