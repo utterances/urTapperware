@@ -310,6 +310,11 @@ function TWRegion:Update(elapsed)
 		self:CallEvents("OnTapAndHold", elapsed)
 	end
 		
+	if self.oldx ~= x or self.oldy ~= y then
+		-- if we moved:
+		self.updateEnv()
+	end
+	
 	self.oldx = x
 	self.oldy = y
 end
