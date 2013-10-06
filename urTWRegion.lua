@@ -207,26 +207,26 @@ function TWRegion:Copy(cx, cy)
 		newRegion:SetAnchor("CENTER",x+INITSIZE+20,y)
 	end
 	
+	-- copy all links
 	for _,v in ipairs(self.inlinks) do
-		DPrint(v.sender:Name())
-		
+		-- DPrint(v.sender:Name())
 		local link = link:new(v.sender, newRegion, v.event, v.action)
-		
-			-- table.remove(r1.links["OnTouchUp"], i)
 	end
 	
 	for _,v in ipairs(self.outlinks) do
-		DPrint(v.receiver:Name())
-		
+		-- DPrint(v.receiver:Name())	
 		local link = link:new(newRegion, v.receiver, v.event, v.action)
 	end
 	
+	-- copy type and properties
 	newRegion.type = self.type
-	
 	if newRegion.type == RTYPE_VAR then
 		newRegion:SwitchRegionType()
 		newRegion.value = self.value
 		newRegion.tl:SetLabel(newRegion.value)
+	else
+		newRegion.h = self.h
+		newRegion.w = self.w
 	end
 	
 	return newRegion
@@ -362,40 +362,40 @@ end
 function TWRegion:TouchUp()
 	self.isHeld = false
 	self.alpha = 1
+
 	if initialLinkRegion == nil then
 		--DPrint("")
 		-- see if we can make links here, check how many regions are held
-		if #heldRegions >= 2 then
-			-- by default let's just link self and the first one that's different
-			for i = 1, #heldRegions do
-				if heldRegions[i] ~= self and RegionOverLap(self, heldRegions[i]) then
-					initialLinkRegion = self
-					EndLinkRegion(heldRegions[i])
-					initialLinkRegion = nil
-					
-					-- initialize bounce back animation, it runs in TWRegion.Update later
-					x1,y1 = self:Center()
-					x2,y2 = heldRegions[i]:Center()
-					EXRATE = 150000
-					mx = (x1+x2)/2
-					my = (y1+y2)/2
-					ds = math.max((x1-x2)^2 + (y1-y2)^2, 400)
-					
-					self.sx = EXRATE*(x1 - mx)/ds
-					self.sy = EXRATE*(y1 - my)/ds
-					-- self.tl:SetLabel(self.sx.." "..self.sy)
-					heldRegions[i].sx = EXRATE*(x2 - mx)/ds
-					heldRegions[i].sy = EXRATE*(y2 - my)/ds
-					-- heldRegions[i].tl:SetLabel(heldRegions[i].sx.." "..heldRegions[i].sy)
-					-- DPrint(self:Name().." vs "..heldRegions[i]:Name())
-					-- temp remove touch input
-					-- self:EnableInput(false)
-					-- heldRegions[i]:EnableInput(false)
-					break
-				end
-			end
-			
-		end
+		-- if #heldRegions >= 2 then
+		-- 	-- by default let's just link self and the first one that's different
+		-- 	for i = 1, #heldRegions do
+		-- 		if heldRegions[i] ~= self and RegionOverLap(self, heldRegions[i]) then
+		-- 			initialLinkRegion = self
+		-- 			EndLinkRegion(heldRegions[i])
+		-- 			initialLinkRegion = nil
+		-- 			
+		-- 			-- initialize bounce back animation, it runs in TWRegion.Update later
+		-- 			x1,y1 = self:Center()
+		-- 			x2,y2 = heldRegions[i]:Center()
+		-- 			EXRATE = 150000
+		-- 			mx = (x1+x2)/2
+		-- 			my = (y1+y2)/2
+		-- 			ds = math.max((x1-x2)^2 + (y1-y2)^2, 400)
+		-- 			
+		-- 			self.sx = EXRATE*(x1 - mx)/ds
+		-- 			self.sy = EXRATE*(y1 - my)/ds
+		-- 			-- self.tl:SetLabel(self.sx.." "..self.sy)
+		-- 			heldRegions[i].sx = EXRATE*(x2 - mx)/ds
+		-- 			heldRegions[i].sy = EXRATE*(y2 - my)/ds
+		-- 			-- heldRegions[i].tl:SetLabel(heldRegions[i].sx.." "..heldRegions[i].sy)
+		-- 			-- DPrint(self:Name().." vs "..heldRegions[i]:Name())
+		-- 			-- temp remove touch input
+		-- 			-- self:EnableInput(false)
+		-- 			-- heldRegions[i]:EnableInput(false)
+		-- 			break
+		-- 		end
+		-- 	end
+		-- end
 		
 		tableRemoveObj(heldRegions, self)
 		
