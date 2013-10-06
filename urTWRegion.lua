@@ -31,6 +31,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self.value = 0
 	self.isHeld = false -- if the r is held by tap currently
 	self.isSelected = false
+	self.canBeMoved = true
 	self.group = nil
 
 	self.dx = 0  -- compute storing current movement speed, for gesture detection
@@ -95,13 +96,14 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	r:EnableMoving(true)
 	r:EnableResizing(true)
 	r:EnableInput(true)
-	r:EnableClamping()
+	r:EnableClamping(true)
 	
 
 	r:Handle("OnDoubleTap", TWRegion.DoubleTap)
 	r:Handle("OnTouchDown", TWRegion.TouchDown)
 	r:Handle("OnTouchUp", TWRegion.TouchUp)
 	r:Handle("OnUpdate", TWRegion.Update)
+	r:Handle("OnLeave", TWRegion.Leave)
 	--r:Handle("OnDragging", TWRegion.Drag)
 	r:Handle("OnMove", TWRegion.Move)
 	r:Handle("OnSizeChanged", TWRegion.SizeChanged)
@@ -194,7 +196,7 @@ function TWRegion:RaiseToTop()
 	self:SetLayer("LOW")
 end
 
-function TWRegion:Copy()
+function TWRegion:Copy(cx, cy)
 	-- return a copy
 	local newRegion = TWRegion:new(nil, updateEnv)
 	newRegion:Show()	
@@ -319,7 +321,10 @@ function TWRegion:Update(elapsed)
 		self.tl:SetVerticalAlign("MIDDLE")
 	end
 	
-	self:CallEvents("OnUpdate")
+	self:CallEvents("OnUpdate", elapsed)
+	if self.isHeld then
+		self:CallEvents("OnTapAndHold", elapsed)
+	end
 	
 	if self.oldx ~= x or self.oldy ~= y then
 		-- if we moved:
@@ -330,7 +335,7 @@ function TWRegion:Update(elapsed)
 	self.oldy = y
 end
 
-function TWRegion:CallEvents(signal)
+function TWRegion:CallEvents(signal, elapsed)
 	local list = {}
 
 	-- if current_mode == modes[1] then
@@ -348,12 +353,14 @@ function TWRegion:CallEvents(signal)
 	
 	for k,v in pairs(self.outlinks) do
 		if(v.event == signal) then
-			v:SendMessageToReceivers(signal)
+			elapsed = elapsed or signal
+			v:SendMessageToReceivers(elapsed)
 		end
 	end
 end
 
 function TWRegion:TouchDown()
+	self.isHeld = true
 	self:CallEvents("OnTouchDown")
 	self:RaiseToTop()
 	self.alpha = .6
@@ -372,6 +379,7 @@ function TWRegion:DoubleTap()
 end
 
 function TWRegion:TouchUp()
+	self.isHeld = false
 	self.alpha = 1
 	if initialLinkRegion == nil then
 		--DPrint("")
@@ -412,11 +420,15 @@ function TWRegion:TouchUp()
 		
 		-- isHoldingRegion = false
 	else
-		EndLinkRegion(self)
+		-- EndLinkRegion(self)
 		initialLinkRegion = nil
 	end
 	
 	self:CallEvents("OnTouchUp")
+end
+
+function TWRegion:Leave()
+	self.isHeld = false
 end
 
 function TWRegion:RaiseToTop()
@@ -463,9 +475,13 @@ function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
 		self.regionType = RTYPE_BLANK
 	end
 	
-
-	
 	CloseMenu(self)
+end
+
+function TWRegion:ToggleAnchor()
+	DPrint("toggle movement")
+	self.canBeMoved = not self.canBeMoved
+	self:EnableMoving(self.canBeMoved)
 end
 
 -- #################################################################
@@ -481,15 +497,17 @@ function move(self, message)
 end
 
 function MoveLeft(self, message)
+	e = tonumber(message) or 2	
 	x,y = self:Center()
-	self.oldx = x - 10
+	self.oldx = x - 5*e
 	self.oldy = y
 	self:SetAnchor('CENTER',x-10,y)
 	linkLayer:Draw()
 end
 function MoveRight(self, message)
+	e = tonumber(message) or 2
 	x,y = self:Center()
-	self.oldx = x + 10
+	self.oldx = x + 5*e
 	self.oldy = y
 	self:SetAnchor('CENTER',x+10,y)
 	linkLayer:Draw()

@@ -8,7 +8,7 @@
 
 link = {}
 
-function link:new(initialLinkRegion,finishLinkRegion,event,action)
+function link:new(initialLinkRegion, finishLinkRegion, event, action)
 	o = {}
 	setmetatable(o,self)
 	self.__index = self

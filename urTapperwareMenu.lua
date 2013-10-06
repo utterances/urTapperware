@@ -39,18 +39,22 @@ function StartLinkOnDrag(self)
 end
 
 function SwitchRegionTypeAction(r)
-	DPrint("switch type")
-	SwitchRegionType(r)
+	-- SwitchRegionType(r)
+	r:SwitchRegionType()
 end
 
 function DuplicateAction(r, draglet)
-	-- DPrint("copy action")
 	if draglet ~= nil then
 		x,y = draglet:Center()
 		DuplicateRegion(r, x, y)
 	else
 		DuplicateRegion(r)
 	end
+end
+
+function LockPos(r)
+	r:ToggleAnchor()
+	CloseMenu(r)
 end
 
 function DupOnDrag(r)
@@ -86,10 +90,10 @@ regionMenu.cmdList = {
 	{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag},
 	{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
 	{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag},
-	{"", testMenu, 6, "tw_timer.png"},
+	{"", LockPos, 6, "tw_unlock.png"}
 	-- {"", testMenu, 7, "tw_paint.png"}
 	--{"", testMenu, 8, "tw_run.png"}
-	{"", CloseMenu, 8, "tw_socket1.png"}
+	-- {"", CloseMenu, 8, "tw_socket1.png"}
 }
 
 local linkMenu = {}

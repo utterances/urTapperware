@@ -22,7 +22,7 @@ EPSILON = 0.001	--small number for rounding
 LASSOSEPDISTANCE = 25 -- pixels between each point when drawing selection lasso
 
 FreeAllRegions()
-
+DPrint('')
 --regions = {}
 --recycledregions = {}
 initialLinkRegion = nil
@@ -399,12 +399,10 @@ end
 menu = nil
 
 function ChooseEvent(self)
-	if initialLinkRegion ~= nil then
-		-- DPrint("linked from "..initialLinkRegion:Name().." to "..self:Name())
-		
+	if initialLinkRegion ~= nil then		
 		finishLinkRegion = self
 		cmdlist = {{'Tap', ChooseAction, 'OnTouchUp'},
-			{'Tap & Hold', ChooseAction, 'OnTouchDown'},
+			{'Tap & Hold', ChooseAction, 'OnTapAndHold'},
 			{'Move', ChooseAction, 'OnUpdate_Move'},
 			{'Cancel', nil, nil}}
 		menu = loadSimpleMenu(cmdlist, 'Choose Event:')
@@ -428,6 +426,8 @@ function ChooseAction(message)
 end
 
 function FinishLink(message)
+	-- DPrint("linked from "..initialLinkRegion:Name().." to "..finishLinkRegion:Name())
+	
 	linkEffect = message
 	menu:dismiss()
 	
@@ -446,7 +446,7 @@ end
 function DuplicateRegion(r, cx, cy)
 	x,y = r:Center()
 	
-	local newRegion = r:Copy()
+	local newRegion = r:Copy(cx, cy)
 	
 	linkLayer:Draw()
 	
@@ -456,9 +456,9 @@ function DuplicateRegion(r, cx, cy)
 	OpenRegionMenu(r)
 end
 
-function SwitchRegionType(self)
-	self:SwitchRegionType()
-end
+-- function SwitchRegionType(self)
+-- 	self:SwitchRegionType()
+-- end
 
 function ShowPotentialLink(region, draglet)
 	linkLayer:DrawPotentialLink(region, draglet)
