@@ -100,7 +100,7 @@ function Group:new(o)
 	o = o or {}   -- create object if user does not provide one
 	setmetatable(o, self)
 	self.__index = self
-	 
+	
 	o.menu = newGroupMenu()
 	o.r = TWRegion:new()
 	o.r.type = RTYPE_GROUP
@@ -114,7 +114,6 @@ function Group:new(o)
 	o.r:Handle("OnTouchDown", nil)
 	o.r:Handle("OnTouchUp", nil)
 	o.r:Handle("OnLeave", nil)
-	o.r:Handle("OnMove", nil)
 	o.r:Handle("OnSizeChanged", nil)
 	
 	o.r:EnableInput(true)

@@ -241,22 +241,7 @@ function TWRegion:Move(x,y,dx,dy)
 		end
 	end	
 
-	-- self.updateEnv()
-		-- also update the rest of the group, if needed: TODO change this later
-	-- if self.group ~= nil then
-	-- 	--DPrint("From Up Group"..self.id..": "..self.dx.." "..self.dy)
-	-- 	rx,ry = self.group.r:Center()
-	-- 	self.group.r:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
-	-- 	
-	-- 	for i=1, #self.group.regions do
-	-- 		if self.group.regions[i] ~= self then
-	-- 			rx,ry = self.group.regions[i]:Center()
-	-- 			self.group.regions[i].oldx = rx+self.dx -- FIXME: stopgap
-	-- 			self.group.regions[i].oldy = ry+self.dy
-	-- 			self.group.regions[i]:SetAnchor('CENTER', rx+self.dx, ry+self.dy)
-	-- 		end
-	-- 	end
-	-- end
+	self.updateEnv()
 
 	self.oldx = x
 	self.oldy = y
@@ -324,12 +309,7 @@ function TWRegion:Update(elapsed)
 	if self.isHeld then
 		self:CallEvents("OnTapAndHold", elapsed)
 	end
-	
-	-- if self.oldx ~= x or self.oldy ~= y then
-	-- 	-- if we moved:
-	-- 	self.updateEnv()
-	-- end
-	
+		
 	self.oldx = x
 	self.oldy = y
 end
@@ -353,6 +333,7 @@ function TWRegion:CallEvents(signal, elapsed)
 	for k,v in pairs(self.outlinks) do
 		if(v.event == signal) then
 			elapsed = elapsed or signal
+			-- DPrint('sending '..signal)
 			v:SendMessageToReceivers(elapsed)
 		end
 	end

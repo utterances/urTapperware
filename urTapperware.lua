@@ -28,7 +28,7 @@ DPrint('')
 initialLinkRegion = nil
 finishLinkRegion = nil
 linkEvent = nil
-linkEffect = nil
+linkAction = nil
 startedSelection = false
 -- touch event state machine:
 -- isHoldingRegion = false
@@ -344,7 +344,7 @@ end
 
 function AddOneToCounter(self)
 	-- DPrint("adding one")
-	if self.counter == 1 then
+	if self.regionType == RTYPE_VAR then
 		self.value = self.value + 1
 		self.tl:SetLabel(self.value)
 	end
@@ -427,10 +427,10 @@ end
 function FinishLink(message)
 	-- DPrint("linked from "..initialLinkRegion:Name().." to "..finishLinkRegion:Name())
 	
-	linkEffect = message
+	linkAction = message
 	menu:dismiss()
 	
-	local link = link:new(initialLinkRegion,finishLinkRegion,linkEvent,linkEffect)
+	local link = link:new(initialLinkRegion,finishLinkRegion,linkEvent,linkAction)
 	
 	linkLayer:ResetPotentialLink()
 	linkLayer:Draw()

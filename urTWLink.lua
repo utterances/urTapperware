@@ -22,7 +22,7 @@ function link:new(initialLinkRegion, finishLinkRegion, event, action)
 end
 
 function link:AddSender(r)
-	DPrint("sender set")
+	-- DPrint("sender set")
 	self.sender = r
 	r:AddOutgoingLink(self)
 end
