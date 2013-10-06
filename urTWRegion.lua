@@ -219,8 +219,7 @@ function TWRegion:Copy(cx, cy)
 	end
 	
 	-- copy type and properties
-	newRegion.type = self.type
-	if newRegion.type == RTYPE_VAR then
+	if self.regionType == RTYPE_VAR then
 		newRegion:SwitchRegionType()
 		newRegion.value = self.value
 		newRegion.tl:SetLabel(newRegion.value)
