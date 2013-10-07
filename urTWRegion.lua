@@ -209,12 +209,10 @@ function TWRegion:Copy(cx, cy)
 	
 	-- copy all links
 	for _,v in ipairs(self.inlinks) do
-		-- DPrint(v.sender:Name())
 		local link = link:new(v.sender, newRegion, v.event, v.action)
 	end
 	
 	for _,v in ipairs(self.outlinks) do
-		-- DPrint(v.receiver:Name())	
 		local link = link:new(newRegion, v.receiver, v.event, v.action)
 	end
 	
@@ -459,7 +457,7 @@ function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
 		self.tl:SetColor(0,0,0,255)
 		self.tl:SetHorizontalAlign("JUSTIFY")
 		self.tl:SetVerticalAlign("MIDDLE")
-		
+		self:EnableResizing(true)
 		self.regionType = RTYPE_BLANK
 	end
 	
