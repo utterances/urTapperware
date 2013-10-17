@@ -217,7 +217,7 @@ linkReceiverMenu.show = 0
 function OpenMenu(self)
 
   -- if regionMenu.show == 0 then
-		DPrint("opens menu!")
+		-- DPrint("opens menu!")
 		
     regionMenu.v = self
 		
@@ -269,7 +269,7 @@ end
 function OpenRegionMenu(self)
 	-- OpenMenu(self, regionMenu)
 	OpenMenu(self)
-	DPrint(self:Name())
+	-- DPrint(self:Name())
 end
 
 -- keep menu on top of pesky things, like regions

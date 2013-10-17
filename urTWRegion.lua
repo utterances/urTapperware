@@ -146,7 +146,7 @@ function RemoveRegion(self)
 	self.group = nil
 
 	table.insert(recycledregions, self.id)
-	DPrint(self:Name().." removed")
+	notifyView:showTimedText(self:Name().." removed")
 end
 
 -- =================
@@ -154,11 +154,6 @@ end
 -- =================
 
 TWRegion = {}
-
-function TWRegion.check(self)
-	DPrint(self.id)
-	toDelete = self.id
-end
 
 -- constructor
 function TWRegion:new(o, updateEnv)
@@ -465,7 +460,7 @@ function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
 end
 
 function TWRegion:ToggleAnchor()
-	DPrint("toggle movement")
+	notifyView:showTimedText("toggle movement")
 	self.canBeMoved = not self.canBeMoved
 	self:EnableMoving(self.canBeMoved)
 end
