@@ -320,7 +320,6 @@ function TWRegion:CallEvents(signal, elapsed)
 	-- 	list = vv.reventlist[signal]
 	-- end
 	
-	-- DPrint(signal, list)
 	if list~=nil then
 		for k = 1,#list do
 			list[k](self)
@@ -330,7 +329,6 @@ function TWRegion:CallEvents(signal, elapsed)
 	for k,v in pairs(self.outlinks) do
 		if(v.event == signal) then
 			elapsed = elapsed or signal
-			-- DPrint('sending '..signal)
 			v:SendMessageToReceivers(elapsed)
 		end
 	end

@@ -27,6 +27,9 @@ function linkLayer:Init()
 	
 	self.links:MoveToTop()
 	self.links:Show()
+	self.links.needsDraw=true
+	self.links:Handle("OnUpdate", linkLayer.Update)
+	self.links.parent = self
 	
 	-- set up another region for drawing guides or potential links
 	self.linkGuides = Region('region', 'backdrop', UIParent)
@@ -63,8 +66,8 @@ end
 function linkLayer:Remove(l)
 	for k,v in pairs(self.list) do
 		if v == l then
-			DPrint("Removing found link")
 			table.remove(self.list,k)
+			notifyView:showTimedText("Removed Link")
 			return true
 		end
 	end
@@ -72,20 +75,27 @@ function linkLayer:Remove(l)
 	return false
 end
 
+function linkLayer:Update()
+	if self.needsDraw then
+		self.needsDraw = false
+		self.t:Clear(0,0,0,0)
+		self.t:SetBrushColor(100,120,120,200)
+		self.t:SetBrushSize(8)
+	
+		for _, link in pairs(self.parent.list) do
+			X1, Y1 = link.sender:Center()
+			X2, Y2 = link.receiver:Center()
+			self.t:Line(X1,Y1,X2,Y2)
+			-- draw the link menu (close button), it will compute centroid using
+			-- region locations	
+			OpenLinkMenu(link.menu)
+		end
+	end
+end
+
 -- draw a line between linked regions, also draws menu
 function linkLayer:Draw()
-	self.links.t:Clear(0,0,0,0)
-	self.links.t:SetBrushColor(100,120,120,200)
-	self.links.t:SetBrushSize(8)
-	
-	for _, link in pairs(self.list) do
-		X1, Y1 = link.sender:Center()
-		X2, Y2 = link.receiver:Center()
-		self.links.t:Line(X1,Y1,X2,Y2)
-		-- draw the link menu (close button), it will compute centroid using
-		-- region locations	
-		OpenLinkMenu(link.menu)
-	end
+	self.links.needsDraw = true	
 end
 
 function linkLayer:DrawPotentialLink(region, draglet)

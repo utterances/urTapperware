@@ -269,7 +269,6 @@ end
 function OpenRegionMenu(self)
 	-- OpenMenu(self, regionMenu)
 	OpenMenu(self)
-	-- DPrint(self:Name())
 end
 
 -- keep menu on top of pesky things, like regions
@@ -380,7 +379,6 @@ end
 -- =============================
 
 function CloseLinkMenu(self)
-	-- DPrint("close link menu")
 	self:Hide()
 	self:EnableInput(false)
 end
