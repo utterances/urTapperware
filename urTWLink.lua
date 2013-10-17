@@ -1,10 +1,6 @@
--- ===============================
--- = Visual Links between regions=
--- ===============================
-
--- methods and appearances and menus for deleting / editing
--- assumes urTapperwareMenu.lua is already processed
-
+-- ===============
+-- = link object =
+-- ===============
 
 link = {}
 
@@ -17,7 +13,7 @@ function link:new(initialLinkRegion, finishLinkRegion, event, action)
 	o.event = event
 	o.action = action
 	o.menu = newLinkMenu(o)
-	linkLayer:Add(o)	
+	linkLayer:Add(o)
 	return o
 end
 

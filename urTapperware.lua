@@ -42,13 +42,13 @@ selectedRegions = {}
 -- current_mode = modes[1]
 
 dofile(DocumentPath("urTWTools.lua"))
-
+dofile(DocumentPath("urTWNotify.lua"))
 dofile(DocumentPath("urTapperwareMenu.lua"))	-- first!
 dofile(DocumentPath("urTWMenu.lua"))
 dofile(DocumentPath("urTWLink.lua"))	-- needs menu
 dofile(DocumentPath("urTWRegion.lua"))
 
-dofile(DocumentPath("urTapperwareLinkLayer.lua"))	-- needs menu
+dofile(DocumentPath("urTWLinkLayer.lua"))	-- needs menu
 dofile(DocumentPath("urTapperwareGroup.lua"))	-- needs TWRegion
 
 -- ============
@@ -168,31 +168,8 @@ selectionLayer.t:SetTexCoord(0,ScreenWidth()/1024.0,1.0,0.0)
 selectionLayer.t:SetBlendMode("BLEND")
 selectionLayer:Show()
 
--- tapVisLayer = Region()
--- tapVisLayer:SetLayer("TOOLTIP")
--- tapVisLayer:SetWidth(ScreenWidth())
--- tapVisLayer:SetHeight(ScreenHeight())
--- tapVisLayer:SetAnchor('BOTTOMLEFT',0,0)
--- tapVisLayer:EnableInput(false)
--- tapVisLayer.t = tapVisLayer:Texture()
--- tapVisLayer.t:Clear(0,0,0,0)
--- tapVisLayer.t:SetTexCoord(0,ScreenWidth()/1024.0,1.0,0.0)
--- tapVisLayer.t:SetBlendMode("BLEND")
--- tapVisLayer:Show()
-
--- tapVisLayer:Handle("OnPageEntered", visdown)
-
--- function visdown()
--- 	local x,y = InputPosition()
--- 	DPrint('down '..x..' '..y)
--- 	tapVisLayer.t:SetBrushColor(255,100,100,200)
--- 	tapVisLayer.t:Ellipse(x,y,w,h)
--- end
--- 
--- function visup()
--- 	local x,y = InputPosition()
--- 	DPrint('up '..x..' '..y)
--- end
+notifyView:Init()
+notifyView:showTimedText("Welcome!", 2)
 
 function selectionLayer:DrawSelectionPoly()
 	if #selectionPoly < 2 then	-- need at least two points to draw
@@ -410,9 +387,7 @@ function ChooseEvent(self)
 end
 
 function ChooseAction(message)
-	linkEvent = message
-	DPrint(linkEvent)
-	
+	linkEvent = message	
 	menu:dismiss()
 	
 	cmdlist = {{'Counter',FinishLink,AddOneToCounter},
@@ -435,7 +410,7 @@ function FinishLink(message)
 	linkLayer:ResetPotentialLink()
 	linkLayer:Draw()
 	-- add notification
-	linkIcon:ShowLinked()
+	notifyView:showTimedText('linked', 3)
 	
 	CloseMenu(initialLinkRegion)
 	initialLinkRegion = nil
