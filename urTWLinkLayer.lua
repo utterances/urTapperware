@@ -76,6 +76,7 @@ function linkLayer:Remove(l)
 end
 
 function linkLayer:Update()
+	-- draw a line between linked regions, also draws menu
 	if self.needsDraw then
 		self.needsDraw = false
 		self.t:Clear(0,0,0,0)
@@ -93,7 +94,6 @@ function linkLayer:Update()
 	end
 end
 
--- draw a line between linked regions, also draws menu
 function linkLayer:Draw()
 	self.links.needsDraw = true	
 end

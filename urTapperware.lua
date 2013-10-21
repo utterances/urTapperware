@@ -49,7 +49,7 @@ dofile(DocumentPath("urTWLink.lua"))	-- needs menu
 dofile(DocumentPath("urTWRegion.lua"))
 
 dofile(DocumentPath("urTWLinkLayer.lua"))	-- needs menu
-dofile(DocumentPath("urTapperwareGroup.lua"))	-- needs TWRegion
+dofile(DocumentPath("urTWGroup.lua"))	-- needs TWRegion
 
 -- ============
 -- = Backdrop =

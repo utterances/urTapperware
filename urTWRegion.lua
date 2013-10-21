@@ -104,7 +104,7 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	r:Handle("OnTouchUp", TWRegion.TouchUp)
 	r:Handle("OnUpdate", TWRegion.Update)
 	r:Handle("OnLeave", TWRegion.Leave)
-	--r:Handle("OnDragging", TWRegion.Drag)
+	r:Handle("OnDragging", TWRegion.Drag)
 	r:Handle("OnMove", TWRegion.Move)
 	r:Handle("OnSizeChanged", TWRegion.SizeChanged)
 	
@@ -225,16 +225,28 @@ function TWRegion:Copy(cx, cy)
 end
 
 function TWRegion:Move(x,y,dx,dy)
-	DPrint('moving'..x..y)
+	DPrint('moving '..dx..' '..dy)
 	
-	for k,v in pairs(self.outlinks) do
-		if(v.event == "_Move") then
-			v:SendMessageToReceivers({dx, dy})
-		end
-	end	
+	-- for k,v in pairs(self.outlinks) do
+	-- 	if(v.event == "_Move") then
+	-- 		v:SendMessageToReceivers({dx, dy})
+	-- 	end
+	-- end	
 
 	self.updateEnv()
 
+	self.oldx = x
+	self.oldy = y
+end
+
+function TWRegion:Drag(x,y,dx,dy)
+	
+
+	-- if dx ~= 0 or dy ~= 0 then
+		-- if we moved:
+	self.updateEnv()
+	-- end
+	
 	self.oldx = x
 	self.oldy = y
 end
@@ -302,13 +314,13 @@ function TWRegion:Update(elapsed)
 		self:CallEvents("OnTapAndHold", elapsed)
 	end
 		
-	if self.oldx ~= x or self.oldy ~= y then
-		-- if we moved:
-		self.updateEnv()
-	end
-	
-	self.oldx = x
-	self.oldy = y
+	-- if self.oldx ~= x or self.oldy ~= y then
+	-- 	-- if we moved:
+	-- 	self.updateEnv()
+	-- end
+	-- 
+	-- self.oldx = x
+	-- self.oldy = y
 end
 
 function TWRegion:CallEvents(signal, elapsed)
