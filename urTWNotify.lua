@@ -37,7 +37,7 @@ function notifyView:ShowText(text)
 end
 
 function notifyView:Dismiss()
-	if self.r:isVisible() then
+	if not self.r:IsVisible() then	-- FIXME workaround of IsVisible bug
 		self.r.timer = 0
 		self.r:Handle("OnUpdate", notifyUpdate)
 	end

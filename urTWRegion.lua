@@ -13,7 +13,8 @@
 
 RTYPE_BLANK = 0
 RTYPE_VAR = 1
-RTYPE_GROUP = 2
+RTYPE_SOUND = 2
+RTYPE_GROUP = 99
 
 -- ==================
 -- = Region Manager =
@@ -246,13 +247,11 @@ function TWRegion:Move(x,y,dx,dy)
 	self.oldy = y
 end
 
-function TWRegion:Drag(x,y,dx,dy)
+function TWRegion:Drag(x,y,dx,dy,e)
 	self.isHeld = false	-- cancel hold gesture
+	gestureManager:Dragged(self, dx, dy, x, y)
 	self.holdTimer = 0
-	-- if dx ~= 0 or dy ~= 0 then
-		-- if we moved:
 	self.updateEnv()
-	-- end
 	
 	self.oldx = x
 	self.oldy = y
@@ -385,11 +384,11 @@ end
 
 function TWRegion:TouchUp()
 	
-	if self.isHeld then
+	if self.isHeld and self.holdTimer < TIME_TO_HOLD then
 		-- a true tap without moving/dragging
-		DPrint('tapped')
 		gestureManager:Tapped(self)
-		
+	else
+		gestureManager:TouchUp(self)
 	end
 	self.isHeld = false
 	
@@ -489,8 +488,14 @@ function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
 		self.tl:SetColor(0,0,0,255)
 		self.tl:SetHorizontalAlign("JUSTIFY")
 		self.tl:SetVerticalAlign("MIDDLE")
+		-- self:EnableResizing(true)
+		self.regionType = RTYPE_SOUND
+		
+	-- 	
+	-- 	
+	-- elseif self.regionType == RTYPE_SOUND then
 		self:EnableResizing(true)
-		self.regionType = RTYPE_BLANK
+		self.regionType = RTYPE_BLANK	
 	end
 	
 	CloseMenu(self)
