@@ -44,11 +44,9 @@ function notifyView:Dismiss()
 end
 
 function notifyView:ShowTimedText(text, time)
-	self.r:Show()
-	self.r:SetAlpha(1)
+	self:ShowText(text)
+
 	self.r.timer = time or 2.0
-	self.r.tl:SetLabel(text)
-	self.r:MoveToTop()
 	self.r:Handle("OnUpdate", notifyUpdate)
 end
 

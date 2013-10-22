@@ -21,6 +21,8 @@ end
 function gestureManager:Reset()
 	self.holding = nil
 	self.receiver = nil
+	self.rx = -1
+	self.ry = -1
 	self.mode = LEARN_OFF
 	self.recording = {}
 end
@@ -48,6 +50,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 	
 	if self.receiver == nil then
 		self.receiver = region
+		self.rx, self.ry = region:Center()
 	end
 	
 	if dx ~= 0 or dy ~= 0 then
@@ -73,8 +76,12 @@ function gestureManager:TouchUp(region)
 		notifyView:Dismiss()
 		
 		-- stop recording drag now, debug print?
-		table.foreach(self.recording, DPrint)
+		self.receiver.movepath = self.recording
 		
+		initialLinkRegion = self.holding
+		finishLinkRegion = self.receiver
+		linkEvent = 'OnTouchUp'
+		FinishLink(TWRegion.PlayAnimation)		
 		
 	elseif self.mode ~= LEARN_OFF and region == self.holding then
 		-- cancel everything, initial region stops holding
@@ -91,16 +98,17 @@ function gestureManager:EndHold(region)
 	notifyView:ShowTimedText("Learning: Holding "..self.holding:Name().." -> effecting "..region:Name())
 	
 	initialLinkRegion = self.holding
+	if initialLinkRegion == nil then
+		DPrint('somethings wrong')
+	end
 	finishLinkRegion = self.receiver
-	linkEvent = 'OnTapAndHold'
-	-- linkAction = nil
+	linkEvent = 'OnTouchUp'
 	
 	cmdlist = {{'Counter',FinishLink,AddOneToCounter},
 		{'Move Left', FinishLink, MoveLeft},
 		{'Move Right', FinishLink, MoveRight},
-		{'Move', FinishLink, move},
 		{'Cancel', nil, nil}}
-	menu = loadSimpleMenu(cmdlist, 'Choose Event to respond:')
+	menu = loadSimpleMenu(cmdlist, 'Choose Action to respond')
 	menu:present(self.receiver:Center())
 	self:Reset()
 end

@@ -19,7 +19,7 @@ FADEINTIME = .2 -- seconds for things to fade in, TESTING for now
 EPSILON = 0.001	--small number for rounding
 
 -- selection param
-LASSOSEPDISTANCE = 25 -- pixels between each point when drawing selection lasso
+LASSOSEPDISTANCE = 20 -- pixels between each point when drawing selection lasso
 
 FreeAllRegions()
 DPrint('')
@@ -322,14 +322,6 @@ function CloseRegionWrapper(self)
 	RemoveRegion(self)
 end
 
-function AddOneToCounter(self)
-	-- DPrint("adding one")
-	if self.regionType == RTYPE_VAR then
-		self.value = self.value + 1
-		self.tl:SetLabel(self.value)
-	end
-end
-
 function ChangeSelectionStateRegion(self, select)
 	if select ~= self.isSelected then
 		if select then
@@ -404,9 +396,13 @@ end
 
 function FinishLink(message)
 	-- DPrint("linked from "..initialLinkRegion:Name().." to "..finishLinkRegion:Name())
-	
+	if message ~= nil then
+		DPrint("linked with action")
+	end
 	linkAction = message
-	menu:dismiss()
+	if menu then
+		menu:dismiss()
+	end
 	
 	local link = link:new(initialLinkRegion,finishLinkRegion,linkEvent,linkAction)
 	

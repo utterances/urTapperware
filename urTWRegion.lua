@@ -27,7 +27,7 @@ heldRegions = {}
 -- ==============
 -- = Parameters =
 -- ==============
-TIME_TO_HOLD = 1	--time to wait to activate hold behaviour (not for hold event)
+TIME_TO_HOLD = .6	--time to wait to activate hold behaviour (not for hold event)
 
 
 -- Reset region to initial state
@@ -41,6 +41,10 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self.isSelected = false
 	self.canBeMoved = true
 	self.group = nil
+
+	self.animationPlaying = -1	
+	-- -1 or 0 for not playing, otherwise increment for each frame
+	self.movepath = {}
 
 	self.dx = 0  -- compute storing current movement speed, for gesture detection
 	self.dy = 0
@@ -247,6 +251,10 @@ function TWRegion:Move(x,y,dx,dy)
 	self.oldy = y
 end
 
+function TWRegion:StartAnimation()
+	
+end
+
 function TWRegion:Drag(x,y,dx,dy,e)
 	self.isHeld = false	-- cancel hold gesture
 	gestureManager:Dragged(self, dx, dy, x, y)
@@ -269,6 +277,20 @@ function TWRegion:Update(elapsed)
 	end
 	x,y = self:Center()
 
+	-- movements if we are playing back animation
+	if self.animationPlaying > 0 then
+		local delta = self.movepath[self.animationPlaying]
+		
+		-- DPrint(delta(dx)..','..delta(dy))
+		self:SetAnchor('CENTER',x+delta(dx),y+delta(dy))
+		
+		if self.animationPlaying < #self.movepath then
+			self.animationPlaying = self.animationPlaying + 1
+		else
+			self.animationPlaying = -1
+			self.updateEnv()
+		end
+	end
 -- move if we have none zero speed
 	-- newx = x
 	-- newy = y
@@ -509,6 +531,21 @@ end
 
 -- #################################################################
 -- #################################################################
+
+function TWRegion:PlayAnimation()
+	DPrint('starting playback '..#self.movepath)
+	if #self.movepath > 0 then
+		self.animationPlaying = 1
+	end
+end
+	
+
+function AddOneToCounter(self)
+	if self.regionType == RTYPE_VAR then
+		self.value = self.value + 1
+		self.tl:SetLabel(self.value)
+	end
+end
 
 function move(self, message)
 	x,y = self:Center()
