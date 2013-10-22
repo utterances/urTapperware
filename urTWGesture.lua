@@ -21,6 +21,7 @@ end
 function gestureManager:Reset()
 	self.holding = nil
 	self.receiver = nil
+	self.receivers = {}
 	self.rx = -1
 	self.ry = -1
 	self.mode = LEARN_OFF
@@ -48,14 +49,15 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		notifyView:ShowText("Learning: Dragging "..region:Name().." to learn movement")
 	end
 	
-	if self.receiver == nil then
-		self.receiver = region
-		self.rx, self.ry = region:Center()
+	if not tableHasObj(self.receivers, region) then
+		table.insert(self.receivers, region)
+		region.movepath = {}
+		-- self.rx, self.ry = region:Center()
 	end
 	
 	if dx ~= 0 or dy ~= 0 then
 		p = Point(dx,dy)
-		table.insert(self.recording, p)
+		table.insert(region.movepath, p)
 	end
 end
 
@@ -66,25 +68,32 @@ function gestureManager:Tapped(region)
 	if region ~= self.holding then
 		gestureManager:EndHold(region)
 	end
+	DPrint('region IsVisible '..region:IsVisible())
 end
 
 function gestureManager:TouchUp(region)
 	if self.mode == LEARN_OFF then
 		return
-	elseif self.mode == LEARN_DRAG and region == self.receiver then
-		self.mode = LEARN_OFF
-		notifyView:Dismiss()
-		
-		-- stop recording drag now, debug print?
-		self.receiver.movepath = self.recording
+	elseif self.mode == LEARN_DRAG and tableHasObj(self.receivers, region) then
+		-- stop recording drag now
+		tableRemoveObj(self.receivers, region)
+		notifyView:Dismiss()		
 		
 		initialLinkRegion = self.holding
-		finishLinkRegion = self.receiver
+		finishLinkRegion = region
 		linkEvent = 'OnTouchUp'
 		FinishLink(TWRegion.PlayAnimation)		
+
+
+		-- cmdlist = {{'Once', self.FinishAnimationLink, {region,false}},
+		-- 	{'Loop', self.FinishAnimationLink, {region,true}}}
+		-- menu = loadSimpleMenu(cmdlist, 'Choose Animation Type')
+		-- menu:present(region:Center())
+
 		
 	elseif self.mode ~= LEARN_OFF and region == self.holding then
 		-- cancel everything, initial region stops holding
+		self.mode = LEARN_OFF
 		self:Reset()
 		notifyView:Dismiss()
 	end
@@ -112,6 +121,21 @@ function gestureManager:EndHold(region)
 	menu:present(self.receiver:Center())
 	self:Reset()
 end
+
+-- ==========================
+-- = set up animation types =
+-- ==========================
+
+-- function gestureManager:FinishAnimationLink(input)
+-- 	r = input[1]
+-- 	loop = input[2]
+-- 	DPrint(r:Name()..' '..)
+-- 	initialLinkRegion = self.holding
+-- 	finishLinkRegion = r
+-- 	r.loopmove = loop
+-- 	linkEvent = 'OnTouchUp'
+-- 	FinishLink(TWRegion.PlayAnimation)
+-- end
 
 
 -- =======================================

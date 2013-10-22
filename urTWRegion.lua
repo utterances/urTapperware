@@ -45,7 +45,8 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self.animationPlaying = -1	
 	-- -1 or 0 for not playing, otherwise increment for each frame
 	self.movepath = {}
-
+	self.loopmove = true
+	
 	self.dx = 0  -- compute storing current movement speed, for gesture detection
 	self.dy = 0
 	x,y = self:Center()
@@ -223,6 +224,7 @@ function TWRegion:Copy(cx, cy)
 		local link = link:new(newRegion, v.receiver, v.event, v.action)
 	end
 	
+	newRegion.movepath = self.movepath
 	-- copy type and properties
 	if self.regionType == RTYPE_VAR then
 		newRegion:SwitchRegionType()
@@ -233,6 +235,7 @@ function TWRegion:Copy(cx, cy)
 		newRegion.w = self.w
 	end
 	
+	notifyView:ShowTimedText("Copied")
 	return newRegion
 end
 
@@ -287,8 +290,12 @@ function TWRegion:Update(elapsed)
 		if self.animationPlaying < #self.movepath then
 			self.animationPlaying = self.animationPlaying + 1
 		else
-			self.animationPlaying = -1
-			self.updateEnv()
+			if self.loopmove then
+				self.animationPlaying = 1
+			else
+				self.animationPlaying = -1
+				self.updateEnv()
+			end
 		end
 	end
 -- move if we have none zero speed
@@ -533,8 +540,14 @@ end
 -- #################################################################
 
 function TWRegion:PlayAnimation()
-	DPrint('starting playback '..#self.movepath)
+	-- DPrint('starting playback '..#self.movepath)
 	if #self.movepath > 0 then
+		if self.loopmove then
+			if self.animationPlaying > 0 then
+				self.animationPlaying = -1
+				return
+			end
+		end
 		self.animationPlaying = 1
 	end
 end

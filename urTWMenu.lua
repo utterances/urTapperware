@@ -55,7 +55,7 @@ function SimpleMenu:new(o, cmdlist, message)
 	table.insert(menus, o)
 	return o
 end
-
+	
 function SimpleMenu:setMessage(messageText)
 	self.r.tl = self.r:TextLabel()
 	self.r.tl:SetLabel(messageText)
