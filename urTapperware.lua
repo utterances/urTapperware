@@ -50,6 +50,7 @@ dofile(DocumentPath("urTWRegion.lua"))
 
 dofile(DocumentPath("urTWLinkLayer.lua"))	-- needs menu
 dofile(DocumentPath("urTWGroup.lua"))	-- needs TWRegion
+dofile(DocumentPath("urTWGesture.lua"))
 
 -- ============
 -- = Backdrop =
@@ -170,6 +171,8 @@ selectionLayer:Show()
 
 notifyView:Init()
 notifyView:showTimedText("Welcome!", 2)
+
+gestureManager:Init()
 
 function selectionLayer:DrawSelectionPoly()
 	if #selectionPoly < 2 then	-- need at least two points to draw

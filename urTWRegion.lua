@@ -23,6 +23,12 @@ regions = {}      -- Live Regions
 recycledregions = {}  -- Removed Regions
 heldRegions = {}
 
+-- ==============
+-- = Parameters =
+-- ==============
+TIME_TO_HOLD = 1	--time to wait to activate hold behaviour (not for hold event)
+
+
 -- Reset region to initial state
 function ResetRegion(self) -- customized parameter initialization of region, events are initialized in VRegion()
 	self.alpha = 1 --target alpha for animation
@@ -30,6 +36,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self.regionType = RTYPE_BLANK	--default blank type
 	self.value = 0
 	self.isHeld = false -- if the r is held by tap currently
+	self.holdTimer = 0
 	self.isSelected = false
 	self.canBeMoved = true
 	self.group = nil
@@ -240,8 +247,8 @@ function TWRegion:Move(x,y,dx,dy)
 end
 
 function TWRegion:Drag(x,y,dx,dy)
-	
-
+	self.isHeld = false	-- cancel hold gesture
+	self.holdTimer = 0
 	-- if dx ~= 0 or dy ~= 0 then
 		-- if we moved:
 	self.updateEnv()
@@ -311,7 +318,16 @@ function TWRegion:Update(elapsed)
 	
 	self:CallEvents("OnUpdate", elapsed)
 	if self.isHeld then
-		self:CallEvents("OnTapAndHold", elapsed)
+		
+		if self.holdTimer > TIME_TO_HOLD then
+			-- do hold action here
+			self:CallEvents("OnTapAndHold", elapsed)
+			
+			gestureManager:StartHold(self)
+		else
+			self.holdTimer = self.holdTimer + elapsed
+		end
+		-- self:CallEvents("OnTapAndHold", elapsed)
 	end
 		
 	-- if self.oldx ~= x or self.oldy ~= y then
@@ -348,6 +364,7 @@ end
 
 function TWRegion:TouchDown()
 	self.isHeld = true
+	self.holdTimer = 0
 	self:CallEvents("OnTouchDown")
 	self:RaiseToTop()
 	self.alpha = .6
@@ -368,6 +385,7 @@ end
 
 function TWRegion:TouchUp()
 	self.isHeld = false
+	self.holdTimer = 0
 	self.alpha = 1
 
 	if initialLinkRegion == nil then
@@ -417,6 +435,7 @@ end
 
 function TWRegion:Leave()
 	self.isHeld = false
+	self.holdTimer = 0
 end
 
 function TWRegion:RaiseToTop()
