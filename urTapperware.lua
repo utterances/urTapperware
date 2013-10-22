@@ -170,7 +170,7 @@ selectionLayer.t:SetBlendMode("BLEND")
 selectionLayer:Show()
 
 notifyView:Init()
-notifyView:showTimedText("Welcome!", 2)
+notifyView:ShowTimedText("Welcome!", 2)
 
 gestureManager:Init()
 
@@ -356,7 +356,7 @@ function StartLinkRegion(self, draglet)
 		tx, ty = draglet:Center()
 		for i = 1, #regions do
 			if regions[i] ~= self and regions[i].usable then
-				notifyView:showTimedText("linking "..self:Name().." to "..regions[i]:Name())
+				notifyView:ShowTimedText("linking "..self:Name().." to "..regions[i]:Name())
 				rx, ry = regions[i]:Center()
 				if math.abs(tx-rx) < INITSIZE and math.abs(ty-ry) < INITSIZE then
 					-- found a match, create a link here
@@ -413,7 +413,7 @@ function FinishLink(message)
 	linkLayer:ResetPotentialLink()
 	linkLayer:Draw()
 	-- add notification
-	notifyView:showTimedText('linked', 3)
+	notifyView:ShowTimedText('linked', 3)
 	
 	CloseMenu(initialLinkRegion)
 	initialLinkRegion = nil

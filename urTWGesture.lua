@@ -22,6 +22,15 @@ function gestureManager:StartHold(region)
 	
 end
 
+function gestureManager:Tapped(region)
+	if self.mode == 0 then
+		return
+	end
+	
+	gestureManager:EndHold(region)
+	
+end
+
 function gestureManager:EndHold(region)
 	self.mode = 0
 	self.receiver = region

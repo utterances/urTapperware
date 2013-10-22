@@ -36,14 +36,14 @@ function notifyView:ShowText(text)
 	self.r:Handle("OnUpdate", nil)
 end
 
-function notifyView:dismiss()
+function notifyView:Dismiss()
 	if self.r:isVisible() then
 		self.r.timer = 0
 		self.r:Handle("OnUpdate", notifyUpdate)
 	end
 end
 
-function notifyView:showTimedText(text, time)
+function notifyView:ShowTimedText(text, time)
 	self.r:Show()
 	self.r:SetAlpha(1)
 	self.r.timer = time or 2.0

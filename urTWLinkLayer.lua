@@ -67,7 +67,7 @@ function linkLayer:Remove(l)
 	for k,v in pairs(self.list) do
 		if v == l then
 			table.remove(self.list,k)
-			notifyView:showTimedText("Removed Link")
+			notifyView:ShowTimedText("Removed Link")
 			return true
 		end
 	end

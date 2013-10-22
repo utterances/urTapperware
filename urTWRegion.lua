@@ -153,7 +153,7 @@ function RemoveRegion(self)
 	self.group = nil
 
 	table.insert(recycledregions, self.id)
-	notifyView:showTimedText(self:Name().." removed")
+	notifyView:ShowTimedText(self:Name().." removed")
 end
 
 -- =================
@@ -384,7 +384,15 @@ function TWRegion:DoubleTap()
 end
 
 function TWRegion:TouchUp()
+	
+	if self.isHeld then
+		-- a true tap without moving/dragging
+		DPrint('tapped')
+		gestureManager:Tapped(self)
+		
+	end
 	self.isHeld = false
+	
 	self.holdTimer = 0
 	self.alpha = 1
 
@@ -489,7 +497,7 @@ function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
 end
 
 function TWRegion:ToggleAnchor()
-	notifyView:showTimedText("toggle movement")
+	notifyView:ShowTimedText("toggle movement")
 	self.canBeMoved = not self.canBeMoved
 	self:EnableMoving(self.canBeMoved)
 end
