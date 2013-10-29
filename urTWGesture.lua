@@ -35,6 +35,12 @@ function gestureManager:StartHold(region)
 		self.holding = region
 		self.receiver = nil
 		notifyView:ShowText("Learning: Holding "..region:Name())
+		
+		-- starts learning mode gesture, shake everything that's not held
+		for i = 1,#regions do
+			regions[i].shaking = true
+		end
+		self.holding.shaking = false
 	-- elseif self.mode == LEARN_ON then
 	-- 	gestureManager:EndHold(region)
 	end
@@ -52,6 +58,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 	if not tableHasObj(self.receivers, region) then
 		table.insert(self.receivers, region)
 		region.movepath = {}
+		region.shaking = false
 		-- self.rx, self.ry = region:Center()
 	end
 	
@@ -93,6 +100,10 @@ function gestureManager:TouchUp(region)
 		
 	elseif self.mode ~= LEARN_OFF and region == self.holding then
 		-- cancel everything, initial region stops holding
+		for i = 1,#regions do
+			regions[i].shaking = false
+		end
+		
 		self.mode = LEARN_OFF
 		self:Reset()
 		notifyView:Dismiss()

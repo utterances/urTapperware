@@ -380,13 +380,8 @@ end
 function CallLinkFunc(self)
 	-- use this to call function on the link menu button
 	-- because we have reference to the link, not just one region
-	CloseLinkMenu(self)
-	if self.func ~= nil then
-		DPrint("func is not nil")
-	end
-	
+	CloseLinkMenu(self)	
 	self.func(self.parent.link)
---	self.func(self.parent.sender, self.parent.receiver)
 end
 
 function CloseLinkMenu(self)
