@@ -152,11 +152,13 @@ function RemoveRegion(self)
 	-- check if in and out links need to be removed
 	for k,v in pairs(self.outlinks) do
 		v:destroy()
+		CloseLinkMenu(v)
 	end
 	self.outlinks = {}
 	
 	for k,v in pairs(self.inlinks) do
 		v:destroy()
+		CloseLinkMenu(v)
 	end
 	self.inlinks = {}
 	

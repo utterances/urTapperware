@@ -182,7 +182,7 @@ end
 
 -- initialize regionMenu graphics
 initMenus(regionMenu)
-initMenus(linkMenu)
+-- initMenus(linkMenu)
 -- initialize connection receiver menu graphics
 linkReceiverMenu.items = {}
 
