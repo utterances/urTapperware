@@ -241,30 +241,30 @@ function pointInSelectionPolygon(x, y)
 end
 
 -- link action icon, shows briefly when a link is made
-linkIcon = Region('region', 'linkicon', UIParent)
-linkIcon:SetLayer("TOOLTIP")
-linkIcon.t = linkIcon:Texture("tw_link.png")
-linkIcon.t:SetBlendMode("BLEND")
-linkIcon.t:SetTexCoord(0,160/256,160/256,0)
-linkIcon:SetWidth(100)
-linkIcon:SetHeight(100)
-linkIcon:SetAnchor('CENTER',ScreenWidth()/2,ScreenHeight()/2)
-
-function linkIcon:ShowLinked(x,y)
-	self:Show()
-	self:SetAlpha(1)
-	self:MoveToTop()
-	self:Handle("OnUpdate", IconUpdate)
-end
-
-function IconUpdate(self, e)
-	if self:Alpha() > 0 then
-		self:SetAlpha(self:Alpha() - self:Alpha() * e/.7)
-	else
-		self:Hide()
-		self:Handle("OnUpdate", nil)
-	end
-end
+-- linkIcon = Region('region', 'linkicon', UIParent)
+-- linkIcon:SetLayer("TOOLTIP")
+-- linkIcon.t = linkIcon:Texture("tw_link.png")
+-- linkIcon.t:SetBlendMode("BLEND")
+-- linkIcon.t:SetTexCoord(0,160/256,160/256,0)
+-- linkIcon:SetWidth(100)
+-- linkIcon:SetHeight(100)
+-- linkIcon:SetAnchor('CENTER',ScreenWidth()/2,ScreenHeight()/2)
+-- 
+-- function linkIcon:ShowLinked(x,y)
+-- 	self:Show()
+-- 	self:SetAlpha(1)
+-- 	self:MoveToTop()
+-- 	self:Handle("OnUpdate", IconUpdate)
+-- end
+-- 
+-- function IconUpdate(self, e)
+-- 	if self:Alpha() > 0 then
+-- 		self:SetAlpha(self:Alpha() - self:Alpha() * e/.7)
+-- 	else
+-- 		self:Hide()
+-- 		self:Handle("OnUpdate", nil)
+-- 	end
+-- end
 
 linkLayer:Init()
 
@@ -276,6 +276,7 @@ function ToggleMenu(self)
 	else
 		CloseMenu(self)
 	end
+	linkLayer:Draw()
 end
 
 function HoldToTrigger(self, elapsed) -- for long tap
@@ -318,9 +319,6 @@ function DeTrigger(self) -- for long tap
 	self:Handle("OnUpdate", self.Update)
 end
 ---------------
-function CloseRegionWrapper(self)
-	RemoveRegion(self)
-end
 
 function ChangeSelectionStateRegion(self, select)
 	if select ~= self.isSelected then
@@ -394,7 +392,7 @@ function ChooseAction(message)
 	menu:present(finishLinkRegion:Center())
 end
 
-function FinishLink(message)
+function FinishLink(message, data)
 	-- DPrint("linked from "..initialLinkRegion:Name().." to "..finishLinkRegion:Name())
 	if message ~= nil then
 		DPrint("linked with action")
@@ -405,7 +403,9 @@ function FinishLink(message)
 	end
 	
 	local link = link:new(initialLinkRegion,finishLinkRegion,linkEvent,linkAction)
-	
+	if data ~= nil then
+		link.data = data
+	end
 	linkLayer:ResetPotentialLink()
 	linkLayer:Draw()
 	-- add notification

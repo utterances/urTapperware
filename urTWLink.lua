@@ -12,6 +12,7 @@ function link:new(initialLinkRegion, finishLinkRegion, event, action)
 	o:AddReceiver(finishLinkRegion)
 	o.event = event
 	o.action = action
+	o.data = {}
 	o.menu = newLinkMenu(o)
 	linkLayer:Add(o)
 	return o
@@ -54,7 +55,6 @@ end
 
 function link:SendMessageToReceivers(message)
 	if self.sender and self.receiver then
-	--DPrint("From Link: "..message[1].." "..message[2])
-		self.action(self.receiver, message)
+		self.action(self.receiver, message, data)
 	end
 end

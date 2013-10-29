@@ -28,12 +28,12 @@ heldRegions = {}
 -- = Parameters =
 -- ==============
 TIME_TO_HOLD = .6	--time to wait to activate hold behaviour (not for hold event)
-
+HOLD_SHIFT_TOR = 2 --pixel to tolerate for holding
 
 -- Reset region to initial state
 function ResetRegion(self) -- customized parameter initialization of region, events are initialized in VRegion()
 	self.alpha = 1 --target alpha for animation
-	self.menu = nil  --contextual menu
+	self.menu = nil --contextual menu nil when not active
 	self.regionType = RTYPE_BLANK	--default blank type
 	self.value = 0
 	self.isHeld = false -- if the r is held by tap currently
@@ -42,7 +42,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self.canBeMoved = true
 	self.group = nil
 
-	self.animationPlaying = -1	
+	self.animationPlaying = -1
 	-- -1 or 0 for not playing, otherwise increment for each frame
 	self.movepath = {}
 	self.loopmove = true
@@ -149,7 +149,17 @@ end
 function RemoveRegion(self)
 	CloseMenu(self)
 	
-	-- might need to check if links need to be removed TODO:
+	-- check if in and out links need to be removed
+	for k,v in pairs(self.outlinks) do
+		v:destroy()
+	end
+	self.outlinks = {}
+	
+	for k,v in pairs(self.inlinks) do
+		v:destroy()
+	end
+	self.inlinks = {}
+	
 	ResetRegion(self)
 	self:EnableInput(false)
 	self:EnableMoving(false)
@@ -259,7 +269,10 @@ function TWRegion:StartAnimation()
 end
 
 function TWRegion:Drag(x,y,dx,dy,e)
-	self.isHeld = false	-- cancel hold gesture
+	
+	if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
+		self.isHeld = false	-- cancel hold gesture if over tolerance
+	end
 	gestureManager:Dragged(self, dx, dy, x, y)
 	self.holdTimer = 0
 	self.updateEnv()
@@ -294,6 +307,7 @@ function TWRegion:Update(elapsed)
 				self.animationPlaying = 1
 			else
 				self.animationPlaying = -1
+				self.movepath = {}
 				self.updateEnv()
 			end
 		end
@@ -539,8 +553,9 @@ end
 -- #################################################################
 -- #################################################################
 
-function TWRegion:PlayAnimation()
+function TWRegion:PlayAnimation(_, linkdata)
 	-- DPrint('starting playback '..#self.movepath)
+	self.movepath = linkdata
 	if #self.movepath > 0 then
 		if self.loopmove then
 			if self.animationPlaying > 0 then

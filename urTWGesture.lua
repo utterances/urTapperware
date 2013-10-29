@@ -82,8 +82,8 @@ function gestureManager:TouchUp(region)
 		initialLinkRegion = self.holding
 		finishLinkRegion = region
 		linkEvent = 'OnTouchUp'
-		FinishLink(TWRegion.PlayAnimation)		
-
+		FinishLink(TWRegion.PlayAnimation, region.movepath)
+		region.movepath = {}
 
 		-- cmdlist = {{'Once', self.FinishAnimationLink, {region,false}},
 		-- 	{'Loop', self.FinishAnimationLink, {region,true}}}

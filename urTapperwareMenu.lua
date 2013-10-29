@@ -22,7 +22,9 @@ function testMenu(self)
 end
 
 function CloseRegion(self)
-	CloseRegionWrapper(self)
+	RemoveRegion(self)
+	CloseMenu(self)
+	-- CloseRegionWrapper(self)
 end
 
 function StartLinkRegionAction(r, draglet)
@@ -215,31 +217,32 @@ end
 linkReceiverMenu.show = 0
 
 function OpenMenu(self)
-
-  -- if regionMenu.show == 0 then
-		-- DPrint("opens menu!")
+	for i = 1,#regions do
+		regions[i].menu = nil
+	end	
+	
+	regionMenu.v = self
 		
-    regionMenu.v = self
-		
-    for i = 1,#regionMenu.items do
-        regionMenu.items[i]:Show()
-        regionMenu.items[i]:EnableInput(true)
-				if regionMenu.items[i].draglet ~= nil then
-					regionMenu.items[i]:EnableMoving(true)
-					regionMenu.items[i]:Handle("OnUpdate", regionMenu.items[i].draglet)
-				end
+	for i = 1,#regionMenu.items do
+		if regionMenu.items[i].draglet ~= nil then
+			regionMenu.items[i]:EnableMoving(true)
+			regionMenu.items[i]:Handle("OnUpdate", regionMenu.items[i].draglet)
+		end
 				
-				-- regionMenu.items[i]:Handle("OnTouchDown", testMenu)
-        regionMenu.items[i]:Handle("OnTouchUp", OptEventFunc)
-        regionMenu.items[i]:MoveToTop()
-				pos = regionMenu.items[i].anchorpos
-				regionMenu.items[i]:SetAnchor("CENTER", self,
-															buttonLocation[pos][1],
-															buttonLocation[pos][2],
-															buttonLocation[pos][3])
-    end
-      
-		self.menu = regionMenu
+		-- regionMenu.items[i]:Handle("OnTouchDown", testMenu)
+		regionMenu.items[i]:Handle("OnTouchUp", OptEventFunc)
+		pos = regionMenu.items[i].anchorpos
+		regionMenu.items[i]:SetAnchor("CENTER", self,
+													buttonLocation[pos][1],
+													buttonLocation[pos][2],
+													buttonLocation[pos][3])
+		regionMenu.items[i]:MoveToTop()
+		regionMenu.items[i]:EnableInput(true)
+		regionMenu.items[i]:Show()
+	end
+	   
+	 self.menu = regionMenu
+	 
     -- regionMenu.show = 1
   -- end
 	
@@ -286,17 +289,15 @@ function RaiseMenu(self)
 end
 
 function CloseMenu(self)
-  -- if regionMenu.show == 1 then
-    for i = 1,#regionMenu.items do
-        regionMenu.items[i]:Hide()
-        regionMenu.items[i]:EnableInput(false)
-				regionMenu.items[i]:Handle("OnTouchUp", nil)
-				regionMenu.items[i]:Handle("OnUpdate", nil)
-    end
-		regionMenu.show = 0
-		regionMenu.v = nil
-		self.menu = nil
-	-- end
+	for i = 1,#regionMenu.items do
+		regionMenu.items[i]:Hide()
+		regionMenu.items[i]:EnableInput(false)
+		regionMenu.items[i]:Handle("OnTouchUp", nil)
+		regionMenu.items[i]:Handle("OnUpdate", nil)
+	end
+	regionMenu.show = 0
+	regionMenu.v = nil
+	self.menu = nil
 	
 	--   for i = 1,#linkReceiverMenu.items do
 	--       linkReceiverMenu.items[i]:Hide()
@@ -312,23 +313,14 @@ function CloseMenu(self)
 	end	
 end
 
-function SwitchToLinkMenu()
-	for i = 1,#regionMenu.items do
-        regionMenu.items[i]:Hide()
-        regionMenu.items[i]:EnableInput(false)
-		regionMenu.items[i]:Handle("OnTouchUp", nil)
-		regionMenu.items[i]:Handle("OnUpdate", nil)
-    end
-end
-
-
-function CallLinkFunc(self)
-	-- use this to call function on the link menu button
-	-- because we have reference to the link, not just one region
-	CloseLinkMenu(self)
-	self.func(self.parent.link)
---	self.func(self.parent.sender, self.parent.receiver)
-end
+-- function SwitchToLinkMenu()
+-- 	for i = 1,#regionMenu.items do
+-- 		regionMenu.items[i]:Hide()
+-- 		regionMenu.items[i]:EnableInput(false)
+-- 		regionMenu.items[i]:Handle("OnTouchUp", nil)
+-- 		regionMenu.items[i]:Handle("OnUpdate", nil)
+--     end
+-- end
 
 -- this actually calls all the menu function on the right region(s)
 function OptEventFunc(self)
@@ -348,13 +340,20 @@ function newLinkMenu(l)
 	else
 		linkMenu = initLinkMenus()
 	end
-	linkMenu.link  = l
+	linkMenu.link = l
 	
 	return linkMenu
 end
-	
-function OpenLinkMenu(menu)
 
+function HideLinkMenu(menu)
+	if menu then
+		menu.r:Hide()
+		menu.r:EnableInput(false)
+		menu.r:Handle("OnTouchUp", CallLinkFunc)
+	end
+end
+
+function OpenLinkMenu(menu)
 	if menu then
 		-- shows the actual menu
 		menu.r:Show()
@@ -377,6 +376,18 @@ end
 -- =============================
 -- = private link menu methods =
 -- =============================
+
+function CallLinkFunc(self)
+	-- use this to call function on the link menu button
+	-- because we have reference to the link, not just one region
+	CloseLinkMenu(self)
+	if self.func ~= nil then
+		DPrint("func is not nil")
+	end
+	
+	self.func(self.parent.link)
+--	self.func(self.parent.sender, self.parent.receiver)
+end
 
 function CloseLinkMenu(self)
 	self:Hide()

@@ -80,16 +80,24 @@ function linkLayer:Update()
 	if self.needsDraw then
 		self.needsDraw = false
 		self.t:Clear(0,0,0,0)
-		self.t:SetBrushColor(100,120,120,200)
-		self.t:SetBrushSize(8)
 	
 		for _, link in pairs(self.parent.list) do
 			X1, Y1 = link.sender:Center()
 			X2, Y2 = link.receiver:Center()
-			self.t:Line(X1,Y1,X2,Y2)
-			-- draw the link menu (close button), it will compute centroid using
-			-- region locations	
-			OpenLinkMenu(link.menu)
+
+			if link.sender.menu ~= nil or link.receiver.menu ~= nil then
+				self.t:SetBrushColor(100,120,120,200)
+				self.t:SetBrushSize(5)
+				self.t:Line(X1,Y1,X2,Y2)
+				-- draw the link menu (close button), it will compute centroid using
+				-- region locations	
+				OpenLinkMenu(link.menu)
+			else
+				self.t:SetBrushColor(100,120,120,100)
+				self.t:SetBrushSize(5)
+				self.t:Line(X1,Y1,X2,Y2)
+				HideLinkMenu(link.menu)
+			end
 		end
 	end
 end
@@ -101,7 +109,7 @@ end
 function linkLayer:DrawPotentialLink(region, draglet)
 	self.linkGuides.t:Clear(0,0,0,0)
 	self.linkGuides.t:SetBrushColor(195,240,240,150)
-	self.linkGuides.t:SetBrushSize(12)
+	self.linkGuides.t:SetBrushSize(10)
 	
 	rx, ry = region:Center()
 	posx, posy = draglet:Center()
