@@ -56,14 +56,14 @@ dofile(DocumentPath("urTWGesture.lua"))
 -- = Backdrop =
 -- ============
 
-function TouchDown(self)
+function bgTouchDown(self)
 	local x,y = InputPosition()
 	
 	shadow:Show()
 	shadow:SetAnchor('CENTER',x,y)
 end
 
-function TouchUp(self)
+function bgTouchUp(self)
 	shadow:Hide()
 	if startedSelection then
 		startedSelection = false
@@ -103,7 +103,7 @@ function TouchUp(self)
 	startedSelection = false
 end
 
-function Move(self)
+function bgMove(self)
 	startedSelection = true
 	shadow:Hide()
 	CloseGroupMenu(lassoGroupMenu)
@@ -123,7 +123,7 @@ function Move(self)
 	end
 end
 
-function Leave(self)
+function bgLeave(self)
 	shadow:Hide()
 	DPrint("")
 end
@@ -133,12 +133,12 @@ backdrop:SetWidth(ScreenWidth())
 backdrop:SetHeight(ScreenHeight())
 backdrop:SetLayer("BACKGROUND")
 backdrop:SetAnchor('BOTTOMLEFT',0,0)
-backdrop:Handle("OnTouchDown", TouchDown)
-backdrop:Handle("OnTouchUp", TouchUp)
-backdrop:Handle("OnDoubleTap", DoubleTap)
-backdrop:Handle("OnEnter", Enter)
-backdrop:Handle("OnLeave", Leave)
-backdrop:Handle("OnMove", Move)
+backdrop:Handle("OnTouchDown", bgTouchDown)
+backdrop:Handle("OnTouchUp", bgTouchUp)
+backdrop:Handle("OnDoubleTap", bgDoubleTap)
+backdrop:Handle("OnEnter", bgEnter)
+backdrop:Handle("OnLeave", bgLeave)
+backdrop:Handle("OnMove", bgMove)
 backdrop:Handle("OnPageEntered", visdown)
 
 backdrop:EnableInput(true)
@@ -372,7 +372,7 @@ function ChooseEvent(self)
 		finishLinkRegion = self
 		cmdlist = {{'Tap', ChooseAction, 'OnTouchUp'},
 			{'Tap & Hold', ChooseAction, 'OnTapAndHold'},
-			{'Move', ChooseAction, 'OnUpdate_Move'},
+			{'Move', ChooseAction, 'OnDragging'},
 			{'Cancel', nil, nil}}
 		menu = loadSimpleMenu(cmdlist, 'Choose Event:')
 		menu:present(initialLinkRegion:Center())
@@ -386,7 +386,7 @@ function ChooseAction(message)
 	cmdlist = {{'Counter',FinishLink,AddOneToCounter},
 		{'Move Left', FinishLink, MoveLeft},
 		{'Move Right', FinishLink, MoveRight},
-		{'Move', FinishLink, move},
+		{'Move', FinishLink, TWRegion.Move},
 		{'Cancel', nil, nil}}
 	menu = loadSimpleMenu(cmdlist, 'Choose Action to respond')
 	menu:present(finishLinkRegion:Center())
@@ -394,9 +394,9 @@ end
 
 function FinishLink(message, data)
 	-- DPrint("linked from "..initialLinkRegion:Name().." to "..finishLinkRegion:Name())
-	if message ~= nil then
-		DPrint("linked with action")
-	end
+	-- if message ~= nil then
+	-- 	DPrint("linked with action")
+	-- end
 	linkAction = message
 	if menu then
 		menu:dismiss()

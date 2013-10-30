@@ -148,15 +148,3 @@ end
 -- end
 
 
--- =======================================
--- = functional tuple for gesture points =
--- =======================================
--- functional tuple design from http://lua-users.org/wiki/FunctionalTuples
--- each point in gesture table is a dx,dy tuple
-
-function Point(_dx, _dy)
-  return function(fn) return fn(_dx, _dy) end
-end
-
-function dx(_dx, _dy) return _dx end
-function dy(_dx, _dy) return _dy end

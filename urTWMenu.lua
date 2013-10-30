@@ -76,7 +76,7 @@ function SimpleMenu:setCommandList(cmdlist)
 	for i = 1, #self.cmdlist do
 		local text = cmdlist[i][1]
 		
-		local label = Region('region', 'menutext', UIParent)
+		local label = Region('region', 'menutext', self.r)
 				
 		-- label.t:SetBlendMode("BLEND")
 		label:SetWidth(200)

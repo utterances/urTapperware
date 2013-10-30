@@ -82,7 +82,26 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	-- self.tl:SetShadowBlur(10)
 	self:SetWidth(INITSIZE/3)
 	self:SetHeight(INITSIZE/3)
+	
+	self:EnableMoving(true)
+	self:EnableResizing(true)
+	self:EnableInput(true)
+	self:EnableClamping(true)
+
+	self.usable = true
+	self.t:SetTexture("tw_roundrec.png") -- reset texture
+	
+	self:Handle("OnDoubleTap", TWRegion.DoubleTap)
+	self:Handle("OnTouchDown", TWRegion.TouchDown)
+	self:Handle("OnTouchUp", TWRegion.TouchUp)
+	self:Handle("OnUpdate", TWRegion.Update)
+	self:Handle("OnLeave", TWRegion.Leave)
+	self:Handle("OnDragging", TWRegion.Drag)
+	self:Handle("OnMove", TWRegion.Move)
+	self:Handle("OnSizeChanged", TWRegion.SizeChanged)
+	
 end
+
 
 -- Initialize a new region
 function CreateRegion(ttype,name,parent,id) -- customized initialization of region
@@ -103,24 +122,7 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	r.shadow = r_s
 	r.shadow:SetAnchor("CENTER",r,"CENTER",0,0) 
 -- initialize for regions{} and recycledregions{}
-	r.usable = 1
 	r.id = id
-	ResetRegion(r)
-	
-	r:EnableMoving(true)
-	r:EnableResizing(true)
-	r:EnableInput(true)
-	r:EnableClamping(true)
-	
-
-	r:Handle("OnDoubleTap", TWRegion.DoubleTap)
-	r:Handle("OnTouchDown", TWRegion.TouchDown)
-	r:Handle("OnTouchUp", TWRegion.TouchUp)
-	r:Handle("OnUpdate", TWRegion.Update)
-	r:Handle("OnLeave", TWRegion.Leave)
-	r:Handle("OnDragging", TWRegion.Drag)
-	r:Handle("OnMove", TWRegion.Move)
-	r:Handle("OnSizeChanged", TWRegion.SizeChanged)
 	
 	return r
 end
@@ -132,19 +134,34 @@ function AllocRegion(ftype, name, parent) --CreateorRecycleregion(ftype, name, p
 	if #recycledregions > 0 then
 		region = regions[recycledregions[#recycledregions]]
 		table.remove(recycledregions)
-		region:EnableMoving(true)
-		region:EnableResizing(true)
-		region:EnableInput(true)
-		region.usable = 1
-		region.t:SetTexture("tw_roundrec.png") -- reset texture
 	else
 		region = CreateRegion(ftype, name, parent, #regions+1)
 		table.insert(regions,region)
 	end
+	ResetRegion(region)
+	
 	region:SetAlpha(0)
 	region.shadow:SetAlpha(0)
 	region:MoveToTop()
 	return region
+end
+
+function DisableRegion(self)
+	self:EnableInput(false)
+	self:EnableMoving(false)
+	self:EnableResizing(false)
+	self:Hide()
+	self.usable = false
+	self.group = nil
+	
+	self:Handle("OnDoubleTap", nil)
+	self:Handle("OnTouchDown", nil)
+	self:Handle("OnTouchUp", nil)
+	self:Handle("OnUpdate", nil)
+	self:Handle("OnLeave", nil)
+	self:Handle("OnDragging", nil)
+	self:Handle("OnMove", nil)
+	self:Handle("OnSizeChanged", nil)
 end
 
 function RemoveRegion(self)
@@ -161,13 +178,7 @@ function RemoveRegion(self)
 	end
 	self.inlinks = {}
 	
-	ResetRegion(self)
-	self:EnableInput(false)
-	self:EnableMoving(false)
-	self:EnableResizing(false)
-	self:Hide()
-	self.usable = false
-	self.group = nil
+	DisableRegion(self)
 
 	table.insert(recycledregions, self.id)
 	notifyView:ShowTimedText(self:Name().." removed")
@@ -278,6 +289,8 @@ function TWRegion:Drag(x,y,dx,dy,e)
 	self.holdTimer = 0
 	self.updateEnv()
 	
+	self:CallEvents('OnDragging', {dx,dy})
+	
 	self.oldx = x
 	self.oldy = y
 end
@@ -315,9 +328,23 @@ function TWRegion:Update(elapsed)
 	end
 	
 	if self.shaking then
+		self:SetAnchor('CENTER',x+math.random()*2-1, y+math.random()*2-1)
+		
 		-- self.t:SetRotation(math.random(-1, 1))
-		self:SetAnchor('CENTER',self.oldx+math.random(-1,1),
-										self.oldy+math.random(-1,1))
+		-- if self.dx == 0 and self.dy == 0 then
+		-- 	self.dx = math.random(-10, 10)*100
+		-- 	self.dy = math.random(-10, 10)*100
+		-- 	self.oldx = x
+		-- 	self.oldy = y
+		-- end
+		-- 
+		-- self:SetAnchor('CENTER',x+self.dx*elapsed, y+self.dy*elapsed)
+		-- 
+		-- -- DPrint('shaking '..self:Name()..' @'..self.oldx..' '..self.oldy..' d '..self.dx..' '..self.dy)
+		-- -- x,y has current value
+		-- self.dx = self.dx + (self.oldx - x)*elapsed
+		-- self.dy = self.dy + (self.oldy - y)*elapsed
+		
 	end
 -- move if we have none zero speed
 	-- newx = x
@@ -376,7 +403,6 @@ function TWRegion:Update(elapsed)
 		else
 			self.holdTimer = self.holdTimer + elapsed
 		end
-		-- self:CallEvents("OnTapAndHold", elapsed)
 	end
 		
 	-- if self.oldx ~= x or self.oldy ~= y then
@@ -567,6 +593,7 @@ function TWRegion:PlayAnimation(_, linkdata)
 		if self.loopmove then
 			if self.animationPlaying > 0 then
 				self.animationPlaying = -1
+				self.updateEnv()
 				return
 			end
 		end
@@ -588,10 +615,10 @@ function AddOneToCounter(self)
 	end
 end
 
-function move(self, message)
+function TWRegion:Move(message)
 	x,y = self:Center()
 	dx,dy = unpack(message)
-	DPrint(dx.." "..dy.." "..x.." "..y)
+	-- DPrint(dx.." "..dy.." "..x.." "..y)
 	self.oldx = x + dx
 	self.oldy = y + dy
 	self:SetAnchor('CENTER',self.oldx,self.oldy)
