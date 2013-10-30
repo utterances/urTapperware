@@ -30,11 +30,13 @@ end
 
 
 function gestureManager:StartHold(region)
-	if self.mode == LEARN_OFF then		
+	if self.mode == LEARN_OFF then
 		self.mode = LEARN_ON
 		self.holding = region
+		self.rx, self.ry = region:Center()
+		self.holding.movepath = {}
 		self.receiver = nil
-		notifyView:ShowText("Learning: Holding "..region:Name())
+		notifyView:ShowText("Holding "..region:Name()..', drag other regions to learn')
 		
 		-- starts learning mode gesture, shake everything that's not held
 		for i = 1,#regions do
@@ -48,11 +50,21 @@ end
 
 function gestureManager:Dragged(region, dx, dy, x, y)
 	-- recording gesture here if we are enabled:
-	if self.mode == LEARN_OFF or region == self.holding then
+	if self.mode == LEARN_OFF then
 		return
-	elseif self.mode == LEARN_ON then
+	elseif self.mode == LEARN_ON and region ~= self.holding then
 		self.mode = LEARN_DRAG
-		notifyView:ShowText("Learning: Dragging "..region:Name().." to learn movement")
+		notifyView:ShowText("Learning movement of "..region:Name())
+	elseif self.mode == LEARN_DRAG and region == self.holding then
+		-- special case when parent region starts to move too, learn
+		-- pinch/reverse pinch, convert to movement event->action pair
+		
+		notifyView:ShowText("Learning move interaction between "..region:Name()..' and '..self.receivers[1]:Name())
+		-- not use for now:
+		if dx ~= 0 or dy ~= 0 then
+			p = Point(dx,dy)
+			table.insert(region.movepath, p)
+		end
 	end
 	
 	if not tableHasObj(self.receivers, region) then
@@ -80,22 +92,37 @@ end
 function gestureManager:TouchUp(region)
 	if self.mode == LEARN_OFF then
 		return
-	elseif self.mode == LEARN_DRAG and tableHasObj(self.receivers, region) then
+	elseif self.mode == LEARN_DRAG and tableHasObj(self.receivers, region) and region ~= self.holding then
 		-- stop recording drag now
 		tableRemoveObj(self.receivers, region)
-		notifyView:Dismiss()		
-		
+		notifyView:Dismiss()
 		initialLinkRegion = self.holding
 		finishLinkRegion = region
-		linkEvent = 'OnTouchUp'
-		FinishLink(TWRegion.PlayAnimation, region.movepath)
-		region.movepath = {}
 
-		-- cmdlist = {{'Once', self.FinishAnimationLink, {region,false}},
-		-- 	{'Loop', self.FinishAnimationLink, {region,true}}}
-		-- menu = loadSimpleMenu(cmdlist, 'Choose Animation Type')
-		-- menu:present(region:Center())
+		x,y = self.holding:Center()
 
+		if math.abs(x-self.rx) > 10 or math.abs(y-self.ry) > 10 then
+			-- do pair interaction instead of recording path
+			-- first compute the movement transformation
+			
+			-- TODO: vector transformation here
+			
+			DPrint('move '..self.holding:Name()..' with '..region:Name())
+			linkEvent = 'OnDragging'
+			FinishLink(TWRegion.Move)
+			region.movepath = {}
+		else
+		
+			linkEvent = 'OnTouchUp'
+			DPrint('path '..self.holding:Name()..' with '..region:Name())
+			FinishLink(TWRegion.PlayAnimation, region.movepath)
+			region.movepath = {}
+
+			-- cmdlist = {{'Once', self.FinishAnimationLink, {region,false}},
+			-- 	{'Loop', self.FinishAnimationLink, {region,true}}}
+			-- menu = loadSimpleMenu(cmdlist, 'Choose Animation Type')
+			-- menu:present(region:Center())
+		end
 		
 	elseif self.mode ~= LEARN_OFF and region == self.holding then
 		-- cancel everything, initial region stops holding
@@ -146,5 +173,3 @@ end
 -- 	linkEvent = 'OnTouchUp'
 -- 	FinishLink(TWRegion.PlayAnimation)
 -- end
-
-

@@ -328,7 +328,7 @@ function TWRegion:Update(elapsed)
 	end
 	
 	if self.shaking then
-		self:SetAnchor('CENTER',x+math.random()*2-1, y+math.random()*2-1)
+		self:SetAnchor('CENTER',x+math.random()-1, y+math.random()-1)
 		
 		-- self.t:SetRotation(math.random(-1, 1))
 		-- if self.dx == 0 and self.dy == 0 then
@@ -615,9 +615,10 @@ function AddOneToCounter(self)
 	end
 end
 
-function TWRegion:Move(message)
+function TWRegion:Move(message, linkdata)
 	x,y = self:Center()
 	dx,dy = unpack(message)
+	cx,xy = unpack(linkdata)
 	-- DPrint(dx.." "..dy.." "..x.." "..y)
 	self.oldx = x + dx
 	self.oldy = y + dy
