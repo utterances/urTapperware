@@ -238,12 +238,14 @@ function TWRegion:Copy(cx, cy)
 	end
 	
 	-- copy all links
-	for _,v in ipairs(self.inlinks) do
-		local link = link:new(v.sender, newRegion, v.event, v.action)
+	for _,link in ipairs(self.inlinks) do
+		local newlink = link:new(link.sender, newRegion, link.event, link.action)
+		newlink.data = link.data
 	end
 	
-	for _,v in ipairs(self.outlinks) do
-		local link = link:new(newRegion, v.receiver, v.event, v.action)
+	for _,link in ipairs(self.outlinks) do
+		local newlink = link:new(newRegion, link.receiver, link.event, link.action)
+		newlink.data = link.data
 	end
 	
 	newRegion.movepath = self.movepath
