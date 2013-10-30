@@ -38,9 +38,9 @@ function gestureManager:StartHold(region)
 		
 		-- starts learning mode gesture, shake everything that's not held
 		for i = 1,#regions do
-			regions[i].shaking = true
+			regions[i]:AnimateShaking(true)
 		end
-		self.holding.shaking = false
+		self.holding:AnimateShaking(false)
 	-- elseif self.mode == LEARN_ON then
 	-- 	gestureManager:EndHold(region)
 	end
@@ -58,7 +58,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 	if not tableHasObj(self.receivers, region) then
 		table.insert(self.receivers, region)
 		region.movepath = {}
-		region.shaking = false
+		region:AnimateShaking(false)
 		-- self.rx, self.ry = region:Center()
 	end
 	
@@ -75,7 +75,6 @@ function gestureManager:Tapped(region)
 	if region ~= self.holding then
 		gestureManager:EndHold(region)
 	end
-	DPrint('region IsVisible '..region:IsVisible())
 end
 
 function gestureManager:TouchUp(region)
@@ -101,7 +100,7 @@ function gestureManager:TouchUp(region)
 	elseif self.mode ~= LEARN_OFF and region == self.holding then
 		-- cancel everything, initial region stops holding
 		for i = 1,#regions do
-			regions[i].shaking = false
+			regions[i]:AnimateShaking(false)
 		end
 		
 		self.mode = LEARN_OFF

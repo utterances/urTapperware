@@ -44,7 +44,7 @@ function link:RemoveReceiver()
 end
 
 function link:destroy()
-	deleteLinkMenu(self.menu)
+	DeleteLinkMenu(self.menu)
 	self.menu = nil
 	self:RemoveSender()
 	self:RemoveReceiver()
@@ -55,7 +55,7 @@ end
 
 function link:SendMessageToReceivers(message)
 	if self.sender and self.receiver then
-		DPrint('sending message'..#self.data..' nil or not')
+		-- DPrint('sending message'..#self.data..' nil or not')
 		self.action(self.receiver, message, self.data)
 	end
 end

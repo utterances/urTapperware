@@ -367,8 +367,8 @@ function OpenLinkMenu(menu)
 	end
 end
 	
-function deleteLinkMenu(menu)
-	--CloseLinkMenu(menu)
+function DeleteLinkMenu(menu)
+	CloseLinkMenu(menu)
 	-- menu = self.parent
 	table.insert(recycledLinkMenu, menu)
 end
@@ -380,11 +380,11 @@ end
 function CallLinkFunc(self)
 	-- use this to call function on the link menu button
 	-- because we have reference to the link, not just one region
-	CloseLinkMenu(self)	
+	-- CloseLinkMenu(self)	
 	self.func(self.parent.link)
 end
 
 function CloseLinkMenu(self)
-	self:Hide()
-	self:EnableInput(false)
+	self.r:Hide()
+	self.r:EnableInput(false)
 end

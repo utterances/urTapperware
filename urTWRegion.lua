@@ -45,7 +45,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self.animationPlaying = -1
 	-- -1 or 0 for not playing, otherwise increment for each frame
 	self.movepath = {}
-	self.loopmove = true
+	self.loopmove = false
 	self.shaking = false
 	
 	self.dx = 0  -- compute storing current movement speed, for gesture detection
@@ -151,15 +151,13 @@ function RemoveRegion(self)
 	CloseMenu(self)
 	
 	-- check if in and out links need to be removed
-	for k,v in pairs(self.outlinks) do
+	for _,v in pairs(self.outlinks) do
 		v:destroy()
-		CloseLinkMenu(v.menu)
 	end
 	self.outlinks = {}
 	
-	for k,v in pairs(self.inlinks) do
+	for _,v in pairs(self.inlinks) do
 		v:destroy()
-		CloseLinkMenu(v.menu)
 	end
 	self.inlinks = {}
 	
@@ -576,6 +574,12 @@ function TWRegion:PlayAnimation(_, linkdata)
 	end
 end
 	
+function TWRegion:AnimateShaking(shake)
+	if shake then
+		self.oldx, self.oldy = self:Center()
+	end
+	self.shaking = shake
+end
 
 function AddOneToCounter(self)
 	if self.regionType == RTYPE_VAR then
