@@ -312,7 +312,7 @@ function TWRegion:Update(elapsed)
 		local delta = self.movepath[self.animationPlaying]
 		
 		-- DPrint(delta(dx)..','..delta(dy))
-		self:SetAnchor('CENTER',x+delta(dx),y+delta(dy))
+		self:SetAnchor('CENTER',x+delta(deltax),y+delta(deltay))
 		
 		if self.animationPlaying < #self.movepath then
 			self.animationPlaying = self.animationPlaying + 1
@@ -328,7 +328,7 @@ function TWRegion:Update(elapsed)
 	end
 	
 	if self.shaking then
-		self:SetAnchor('CENTER',x+math.random()-1, y+math.random()-1)
+		self:SetAnchor('CENTER',self.oldx+math.random()*2-1, self.oldy+math.random()*2-1)
 		
 		-- self.t:SetRotation(math.random(-1, 1))
 		-- if self.dx == 0 and self.dy == 0 then
@@ -618,10 +618,16 @@ end
 function TWRegion:Move(message, linkdata)
 	x,y = self:Center()
 	dx,dy = unpack(message)
-	cx,xy = unpack(linkdata)
+	fx = 1
+	fy = 1
+	
+	if #linkdata > 0 then
+		fx,fy = unpack(linkdata)
+	end
+	
 	-- DPrint(dx.." "..dy.." "..x.." "..y)
-	self.oldx = x + dx
-	self.oldy = y + dy
+	self.oldx = x + dx*fx
+	self.oldy = y + dy*fy
 	self:SetAnchor('CENTER',self.oldx,self.oldy)
 end
 

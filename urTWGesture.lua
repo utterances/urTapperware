@@ -104,17 +104,22 @@ function gestureManager:TouchUp(region)
 		if math.abs(x-self.rx) > 10 or math.abs(y-self.ry) > 10 then
 			-- do pair interaction instead of recording path
 			-- first compute the movement transformation
-			
-			-- TODO: vector transformation here
-			
-			DPrint('move '..self.holding:Name()..' with '..region:Name())
+			-- holding movement is x-self.rx, y-self.ry
+			mx = 0
+			my = 0
+			for i = 1,#region.movepath do
+				mx = mx + region.movepath[i](deltax)
+				my = my + region.movepath[i](deltay)
+			end
+			-- DPrint(mx..' '..my..' vs '..x-self.rx..' '..y-self.ry)
+			-- DPrint('move '..self.holding:Name()..' with '..region:Name())
 			linkEvent = 'OnDragging'
-			FinishLink(TWRegion.Move)
+			FinishLink(TWRegion.Move, {mx/(x-self.rx), my/(y-self.ry)})
 			region.movepath = {}
 		else
 		
 			linkEvent = 'OnTouchUp'
-			DPrint('path '..self.holding:Name()..' with '..region:Name())
+			-- DPrint('path '..self.holding:Name()..' with '..region:Name())
 			FinishLink(TWRegion.PlayAnimation, region.movepath)
 			region.movepath = {}
 

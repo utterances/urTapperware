@@ -40,5 +40,5 @@ function Point(_dx, _dy)
   return function(fn) return fn(_dx, _dy) end
 end
 
-function dx(_dx, _dy) return _dx end
-function dy(_dx, _dy) return _dy end
+function deltax(_dx, _dy) return _dx end
+function deltay(_dx, _dy) return _dy end
