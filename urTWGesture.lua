@@ -100,8 +100,9 @@ function gestureManager:TouchUp(region)
 		finishLinkRegion = region
 
 		x,y = self.holding:Center()
-
-		if math.abs(x-self.rx) > 10 or math.abs(y-self.ry) > 10 then
+		dx = x-self.rx
+		dy = y-self.ry
+		if math.abs(dx) > 10 or math.abs(dy) > 10 then
 			-- do pair interaction instead of recording path
 			-- first compute the movement transformation
 			-- holding movement is x-self.rx, y-self.ry
@@ -114,7 +115,12 @@ function gestureManager:TouchUp(region)
 			-- DPrint(mx..' '..my..' vs '..x-self.rx..' '..y-self.ry)
 			-- DPrint('move '..self.holding:Name()..' with '..region:Name())
 			linkEvent = 'OnDragging'
-			FinishLink(TWRegion.Move, {mx/(x-self.rx), my/(y-self.ry)})
+			
+			normsquare = dx^2 + dy^2
+			cosT = (mx*dx + my*dy)/normsquare
+			sinT = (my*dx - mx*dy)/normsquare
+			
+			FinishLink(TWRegion.Move, {cosT, sinT})
 			region.movepath = {}
 		else
 		

@@ -96,10 +96,9 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self:Handle("OnTouchUp", TWRegion.TouchUp)
 	self:Handle("OnUpdate", TWRegion.Update)
 	self:Handle("OnLeave", TWRegion.Leave)
-	self:Handle("OnDragging", TWRegion.Drag)
-	self:Handle("OnMove", TWRegion.Move)
+	self:Handle("OnDragging", TWRegion.OnDrag)
+	self:Handle("OnMove", TWRegion.OnMove)
 	self:Handle("OnSizeChanged", TWRegion.SizeChanged)
-	
 end
 
 
@@ -263,7 +262,7 @@ function TWRegion:Copy(cx, cy)
 	return newRegion
 end
 
-function TWRegion:Move(x,y,dx,dy)
+function TWRegion:OnMove(x,y,dx,dy)
 	DPrint('moving '..dx..' '..dy)
 	
 	-- for k,v in pairs(self.outlinks) do
@@ -278,11 +277,7 @@ function TWRegion:Move(x,y,dx,dy)
 	self.oldy = y
 end
 
-function TWRegion:StartAnimation()
-	
-end
-
-function TWRegion:Drag(x,y,dx,dy,e)
+function TWRegion:OnDrag(x,y,dx,dy,e)
 	
 	if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
 		self.isHeld = false	-- cancel hold gesture if over tolerance
@@ -315,7 +310,7 @@ function TWRegion:Update(elapsed)
 		
 		-- DPrint(delta(dx)..','..delta(dy))
 		self:SetAnchor('CENTER',x+delta(deltax),y+delta(deltay))
-		
+		self:CallEvents('OnDragging', {delta(deltax), delta(deltay)})
 		if self.animationPlaying < #self.movepath then
 			self.animationPlaying = self.animationPlaying + 1
 		else
@@ -619,18 +614,22 @@ end
 
 function TWRegion:Move(message, linkdata)
 	x,y = self:Center()
+	
 	dx,dy = unpack(message)
-	fx = 1
-	fy = 1
+	cosT = 1
+	sinT = 0
 	
 	if #linkdata > 0 then
-		fx,fy = unpack(linkdata)
+		cosT,sinT = unpack(linkdata)
 	end
 	
-	-- DPrint(dx.." "..dy.." "..x.." "..y)
-	self.oldx = x + dx*fx
-	self.oldy = y + dy*fy
+	moveX = cosT*dx - sinT*dy
+	moveY = sinT*dx + cosT*dy
+	self.oldx = x + moveX
+	self.oldy = y + moveY
 	self:SetAnchor('CENTER',self.oldx,self.oldy)
+	
+	self:CallEvents('OnDragging', {moveX, moveY})
 end
 
 function MoveLeft(self, message)
