@@ -112,7 +112,6 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	r_s.t:SetBlendMode("BLEND")
 	r_s:SetWidth(INITSIZE + 60)
 	r_s:SetHeight(INITSIZE + 60)
-	r_s:EnableMoving(true)
 	r_s:SetLayer("LOW")
 	r_s:Show() 
 
