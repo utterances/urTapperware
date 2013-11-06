@@ -100,7 +100,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self:Handle("OnLeave", TWRegion.OnLeave)
 	self:Handle("OnDragging", TWRegion.OnDrag)
 	self:Handle("OnMove", TWRegion.OnMove)
-	self:Handle("OnSizeChanged", TWRegion.SizeChanged)
+	self:Handle("OnSizeChanged", TWRegion.OnSizeChanged)
 end
 
 
@@ -112,7 +112,7 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	r_s.t:SetBlendMode("BLEND")
 	r_s:SetWidth(INITSIZE + 60)
 	r_s:SetHeight(INITSIZE + 60)
-	--r_s:EnableMoving(true)
+	r_s:EnableMoving(true)
 	r_s:SetLayer("LOW")
 	r_s:Show() 
 
