@@ -69,14 +69,17 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 	
 	if not tableHasObj(self.receivers, region) then
 		table.insert(self.receivers, region)
+		region.rx, region.ry = region:Center()
 		region.movepath = {}
 		region:AnimateShaking(false)
-		-- self.rx, self.ry = region:Center()
 	end
 	
+	-- record the actual path here:
 	if dx ~= 0 or dy ~= 0 then
 		p = Point(dx,dy)
 		table.insert(region.movepath, p)
+		-- update the guide to show this path
+		guideView:ShowPath(self.receivers)
 	end
 end
 
@@ -98,7 +101,7 @@ function gestureManager:TouchUp(region)
 		notifyView:Dismiss()
 		initialLinkRegion = self.holding
 		finishLinkRegion = region
-
+		
 		x,y = self.holding:Center()
 		dx = x-self.rx
 		dy = y-self.ry
@@ -122,13 +125,14 @@ function gestureManager:TouchUp(region)
 			
 			FinishLink(TWRegion.Move, {cosT, sinT})
 			region.movepath = {}
+			region:SetAnchor("CENTER", region.rx, region.ry)
 		else
 		
 			linkEvent = 'OnTouchUp'
 			-- DPrint('path '..self.holding:Name()..' with '..region:Name())
 			FinishLink(TWRegion.PlayAnimation, region.movepath)
 			region.movepath = {}
-
+			
 			-- cmdlist = {{'Once', self.FinishAnimationLink, {region,false}},
 			-- 	{'Loop', self.FinishAnimationLink, {region,true}}}
 			-- menu = loadSimpleMenu(cmdlist, 'Choose Animation Type')

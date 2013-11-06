@@ -45,16 +45,18 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self.animationPlaying = -1
 	-- -1 or 0 for not playing, otherwise increment for each frame
 	self.movepath = {}
+	self.rx = 0
+	self.ry = 0
 	self.loopmove = false
 	self.shaking = false
 	
-	self.dx = 0  -- compute storing current movement speed, for gesture detection
-	self.dy = 0
+	-- self.dx = 0  -- compute storing current movement speed, for gesture detection
+	-- self.dy = 0
 	x,y = self:Center()
 	self.oldx = x
 	self.oldy = y
-	self.sx = 0
-	self.sy = 0
+	-- self.sx = 0
+	-- self.sy = 0
 	self.w = INITSIZE
 	self.h = INITSIZE
 

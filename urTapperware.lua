@@ -5,7 +5,7 @@
 -- A multipurpose non-programming environment aimed towards giving the user the ability
 -- To create a increasingly more complex application without any coding on the users side.
 -- The basis of the script is contained in this file while most of the features are contained
--- the accompianing scripts, listed below.
+-- the accompanying scripts, listed below.
 
 -- ==================================
 -- = setup Global var and constants =
@@ -23,35 +23,27 @@ LASSOSEPDISTANCE = 20 -- pixels between each point when drawing selection lasso
 
 FreeAllRegions()
 DPrint('')
---regions = {}
---recycledregions = {}
 initialLinkRegion = nil
 finishLinkRegion = nil
 linkEvent = nil
 linkAction = nil
 startedSelection = false
--- touch event state machine:
--- isHoldingRegion = false
-heldRegions = {}
+
 -- selection data structs
 selectionPoly = {}
 selectedRegions = {}
 
-
--- modes = {"EDIT","RELEASE"}
--- current_mode = modes[1]
-
-dofile(DocumentPath("urTWTools.lua"))
-dofile(DocumentPath("urTWNotify.lua"))
-dofile(DocumentPath("urTapperwareMenu.lua"))	-- first!
-dofile(DocumentPath("urTWMenu.lua"))
-dofile(DocumentPath("urTWLink.lua"))	-- needs menu
+dofile(DocumentPath("urTWTools.lua"))	--misc helper func and obj
+dofile(DocumentPath("urTWNotify.lua"))	-- text notification view
+dofile(DocumentPath("urTapperwareMenu.lua"))	-- old menu system, need rewrite
+dofile(DocumentPath("urTWMenu.lua"))	-- new cleaner simple menu
+dofile(DocumentPath("urTWLink.lua"))	-- needs menu, links
 dofile(DocumentPath("urTWRegion.lua"))
 
-dofile(DocumentPath("urTWLinkLayer.lua"))	-- needs menu
+dofile(DocumentPath("urTWLinkLayer.lua"))	-- needs menu, visual links
 dofile(DocumentPath("urTWGroup.lua"))	-- needs TWRegion
-dofile(DocumentPath("urTWGesture.lua"))
-dofile(DocumentPath("urTWGuide.lua"))
+dofile(DocumentPath("urTWGesture.lua"))	--gesture manager
+dofile(DocumentPath("urTWGuide.lua"))		--gesture visual guide
 -- ============
 -- = Backdrop =
 -- ============
@@ -173,7 +165,6 @@ notifyView:Init()
 notifyView:ShowTimedText("Welcome!", 2)
 
 guideView:Init()
-guideView:ShowPing(ScreenWidth()/2,ScreenHeight()/2)
 
 gestureManager:Init()
 

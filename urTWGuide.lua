@@ -3,8 +3,8 @@
 -- ==============
 -- shows gesture guides, visual, tutorial
 
-FADE_RATE = .8
-PING_TIME = 1
+PING_TIME = .7
+PING_RATE = 700
 guideView = {}
 
 function guideView:Init()	
@@ -19,9 +19,10 @@ function guideView:Init()
 	self.r.t:SetTexCoord(0,ScreenWidth()/1024.0,1.0,0.0)
 	self.r.t:SetBrushColor(255,146,2)
 	self.r.t:SetBrushSize(5)
-	
 	self.r:Hide()
 
+	self.r.parent = self
+	
 	-- properties for animations
 	self.r.timer = 0
 	self.r.ping = false
@@ -29,12 +30,17 @@ function guideView:Init()
 	self.r.pingy = 0
 	self.r.pingsize = 0
 	
+	self.r.needsUpdate = false
+	self.isDrawing = false
+	
+	self.regions = {}
+	
 	self.arrows = {}
 	for i=1,2 do
 		local r = Region('region', 'arrow', self.r)
 		r:SetLayer("TOOLTIP")
-		r:SetWidth(250)
-		r:SetHeight(250)
+		r:SetWidth(512)
+		r:SetHeight(512)
 		r.t = r:Texture("tw_arrow.png")
 		r.t:SetBlendMode("BLEND")
 		r:Hide()
@@ -46,12 +52,34 @@ function guideView:ShowPing(x,y)
 	self.r.pingx = x
 	self.r.pingy = y
 	self.r.ping = true
-	self.r.pingsize = 200
+	self.r.pingsize = 150
 	self.r.timer = PING_TIME
 	self.r.t:Clear(0,0,0,0)
 	self.r:Show()
-	self.r:MoveToTop()	
+	self.r:MoveToTop()
 	self.r:Handle("OnUpdate", guideUpdate)
+	self.arrows[1]:SetAnchor("CENTER",x,y)
+	self.arrows[1]:Show()
+end
+
+function guideView:ShowPath(regions)
+	self.regions = regions
+	self.r.needsUpdate = true
+	
+	if not self.isDrawing then
+		self.isDrawing = true
+		self.r:Show()
+		self.r:Handle("OnUpdate", guideUpdate)
+	end
+end
+
+function guideView:Disable()
+	self.r.needsUpdate = false
+	self.isDrawing = false
+	if self.timer == 0 then
+		self.r:Handle("OnUpdate", nil)
+		self.r:Hide()
+	end
 end
 
 function guideUpdate(self, e)
@@ -60,12 +88,32 @@ function guideUpdate(self, e)
 		if self.timer == 0 then
 			self:Handle("OnUpdate", nil)
 			self:Hide()
+			self.parent.arrows[1]:Hide()
 		end
 		
 		-- draw the ping circle here, and then compute next size
 		self.t:Clear(0,0,0,0)
 		self.t:Ellipse(self.pingx, self.pingy, self.pingsize, self.pingsize)
-		self.pingsize = self.pingsize + e*300
-		
+		self.pingsize = self.pingsize + e*PING_RATE
+	end
+	
+	if self.needsUpdate then
+		-- draw guide path here, vector possibly too
+		self.t:Clear(0,0,0,0)
+		for i = 1,#self.parent.regions do
+			x1 = self.parent.regions[i].rx
+			y1 = self.parent.regions[i].ry
+			
+			for j = 1,#self.parent.regions[i].movepath do
+				x2=x1 + self.parent.regions[i].movepath[j](deltax)
+				y2=y1 + self.parent.regions[i].movepath[j](deltay)
+				
+				self.t:Line(x1,y1,x2,y2)
+				
+				x1 = x2
+				y1 = y2
+			end
+		end
+		self.needsUpdate = false
 	end
 end
