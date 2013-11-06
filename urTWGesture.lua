@@ -59,12 +59,15 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		-- special case when parent region starts to move too, learn
 		-- pinch/reverse pinch, convert to movement event->action pair
 		
-		notifyView:ShowText("Learning move interaction between "..region:Name()..' and '..self.receivers[1]:Name())
-		-- not use for now:
-		if dx ~= 0 or dy ~= 0 then
-			p = Point(dx,dy)
-			table.insert(region.movepath, p)
+		if #self.receivers > 0 then
+			notifyView:ShowText("Learning move interaction between "..region:Name()..' and '..self.receivers[1]:Name())			
 		end
+		
+		-- not use for now:
+		-- if dx ~= 0 or dy ~= 0 then
+		-- 	p = Point(dx,dy)
+		-- 	table.insert(region.movepath, p)
+		-- end
 	end
 	
 	if not tableHasObj(self.receivers, region) and region ~= self.holding then
@@ -80,6 +83,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		table.insert(region.movepath, p)
 		-- update the guide to show this path
 		guideView:ShowPath(self.receivers)
+		guideView:ShowArrow(region)
 	end
 end
 

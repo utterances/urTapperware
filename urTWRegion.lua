@@ -97,7 +97,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self:Handle("OnTouchDown", TWRegion.TouchDown)
 	self:Handle("OnTouchUp", TWRegion.TouchUp)
 	self:Handle("OnUpdate", TWRegion.Update)
-	self:Handle("OnLeave", TWRegion.Leave)
+	self:Handle("OnLeave", TWRegion.OnLeave)
 	self:Handle("OnDragging", TWRegion.OnDrag)
 	self:Handle("OnMove", TWRegion.OnMove)
 	self:Handle("OnSizeChanged", TWRegion.SizeChanged)
@@ -515,7 +515,9 @@ function TWRegion:TouchUp()
 	self:CallEvents("OnTouchUp")
 end
 
-function TWRegion:Leave()
+function TWRegion:OnLeave()
+	gestureManager:TouchUp(self)
+	
 	self.isHeld = false
 	self.holdTimer = 0
 end

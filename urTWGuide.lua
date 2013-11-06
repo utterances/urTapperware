@@ -4,7 +4,7 @@
 -- shows gesture guides, visual, tutorial
 
 PING_TIME = .7
-PING_RATE = 700
+PING_RATE = 900
 guideView = {}
 
 function guideView:Init()	
@@ -18,7 +18,7 @@ function guideView:Init()
 	self.r.t:Clear(0,0,0,0)
 	self.r.t:SetTexCoord(0,ScreenWidth()/1024.0,1.0,0.0)
 	self.r.t:SetBrushColor(255,146,2)
-	self.r.t:SetBrushSize(5)
+	-- self.r.t:SetBrushSize(7)
 	self.r:Hide()
 
 	self.r.parent = self
@@ -49,6 +49,7 @@ function guideView:Init()
 end
 
 function guideView:ShowPing(x,y)
+	-- DPrint('show ping')
 	self.r.pingx = x
 	self.r.pingy = y
 	self.r.ping = true
@@ -57,30 +58,35 @@ function guideView:ShowPing(x,y)
 	self.r.t:Clear(0,0,0,0)
 	self.r:Show()
 	self.r:MoveToTop()
+	self.r.needsUpdate = false
 	self.r:Handle("OnUpdate", guideUpdate)
-	self.arrows[1]:SetAnchor("CENTER",x,y)
-	self.arrows[1]:Show()
 end
 
 function guideView:ShowPath(regions)
 	self.regions = regions
 	self.r.needsUpdate = true
 	
-	if not self.isDrawing then
+	-- if not self.isDrawing then
 		self.isDrawing = true
 		self.r:Show()
 		self.r:Handle("OnUpdate", guideUpdate)
-	end
+	-- end
+end
+
+function guideView:ShowArrow(region)	
+	self.arrows[1]:SetAnchor("CENTER",region,'CENTER',0,0)
+	self.arrows[1]:Show()
 end
 
 function guideView:Disable()
 	self.r.needsUpdate = false
 	self.isDrawing = false
 	self.regions = {}
-	if self.timer == 0 then
+	-- if self.timer == 0 then
 		self.r:Handle("OnUpdate", nil)
 		self.r:Hide()
-	end
+	-- end
+	self.arrows[1]:Hide()
 end
 
 function guideUpdate(self, e)
@@ -89,11 +95,11 @@ function guideUpdate(self, e)
 		if self.timer == 0 then
 			self:Handle("OnUpdate", nil)
 			self:Hide()
-			self.parent.arrows[1]:Hide()
 		end
 		
 		-- draw the ping circle here, and then compute next size
 		self.t:Clear(0,0,0,0)
+		self.t:SetBrushSize(12)
 		self.t:Ellipse(self.pingx, self.pingy, self.pingsize, self.pingsize)
 		self.pingsize = self.pingsize + e*PING_RATE
 	end
@@ -108,7 +114,8 @@ function guideUpdate(self, e)
 			for j = 1,#self.parent.regions[i].movepath do
 				x2=x1 + self.parent.regions[i].movepath[j](deltax)
 				y2=y1 + self.parent.regions[i].movepath[j](deltay)
-				
+
+				self.t:SetBrushSize(3)
 				self.t:Line(x1,y1,x2,y2)
 				
 				x1 = x2

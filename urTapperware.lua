@@ -165,7 +165,7 @@ notifyView:Init()
 notifyView:ShowTimedText("Welcome!", 2)
 
 guideView:Init()
-
+guideView:ShowPing(200,300)
 gestureManager:Init()
 
 function selectionLayer:DrawSelectionPoly()
