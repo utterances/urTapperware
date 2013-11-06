@@ -76,6 +76,7 @@ end
 function guideView:Disable()
 	self.r.needsUpdate = false
 	self.isDrawing = false
+	self.regions = {}
 	if self.timer == 0 then
 		self.r:Handle("OnUpdate", nil)
 		self.r:Hide()

@@ -67,7 +67,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		end
 	end
 	
-	if not tableHasObj(self.receivers, region) then
+	if not tableHasObj(self.receivers, region) and region ~= self.holding then
 		table.insert(self.receivers, region)
 		region.rx, region.ry = region:Center()
 		region.movepath = {}
@@ -124,20 +124,21 @@ function gestureManager:TouchUp(region)
 			sinT = (my*dx - mx*dy)/normsquare
 			
 			FinishLink(TWRegion.Move, {cosT, sinT})
-			region.movepath = {}
-			region:SetAnchor("CENTER", region.rx, region.ry)
 		else
 		
 			linkEvent = 'OnTouchUp'
 			-- DPrint('path '..self.holding:Name()..' with '..region:Name())
 			FinishLink(TWRegion.PlayAnimation, region.movepath)
-			region.movepath = {}
 			
 			-- cmdlist = {{'Once', self.FinishAnimationLink, {region,false}},
 			-- 	{'Loop', self.FinishAnimationLink, {region,true}}}
 			-- menu = loadSimpleMenu(cmdlist, 'Choose Animation Type')
 			-- menu:present(region:Center())
+			region:SetAnchor("CENTER", region.rx, region.ry)
 		end
+		
+		region.movepath = {}
+		guideView:Disable()
 		
 	elseif self.mode ~= LEARN_OFF and region == self.holding then
 		-- cancel everything, initial region stops holding
@@ -148,6 +149,7 @@ function gestureManager:TouchUp(region)
 		self.mode = LEARN_OFF
 		self:Reset()
 		notifyView:Dismiss()
+		guideView:Disable()
 	end
 end
 
