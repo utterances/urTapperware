@@ -51,7 +51,7 @@ dofile(DocumentPath("urTWRegion.lua"))
 dofile(DocumentPath("urTWLinkLayer.lua"))	-- needs menu
 dofile(DocumentPath("urTWGroup.lua"))	-- needs TWRegion
 dofile(DocumentPath("urTWGesture.lua"))
-
+dofile(DocumentPath("urTWGuide.lua"))
 -- ============
 -- = Backdrop =
 -- ============
@@ -171,6 +171,9 @@ selectionLayer:Show()
 
 notifyView:Init()
 notifyView:ShowTimedText("Welcome!", 2)
+
+guideView:Init()
+guideView:ShowPing(ScreenWidth()/2,ScreenHeight()/2)
 
 gestureManager:Init()
 

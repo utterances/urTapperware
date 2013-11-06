@@ -37,7 +37,7 @@ function gestureManager:StartHold(region)
 		self.holding.movepath = {}
 		self.receiver = nil
 		notifyView:ShowText("Holding "..region:Name()..', drag other regions to learn')
-		
+		guideView:ShowPing(self.rx, self.ry)
 		-- starts learning mode gesture, shake everything that's not held
 		for i = 1,#regions do
 			regions[i]:AnimateShaking(true)
