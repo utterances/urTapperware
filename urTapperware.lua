@@ -12,7 +12,7 @@
 -- ==================================
 
 CREATION_MARGIN = 40	-- margin for creating via tapping
-INITSIZE = 140	-- initial size for regions
+INITSIZE = 120	-- initial size for regions
 MENUHOLDWAIT = 0.4 -- seconds to wait for hold to menu
 
 FADEINTIME = .2 -- seconds for things to fade in, TESTING for now
@@ -89,6 +89,8 @@ function bgTouchUp(self)
 		local region = TWRegion:new(nil,updateEnv)		
 		region:Show()
 		region:SetAnchor("CENTER",x,y)
+		region.oldx = x
+		region.oldy = y
 		-- DPrint(region:Name().." created at "..x..", "..y)
 	end
 	
@@ -273,45 +275,45 @@ function ToggleMenu(self)
 	linkLayer:Draw()
 end
 
-function HoldToTrigger(self, elapsed) -- for long tap
-	x,y = self:Center()
-	
-	if self.holdtime <= 0 then
-		self.x = x 
-		self.y = y
-		DPrint("trying menu")
-		if self.menu == nil then
-			OpenRegionMenu(self)
-		else
-			CloseMenu(self)
-		end
-		self:Handle("OnUpdate",nil)
-	else 
-		if math.abs(self.x - x) > 10 or math.abs(self.y - y) > 10 then
-			self:Handle("OnUpdate", nil)
-			self:Handle("OnUpdate", self.Update)
-		end
-		if self.holdtime < MENUHOLDWAIT/2 then
-			DPrint("hold for menu")
-		end
-		self.holdtime = self.holdtime - elapsed
-	end
-end
+-- function HoldToTrigger(self, elapsed) -- for long tap
+-- 	x,y = self:Center()
+-- 	
+-- 	if self.holdtime <= 0 then
+-- 		self.x = x 
+-- 		self.y = y
+-- 		DPrint("trying menu")
+-- 		if self.menu == nil then
+-- 			OpenRegionMenu(self)
+-- 		else
+-- 			CloseMenu(self)
+-- 		end
+-- 		self:Handle("OnUpdate",nil)
+-- 	else 
+-- 		if math.abs(self.x - x) > 10 or math.abs(self.y - y) > 10 then
+-- 			self:Handle("OnUpdate", nil)
+-- 			self:Handle("OnUpdate", self.Update)
+-- 		end
+-- 		if self.holdtime < MENUHOLDWAIT/2 then
+-- 			DPrint("hold for menu")
+-- 		end
+-- 		self.holdtime = self.holdtime - elapsed
+-- 	end
+-- end
 
-function HoldTrigger(self) -- for long tap
-	DPrint("starting hold")
-	self.holdtime = MENUHOLDWAIT
-	self.x,self.y = self:Center()
-	self:Handle("OnUpdate", nil)
-	self:Handle("OnUpdate", HoldToTrigger)
-	self:Handle("OnLeave", DeTrigger)
-end
-
-function DeTrigger(self) -- for long tap
-	self.eventlist["OnUpdate"].currentevent = nil
-	self:Handle("OnUpdate", nil)
-	self:Handle("OnUpdate", self.Update)
-end
+-- function HoldTrigger(self) -- for long tap
+-- 	DPrint("starting hold")
+-- 	self.holdtime = MENUHOLDWAIT
+-- 	self.x,self.y = self:Center()
+-- 	self:Handle("OnUpdate", nil)
+-- 	self:Handle("OnUpdate", HoldToTrigger)
+-- 	self:Handle("OnLeave", DeTrigger)
+-- end
+-- 
+-- function DeTrigger(self) -- for long tap
+-- 	self.eventlist["OnUpdate"].currentevent = nil
+-- 	self:Handle("OnUpdate", nil)
+-- 	self:Handle("OnUpdate", self.Update)
+-- end
 ---------------
 
 function ChangeSelectionStateRegion(self, select)
@@ -377,7 +379,7 @@ function ChooseAction(message)
 	linkEvent = message	
 	menu:dismiss()
 	
-	cmdlist = {{'Counter',FinishLink,AddOneToCounter},
+	cmdlist = {{'Counter',FinishLink, TWRegion.UpdateVal},
 		{'Move Left', FinishLink, MoveLeft},
 		{'Move Right', FinishLink, MoveRight},
 		{'Move', FinishLink, TWRegion.Move},
@@ -386,12 +388,11 @@ function ChooseAction(message)
 	menu:present(finishLinkRegion:Center())
 end
 
-function FinishLink(message, data)
+function FinishLink(linkAction, data)
 	-- DPrint("linked from "..initialLinkRegion:Name().." to "..finishLinkRegion:Name())
 	-- if message ~= nil then
 	-- 	DPrint("linked with action")
 	-- end
-	linkAction = message
 	if menu then
 		menu:dismiss()
 	end

@@ -102,7 +102,7 @@ function Group:new(o)
 	self.__index = self
 	
 	o.menu = newGroupMenu()
-	o.r = TWRegion:new()
+	o.r = TWRegion:new(nil,updateEnv)
 	o.r.type = RTYPE_GROUP
 	o.r.t = o.r:Texture()
 	o.r.t:Clear(0,0,0,100)
@@ -169,13 +169,15 @@ function Group:Draw()
 		r = self.regions[i]
 		x,y = r:Center()
 		r:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', x - minX, y - minY)
-		r:EnableMoving(false)
+		if r.canBeMoved then
+			r:EnableMoving(false)
+		end
 		r:MoveToTop()
 	end
 	
 	-- now show everything
 	self.r:Show()
-	OpenGroupMenu(self.menu, minX, minY, nil) -- TODO: self.regions functionality
+	-- OpenGroupMenu(self.menu, minX, minY, nil) -- TODO: self.regions functionality
 	self.menu.item:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', 0, 0)
 	self.menu.item:EnableInput(false)
 end

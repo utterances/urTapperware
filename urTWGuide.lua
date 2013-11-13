@@ -5,6 +5,7 @@
 
 PING_TIME = .7
 PING_RATE = 900
+PATH_Y_OFFSET = 20
 guideView = {}
 
 function guideView:Init()	
@@ -109,7 +110,7 @@ function guideUpdate(self, e)
 		self.t:Clear(0,0,0,0)
 		for i = 1,#self.parent.regions do
 			x1 = self.parent.regions[i].rx
-			y1 = self.parent.regions[i].ry
+			y1 = self.parent.regions[i].ry + PATH_Y_OFFSET
 			
 			for j = 1,#self.parent.regions[i].movepath do
 				x2=x1 + self.parent.regions[i].movepath[j](deltax)

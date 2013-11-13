@@ -101,6 +101,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self:Handle("OnDragging", TWRegion.OnDrag)
 	self:Handle("OnMove", TWRegion.OnMove)
 	self:Handle("OnSizeChanged", TWRegion.OnSizeChanged)
+	self:Handle("OnHorizontalScroll", TWRegion.OnHScroll)
 end
 
 
@@ -288,9 +289,21 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	self.updateEnv()
 	
 	self:CallEvents('OnDragging', {dx,dy})
-	
+
 	self.oldx = x
-	self.oldy = y
+	
+	if not self.canBeMoved then
+		self:SetAnchor('CENTER',x,self.oldy)
+	else
+		self.oldy = y
+	end
+	
+end
+
+function TWRegion:OnHScroll(scrollspeedX)
+	
+	
+	DPrint(scrollspeedX)
 end
 
 function TWRegion:Update(elapsed)
@@ -451,9 +464,9 @@ function TWRegion:TouchDown()
 end
 
 function TWRegion:DoubleTap()
-	if self.regionType ~= RTYPE_GROUP then
-		self:CallEvents("OnDoubleTap")
-	end
+	-- if self.regionType ~= RTYPE_GROUP then
+	self:CallEvents("OnDoubleTap")
+	-- end
 end
 
 function TWRegion:TouchUp()
@@ -578,9 +591,9 @@ function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
 end
 
 function TWRegion:ToggleAnchor()
-	notifyView:ShowTimedText("toggle movement")
+	notifyView:ShowTimedText("toggled movement")
 	self.canBeMoved = not self.canBeMoved
-	self:EnableMoving(self.canBeMoved)
+	-- self:EnableMoving(self.canBeMoved)
 end
 
 -- #################################################################
@@ -608,11 +621,18 @@ function TWRegion:AnimateShaking(shake)
 	self.shaking = shake
 end
 
-function AddOneToCounter(self)
+function TWRegion:UpdateVal(message)
 	if self.regionType == RTYPE_VAR then
-		self.value = self.value + 1
+		
+		if message ~= 'OnTouchUp' then
+			incre = message[1]
+		else
+			incre = 1
+		end
+
+		self.value = self.value + incre
 		self.tl:SetLabel(self.value)
-	end
+	end	
 end
 
 function TWRegion:Move(message, linkdata)

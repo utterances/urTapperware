@@ -54,7 +54,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		return
 	elseif self.mode == LEARN_ON and region ~= self.holding then
 		self.mode = LEARN_DRAG
-		notifyView:ShowText("Learning movement of "..region:Name())
+		notifyView:ShowText("Learning movement of "..region:Name())		
 	elseif self.mode == LEARN_DRAG and region == self.holding then
 		-- special case when parent region starts to move too, learn
 		-- pinch/reverse pinch, convert to movement event->action pair
@@ -84,6 +84,9 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		-- update the guide to show this path
 		guideView:ShowPath(self.receivers)
 		guideView:ShowArrow(region)
+		if region ~= self.holding then
+			linkLayer:DrawPotentialLink(self.holding, region)
+		end
 	end
 end
 
@@ -99,7 +102,7 @@ end
 function gestureManager:TouchUp(region)
 	if self.mode == LEARN_OFF then
 		return
-	elseif self.mode == LEARN_DRAG and tableHasObj(self.receivers, region) and region ~= self.holding then
+	elseif self.mode == LEARN_DRAG and tableHasObj(self.receivers, region) then
 		-- stop recording drag now
 		tableRemoveObj(self.receivers, region)
 		notifyView:Dismiss()
@@ -129,7 +132,7 @@ function gestureManager:TouchUp(region)
 			
 			FinishLink(TWRegion.Move, {cosT, sinT})
 		else
-		
+			-- set up path based animation
 			linkEvent = 'OnTouchUp'
 			-- DPrint('path '..self.holding:Name()..' with '..region:Name())
 			FinishLink(TWRegion.PlayAnimation, region.movepath)
@@ -144,7 +147,7 @@ function gestureManager:TouchUp(region)
 		region.movepath = {}
 		guideView:Disable()
 		
-	elseif self.mode ~= LEARN_OFF and region == self.holding then
+	elseif region == self.holding then
 		-- cancel everything, initial region stops holding
 		for i = 1,#regions do
 			regions[i]:AnimateShaking(false)
@@ -171,7 +174,7 @@ function gestureManager:EndHold(region)
 	finishLinkRegion = self.receiver
 	linkEvent = 'OnTouchUp'
 	
-	cmdlist = {{'Counter',FinishLink,AddOneToCounter},
+	cmdlist = {{'Counter',FinishLink, TWRegion.UpdateVal},
 		{'Move Left', FinishLink, MoveLeft},
 		{'Move Right', FinishLink, MoveRight},
 		{'Cancel', nil, nil}}
