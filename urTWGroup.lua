@@ -13,6 +13,7 @@ function ToggleLockGroup(regions)
 	newGroup = Group:new()
 	newGroup:SetRegions(regions)
 	newGroup:Draw()
+	return newGroup
 end
 
 function initGroupMenu()
@@ -103,14 +104,15 @@ function Group:new(o)
 	
 	o.menu = newGroupMenu()
 	o.r = TWRegion:new(nil,updateEnv)
-	o.r.type = RTYPE_GROUP
+	o.r.regionType = RTYPE_GROUP
 	o.r.t = o.r:Texture()
 	o.r.t:Clear(0,0,0,100)
 	o.r.t:SetBlendMode("BLEND")
 	o.r.tl:SetLabel("")
 	o.r.shadow:Hide()
+	o.r.groupObj = o
 	
-	o.r:Handle("OnDoubleTap", nil)
+	-- o.r:Handle("OnDoubleTap", nil)
 	o.r:Handle("OnTouchDown", nil)
 	o.r:Handle("OnTouchUp", nil)
 	o.r:Handle("OnLeave", nil)
@@ -168,9 +170,9 @@ function Group:Draw()
 	for i = 1, #self.regions do
 		r = self.regions[i]
 		x,y = r:Center()
-		r:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', x - minX, y - minY)
 		if r.canBeMoved then
 			r:EnableMoving(false)
+			r:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', x - minX, y - minY)
 		end
 		r:MoveToTop()
 	end

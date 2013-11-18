@@ -28,6 +28,7 @@ finishLinkRegion = nil
 linkEvent = nil
 linkAction = nil
 startedSelection = false
+touchStateDown = false
 
 -- selection data structs
 selectionPoly = {}
@@ -50,7 +51,7 @@ dofile(DocumentPath("urTWGuide.lua"))		--gesture visual guide
 
 function bgTouchDown(self)
 	local x,y = InputPosition()
-	
+	touchStateDown = true
 	shadow:Show()
 	shadow:SetAnchor('CENTER',x,y)
 end
@@ -82,6 +83,9 @@ function bgTouchUp(self)
 	end
 	
 	-- only create if we are not too close to the edge
+	if not touchStateDown then
+		return
+	end
 	local x,y = InputPosition()
 	
 	if x>CREATION_MARGIN and x<ScreenWidth()-CREATION_MARGIN and 
@@ -93,8 +97,8 @@ function bgTouchUp(self)
 		region.oldy = y
 		-- DPrint(region:Name().." created at "..x..", "..y)
 	end
-	
-	startedSelection = false
+	touchStateDown = false
+	-- startedSelection = false
 end
 
 function bgMove(self)
@@ -120,6 +124,7 @@ end
 function bgLeave(self)
 	shadow:Hide()
 	DPrint("")
+	touchStateDown = false
 end
 
 backdrop = Region('region', 'backdrop', UIParent)
@@ -417,8 +422,10 @@ function DuplicateRegion(r, cx, cy)
 	local newRegion = r:Copy(cx, cy)
 	
 	linkLayer:Draw()
-	
-	newRegion:RaiseToTop()
+	if r.regionType ~= RTYPE_GROUP then
+		DPrint(r.regionType)
+		newRegion:RaiseToTop()
+	end
 	
 	CloseMenu(r)
 	OpenRegionMenu(r)

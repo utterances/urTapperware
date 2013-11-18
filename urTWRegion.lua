@@ -93,8 +93,8 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self.usable = true
 	self.t:SetTexture("tw_roundrec.png") -- reset texture
 	
-	self:Handle("OnDoubleTap", TWRegion.DoubleTap)
-	self:Handle("OnTouchDown", TWRegion.TouchDown)
+	self:Handle("OnDoubleTap", TWRegion.OnDoubleTap)
+	self:Handle("OnTouchDown", TWRegion.OnTouchDown)
 	self:Handle("OnTouchUp", TWRegion.TouchUp)
 	self:Handle("OnUpdate", TWRegion.Update)
 	self:Handle("OnLeave", TWRegion.OnLeave)
@@ -168,6 +168,14 @@ end
 function RemoveRegion(self)
 	CloseMenu(self)
 	
+	
+	if self.regionType == RTYPE_GROUP then
+		-- remove all the children if needed
+		for _,r in pairs(self.groupObj.regions) do
+			RemoveRegion(r)
+		end
+	end
+		
 	-- check if in and out links need to be removed
 	for _,v in pairs(self.outlinks) do
 		v:destroy()
@@ -229,11 +237,28 @@ end
 
 function TWRegion:Copy(cx, cy)
 	-- return a copy
+	
+	if self.regionType == RTYPE_GROUP then
+		notifyView:ShowTimedText('Copying Group')
+		-- copy all the group's child, then regroup them and move to new place
+		newRegions = {}	
+		for _,r in ipairs(self.groupObj.regions) do
+			-- find position delta first
+			x,y = self:Center()
+			x2,y2 = r:Center()
+			
+			table.insert(newRegions, r:Copy(cx+x2-x,cy+y2-y))
+		end
+		return ToggleLockGroup(newRegions)
+	end
+	
 	local newRegion = TWRegion:new(nil, updateEnv)
 	newRegion:Show()	
 	
 	if cx ~= nil then
 		newRegion:SetAnchor("CENTER", cx, cy)
+		newRegion.oldx = cx
+		newRegion.oldy = cy
 	else
 		newRegion:SetAnchor("CENTER",x+INITSIZE+20,y)
 	end
@@ -250,6 +275,7 @@ function TWRegion:Copy(cx, cy)
 	end
 	
 	newRegion.movepath = self.movepath
+	newRegion.canBeMoved = self.canBeMoved
 	-- copy type and properties
 	if self.regionType == RTYPE_VAR then
 		newRegion:SwitchRegionType()
@@ -448,7 +474,7 @@ function TWRegion:CallEvents(signal, elapsed)
 	end
 end
 
-function TWRegion:TouchDown()
+function TWRegion:OnTouchDown()
 	self.isHeld = true
 	self.holdTimer = 0
 	self:CallEvents("OnTouchDown")
@@ -463,7 +489,7 @@ function TWRegion:TouchDown()
 	end
 end
 
-function TWRegion:DoubleTap()
+function TWRegion:OnDoubleTap()
 	-- if self.regionType ~= RTYPE_GROUP then
 	self:CallEvents("OnDoubleTap")
 	-- end
@@ -530,6 +556,7 @@ end
 function TWRegion:OnLeave()
 	gestureManager:TouchUp(self)
 	
+	tableRemoveObj(heldRegions, self)
 	self.isHeld = false
 	self.holdTimer = 0
 end
@@ -541,8 +568,9 @@ function TWRegion:RaiseToTop()
 	self:SetLayer("LOW")
 end
 
-function TWRegion:SizeChanged()
+function TWRegion:OnSizeChanged()
 	-- the user changed the size, so let's fix it 
+	DPrint('size changed')
 	self.w = self:Width()
 	self.h = self:Height()
 end
@@ -577,13 +605,12 @@ function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
 		self.tl:SetColor(0,0,0,255)
 		self.tl:SetHorizontalAlign("JUSTIFY")
 		self.tl:SetVerticalAlign("MIDDLE")
-		-- self:EnableResizing(true)
-		self.regionType = RTYPE_SOUND
+		self:EnableResizing(true)
+		-- self.regionType = RTYPE_SOUND
 		
 	-- 	
 	-- 	
 	-- elseif self.regionType == RTYPE_SOUND then
-		self:EnableResizing(true)
 		self.regionType = RTYPE_BLANK	
 	end
 	
