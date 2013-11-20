@@ -22,15 +22,23 @@ function gestureManager:Reset()
 	self.holding = nil
 	self.receiver = nil
 	self.receivers = {}
+	self.allRegions = {}
 	self.rx = -1
 	self.ry = -1
 	self.mode = LEARN_OFF
 	self.recording = {}
 end
 
+function gestureManager:BeginGestureOnRegion(region)
+	table.insert(self.allRegions, region)
+end
+
+function gestureManager:EndGestureOnRegion(region)
+	tableRemoveObj(self.allRegions, region)
+end
 
 function gestureManager:StartHold(region)
-	if self.mode == LEARN_OFF then
+	if self.mode == LEARN_OFF and #self.allRegions<2 then
 		self.mode = LEARN_ON
 		self.holding = region
 		self.rx, self.ry = region:Center()
@@ -38,6 +46,7 @@ function gestureManager:StartHold(region)
 		self.receiver = nil
 		notifyView:ShowText("Holding "..region:Name()..', drag other regions to learn')
 		guideView:ShowPing(self.rx, self.ry)
+		guideView:ShowSpotlight(region)
 		-- starts learning mode gesture, shake everything that's not held
 		for i = 1,#regions do
 			regions[i]:AnimateShaking(true)
@@ -83,7 +92,6 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		table.insert(region.movepath, p)
 		-- update the guide to show this path
 		guideView:ShowPath(self.receivers)
-		guideView:ShowArrow(region)
 		if region ~= self.holding then
 			linkLayer:DrawPotentialLink(self.holding, region)
 		end
@@ -99,7 +107,14 @@ function gestureManager:Tapped(region)
 	end
 end
 
-function gestureManager:TouchUp(region)
+function gestureManager:TouchDown(region)
+	if self.mode == LEARN_OFF then
+		-- different linking gesture mode
+		
+	end
+end
+
+function gestureManager:EndHold(region)
 	if self.mode == LEARN_OFF then
 		return
 	elseif self.mode == LEARN_DRAG and tableHasObj(self.receivers, region) then

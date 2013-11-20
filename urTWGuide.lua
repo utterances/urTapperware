@@ -36,14 +36,40 @@ function guideView:Init()
 	
 	self.regions = {}
 	
+	-- init focus/spotlight
+	self.focusOverlay = Region('region', 'focus', self.r)
+	self.focusOverlay:SetLayer("TOOLTIP")
+	self.focusOverlay:SetWidth(2000)
+	self.focusOverlay:SetHeight(2000)
+	self.focusOverlay.t = self.focusOverlay:Texture("texture/tw_focuslight.png")
+	self.focusOverlay.t:SetBlendMode("BLEND")
+	self.focusOverlay:Hide()
+	self.focusOverlay:EnableInput(false)
+	
+	-- init gesture overlays, these fade out or in depends
+	self.gestOverlays = {}
+	for i=1,2 do
+		local r = Region('region', 'gestO', self.r)
+		r:SetLayer("TOOLTIP")
+		r:SetWidth(1200)
+		r:SetHeight(1200)
+		if i==1 then
+			r.t = r:Texture("texture/tw_gestCenter.png")
+		else
+			r.t = r:Texture("texture/tw_gestRed.png")
+		end
+		r.t:SetBlendMode("BLEND")
+		r:Hide()
+		table.insert(self.gestOverlays, r)
+	end
+	
 	self.arrows = {}
 	for i=1,2 do
 		local r = Region('region', 'arrow', self.r)
 		r:SetLayer("TOOLTIP")
 		r:SetWidth(512)
 		r:SetHeight(512)
-		-- r.t = r:Texture("tw_arrow.png")
-		r.t = r:Texture("tw_zoomorange")
+		r.t = r:Texture("tw_arrow.png")
 		r.t:SetBlendMode("BLEND")
 		r:Hide()
 		table.insert(self.arrows, r)
@@ -57,9 +83,9 @@ function guideView:ShowPing(x,y)
 	self.r.ping = true
 	self.r.pingsize = 150
 	self.r.timer = PING_TIME
+	self.r:MoveToTop()
 	self.r.t:Clear(0,0,0,0)
 	self.r:Show()
-	self.r:MoveToTop()
 	self.r.needsUpdate = false
 	self.r:Handle("OnUpdate", guideUpdate)
 end
@@ -80,6 +106,15 @@ function guideView:ShowArrow(region)
 	self.arrows[1]:Show()
 end
 
+function guideView:ShowSpotlight(region)
+	self.focusOverlay:SetAnchor("CENTER", region, "CENTER", 0, 0)
+	self.focusOverlay:Show()
+end
+
+function guideView:ShowGesturePull(r1, r2)
+	
+end
+
 function guideView:Disable()
 	self.r.needsUpdate = false
 	self.isDrawing = false
@@ -89,6 +124,7 @@ function guideView:Disable()
 		self.r:Hide()
 	-- end
 	self.arrows[1]:Hide()
+	self.focusOverlay:Hide()
 end
 
 function guideUpdate(self, e)

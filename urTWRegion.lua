@@ -476,12 +476,13 @@ end
 
 function TWRegion:OnTouchDown()
 	self.isHeld = true
+	gestureManager:BeginGestureOnRegion(self)
 	self.holdTimer = 0
 	self:CallEvents("OnTouchDown")
 	self:RaiseToTop()
 	self.alpha = .6
 	-- isHoldingRegion = true
-	table.insert(heldRegions, self)
+	-- table.insert(heldRegions, self)
 
 	-- bring menu up if they are already open
 	if self.menu ~= nil then
@@ -496,19 +497,20 @@ function TWRegion:OnDoubleTap()
 end
 
 function TWRegion:TouchUp()
+	gestureManager:EndGestureOnRegion(self)
 	
 	if self.isHeld and self.holdTimer < TIME_TO_HOLD then
 		-- a true tap without moving/dragging
 		gestureManager:Tapped(self)
 	else
-		gestureManager:TouchUp(self)
+		gestureManager:EndHold(self)
 	end
 	self.isHeld = false
 	
 	self.holdTimer = 0
 	self.alpha = 1
 
-	if initialLinkRegion == nil then
+	-- if initialLinkRegion == nil then
 		--DPrint("")
 		-- see if we can make links here, check how many regions are held
 		-- if #heldRegions >= 2 then
@@ -542,21 +544,20 @@ function TWRegion:TouchUp()
 		-- 	end
 		-- end
 		
-		tableRemoveObj(heldRegions, self)
-		
+		-- tableRemoveObj(heldRegions, self)
 		-- isHoldingRegion = false
-	else
+	-- else
 		-- EndLinkRegion(self)
-		initialLinkRegion = nil
-	end
+	-- 	initialLinkRegion = nil
+	-- end
 	
 	self:CallEvents("OnTouchUp")
 end
 
 function TWRegion:OnLeave()
-	gestureManager:TouchUp(self)
+ 	gestureManager:TouchUp(self)
 	
-	tableRemoveObj(heldRegions, self)
+	-- tableRemoveObj(heldRegions, self)
 	self.isHeld = false
 	self.holdTimer = 0
 end
