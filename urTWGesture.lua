@@ -11,6 +11,7 @@ FADE_RATE = .8
 LEARN_OFF = 0
 LEARN_ON = 1
 LEARN_DRAG = 2
+LEARN_LINK = 3
 
 gestureManager = {}
 
@@ -39,13 +40,13 @@ end
 
 function gestureManager:StartHold(region)
 	if self.mode == LEARN_OFF and #self.allRegions<2 then
+		-- animation learning and movement learning mode
 		self.mode = LEARN_ON
 		self.holding = region
 		self.rx, self.ry = region:Center()
 		self.holding.movepath = {}
 		self.receiver = nil
 		notifyView:ShowText("Holding "..region:Name()..', drag other regions to learn')
-		guideView:ShowPing(self.rx, self.ry)
 		guideView:ShowSpotlight(region)
 		-- starts learning mode gesture, shake everything that's not held
 		for i = 1,#regions do
@@ -54,6 +55,20 @@ function gestureManager:StartHold(region)
 		self.holding:AnimateShaking(false)
 	-- elseif self.mode == LEARN_ON then
 	-- 	gestureManager:EndHold(region)
+	else if #self.allRegions == 2 then
+		-- exactly two holds, let's do linking gesture instead
+		self.mode = LEARN_LINK
+		-- first store their locations
+		for i = 1,2 do
+			self.allRegions[i].rx, self.allRegions[i].ry = self.allRegions[i]:Center()
+		end
+		r1 = self.allRegions[1]
+		r2 = self.allRegions[2]
+		
+		-- draw the guide overlay
+		guideView:ShowGesturePull(r1, r2)
+		guideView:ShowGesturePull(r1, r2)
+		
 	end
 end
 
@@ -175,28 +190,28 @@ function gestureManager:EndHold(region)
 	end
 end
 
-function gestureManager:EndHold(region)
-	-- Do NOT call this with region == initial holding region
-	self.mode = LEARN_OFF
-	
-	self.receiver = region
-	notifyView:ShowTimedText("Learning: Holding "..self.holding:Name().." -> effecting "..region:Name())
-	
-	initialLinkRegion = self.holding
-	if initialLinkRegion == nil then
-		DPrint('somethings wrong')
-	end
-	finishLinkRegion = self.receiver
-	linkEvent = 'OnTouchUp'
-	
-	cmdlist = {{'Counter',FinishLink, TWRegion.UpdateVal},
-		{'Move Left', FinishLink, MoveLeft},
-		{'Move Right', FinishLink, MoveRight},
-		{'Cancel', nil, nil}}
-	menu = loadSimpleMenu(cmdlist, 'Choose Action to respond')
-	menu:present(self.receiver:Center())
-	self:Reset()
-end
+-- function gestureManager:EndHold(region)
+-- 	-- Do NOT call this with region == initial holding region
+-- 	self.mode = LEARN_OFF
+-- 	
+-- 	self.receiver = region
+-- 	notifyView:ShowTimedText("Learning: Holding "..self.holding:Name().." -> effecting "..region:Name())
+-- 	
+-- 	initialLinkRegion = self.holding
+-- 	if initialLinkRegion == nil then
+-- 		DPrint('somethings wrong')
+-- 	end
+-- 	finishLinkRegion = self.receiver
+-- 	linkEvent = 'OnTouchUp'
+-- 	
+-- 	cmdlist = {{'Counter',FinishLink, TWRegion.UpdateVal},
+-- 		{'Move Left', FinishLink, MoveLeft},
+-- 		{'Move Right', FinishLink, MoveRight},
+-- 		{'Cancel', nil, nil}}
+-- 	menu = loadSimpleMenu(cmdlist, 'Choose Action to respond')
+-- 	menu:present(self.receiver:Center())
+-- 	self:Reset()
+-- end
 
 -- ==========================
 -- = set up animation types =

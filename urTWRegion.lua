@@ -55,8 +55,8 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	x,y = self:Center()
 	self.oldx = x
 	self.oldy = y
-	-- self.sx = 0
-	-- self.sy = 0
+	self.x = x
+	self.y = y
 	self.w = INITSIZE
 	self.h = INITSIZE
 
@@ -310,6 +310,9 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
 		self.isHeld = false	-- cancel hold gesture if over tolerance
 	end
+	self.x = x
+	self.y = y
+	
 	gestureManager:Dragged(self, dx, dy, x, y)
 	self.holdTimer = 0
 	self.updateEnv()
@@ -429,6 +432,17 @@ function TWRegion:Update(elapsed)
 		self.tl:SetVerticalAlign("MIDDLE")
 	end
 	
+	-- animate move if we are not at x,y
+	if self.x ~= x or self.y ~= y then
+		if math.abs(self.x - x) < EPSILON and math.abs(self:y - y) < EPSILON then
+			self:SetAnchor('CENTER', self.x, self.y)
+		else
+			newx = self.x + (self.x - x)*elapsed/FADEINTIME
+			newy = self.y + (self.y - y)*elapsed/FADEINTIME
+			self:SetAnchor('CENTER', newx, newy)
+		end
+	end
+		
 	self:CallEvents("OnUpdate", elapsed)
 	if self.isHeld then
 		
@@ -555,7 +569,7 @@ function TWRegion:TouchUp()
 end
 
 function TWRegion:OnLeave()
- 	gestureManager:TouchUp(self)
+ 	gestureManager:EndHold(self)
 	
 	-- tableRemoveObj(heldRegions, self)
 	self.isHeld = false
@@ -700,9 +714,9 @@ function MoveRight(self, message)
 	linkLayer:Draw()
 end
 
-function ControllerTouchDownLeft(self) -- event for OnTouchDown of the controller
-    ControllerTouchDown(self)
-    MoveLeft(self)
-    self:Handle("OnUpdate",TriggerLeft)
-end
+-- function ControllerTouchDownLeft(self) -- event for OnTouchDown of the controller
+--     ControllerTouchDown(self)
+--     MoveLeft(self)
+--     self:Handle("OnUpdate",TriggerLeft)
+-- end
 

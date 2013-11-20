@@ -51,12 +51,12 @@ function guideView:Init()
 	for i=1,2 do
 		local r = Region('region', 'gestO', self.r)
 		r:SetLayer("TOOLTIP")
-		r:SetWidth(1200)
-		r:SetHeight(1200)
 		if i==1 then
 			r.t = r:Texture("texture/tw_gestCenter.png")
 		else
 			r.t = r:Texture("texture/tw_gestRed.png")
+			r:SetWidth(1100)
+			r:SetHeight(1100)
 		end
 		r.t:SetBlendMode("BLEND")
 		r:Hide()
@@ -112,7 +112,16 @@ function guideView:ShowSpotlight(region)
 end
 
 function guideView:ShowGesturePull(r1, r2)
+	local gr = self.gestOverlays[2] --this is the pull one
+	x1,y1 = r1:Center()
+	x2,y2 = r2:Center()
+
+	gr:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
+	gr:SetRotation(math.atan((x2-x1)/(y2-y1)))
 	
+	-- gr:SetWidth()
+	-- gr:SetHeight()
+	gr:Show()
 end
 
 function guideView:Disable()
@@ -120,11 +129,15 @@ function guideView:Disable()
 	self.isDrawing = false
 	self.regions = {}
 	-- if self.timer == 0 then
-		self.r:Handle("OnUpdate", nil)
-		self.r:Hide()
+	self.r:Handle("OnUpdate", nil)
+	self.r:Hide()
 	-- end
 	self.arrows[1]:Hide()
 	self.focusOverlay:Hide()
+	
+	for i =1,2 do
+		self.gestOverlays[i]:Hide()
+	end
 end
 
 function guideUpdate(self, e)
