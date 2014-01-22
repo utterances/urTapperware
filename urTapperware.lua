@@ -36,6 +36,8 @@ selectedRegions = {}
 
 dofile(DocumentPath("urTWTools.lua"))	--misc helper func and obj
 dofile(DocumentPath("urTWNotify.lua"))	-- text notification view
+dofile(DocumentPath("urTWEventBubble.lua"))	-- event notification view
+
 dofile(DocumentPath("urTapperwareMenu.lua"))	-- old menu system, need rewrite
 dofile(DocumentPath("urTWMenu.lua"))	-- new cleaner simple menu
 dofile(DocumentPath("urTWLink.lua"))	-- needs menu, links
@@ -84,6 +86,7 @@ function bgTouchUp(self)
 	
 	-- only create if we are not too close to the edge
 	if not touchStateDown then
+		DPrint('not down yet')
 		return
 	end
 	local x,y = InputPosition()
@@ -168,12 +171,15 @@ selectionLayer.t:SetTexCoord(0,ScreenWidth()/1024.0,1.0,0.0)
 selectionLayer.t:SetBlendMode("BLEND")
 selectionLayer:Show()
 
+-- set up other views:
 notifyView:Init()
 notifyView:ShowTimedText("Welcome!", 2)
 
 guideView:Init()
 guideView:ShowPing(200,300)
 gestureManager:Init()
+
+bubbleView:Init()
 
 function selectionLayer:DrawSelectionPoly()
 	if #selectionPoly < 2 then	-- need at least two points to draw

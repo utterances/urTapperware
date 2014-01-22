@@ -55,7 +55,7 @@ function gestureManager:StartHold(region)
 		self.holding:AnimateShaking(false)
 	-- elseif self.mode == LEARN_ON then
 	-- 	gestureManager:EndHold(region)
-	else if #self.allRegions == 2 then
+	elseif self.mode == LEARN_OFF and #self.allRegions == 2 then
 		-- exactly two holds, let's do linking gesture instead
 		self.mode = LEARN_LINK
 		-- first store their locations
@@ -67,7 +67,7 @@ function gestureManager:StartHold(region)
 		
 		-- draw the guide overlay
 		guideView:ShowGesturePull(r1, r2)
-		guideView:ShowGesturePull(r1, r2)
+		guideView:ShowGestureCenter(r1, r2)
 		
 	end
 end
@@ -75,6 +75,9 @@ end
 function gestureManager:Dragged(region, dx, dy, x, y)
 	-- recording gesture here if we are enabled:
 	if self.mode == LEARN_OFF then
+		-- only show event notification here if we are not doing learning
+		bubbleView:ShowEvent('moved X Y', region)
+		
 		return
 	elseif self.mode == LEARN_ON and region ~= self.holding then
 		self.mode = LEARN_DRAG
@@ -92,7 +95,25 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		-- 	p = Point(dx,dy)
 		-- 	table.insert(region.movepath, p)
 		-- end
-	end
+	elseif self.mode == LEARN_LINK then
+		-- compute how much are we off into each gesture and update vis guide
+		r1 = self.allRegions[1]
+		r2 = self.allRegions[2]
+		x1,y1 = r1:Center()
+		x2,y2 = r2:Center()
+		-- cx = (r1.rx + r2.rx)/2
+		-- cy = (r1.ry + r2.ry)/2
+		olddist = math.abs(r1.rx - r2.rx) + math.abs(r1.ry - r2.ry)
+		newdist = math.abs(x1 - x2) + math.abs(y1 - y2)
+		gestDeg = newdist - olddist -- positive if pulling, negative if pinching
+		
+		-- update gesture guide here:
+		guideView:UpdatePull(-(olddist/3 - gestDeg)/(olddist/3))
+		guideView:UpdateCenter(-(gestDeg - olddist/3)/(olddist/3))
+		
+		return
+	end	
+	
 	
 	if not tableHasObj(self.receivers, region) and region ~= self.holding then
 		table.insert(self.receivers, region)

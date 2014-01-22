@@ -309,6 +309,8 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	
 	if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
 		self.isHeld = false	-- cancel hold gesture if over tolerance
+	else
+		return
 	end
 	self.x = x
 	self.y = y
@@ -329,14 +331,11 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	
 end
 
-function TWRegion:OnHScroll(scrollspeedX)
-	
-	
-	DPrint(scrollspeedX)
-end
+-- function TWRegion:OnHScroll(scrollspeedX)
+-- 	DPrint(scrollspeedX)
+-- end
 
 function TWRegion:Update(elapsed)
-	-- DPrint(elapsed)
 	if self:Alpha() ~= self.alpha then
 		if math.abs(self:Alpha() - self.alpha) < EPSILON then -- just set if it's close enough
 			self:SetAlpha(self.alpha)
@@ -433,15 +432,15 @@ function TWRegion:Update(elapsed)
 	end
 	
 	-- animate move if we are not at x,y
-	if self.x ~= x or self.y ~= y then
-		if math.abs(self.x - x) < EPSILON and math.abs(self:y - y) < EPSILON then
-			self:SetAnchor('CENTER', self.x, self.y)
-		else
-			newx = self.x + (self.x - x)*elapsed/FADEINTIME
-			newy = self.y + (self.y - y)*elapsed/FADEINTIME
-			self:SetAnchor('CENTER', newx, newy)
-		end
-	end
+	-- if self.x ~= x or self.y ~= y then
+	-- 	if math.abs(self.x - x) < EPSILON and math.abs(self.y - y) < EPSILON then
+	-- 		self:SetAnchor('CENTER', self.x, self.y)
+	-- 	else
+	-- 		newx = self.x + (self.x - x)*elapsed/FADEINTIME
+	-- 		newy = self.y + (self.y - y)*elapsed/FADEINTIME
+	-- 		self:SetAnchor('CENTER', newx, newy)
+	-- 	end
+	-- end
 		
 	self:CallEvents("OnUpdate", elapsed)
 	if self.isHeld then
@@ -507,11 +506,14 @@ end
 function TWRegion:OnDoubleTap()
 	-- if self.regionType ~= RTYPE_GROUP then
 	self:CallEvents("OnDoubleTap")
+	bubbleView:ShowEvent('Double Tap', self)
+	
 	-- end
 end
 
 function TWRegion:TouchUp()
 	gestureManager:EndGestureOnRegion(self)
+	bubbleView:ShowEvent('Touch Up', self)
 	
 	if self.isHeld and self.holdTimer < TIME_TO_HOLD then
 		-- a true tap without moving/dragging

@@ -59,6 +59,7 @@ function guideView:Init()
 			r:SetHeight(1100)
 		end
 		r.t:SetBlendMode("BLEND")
+		r:SetAlpha(.7)
 		r:Hide()
 		table.insert(self.gestOverlays, r)
 	end
@@ -117,10 +118,32 @@ function guideView:ShowGesturePull(r1, r2)
 	x2,y2 = r2:Center()
 
 	gr:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
-	gr:SetRotation(math.atan((x2-x1)/(y2-y1)))
+	gr.t:SetRotation(math.atan2(x2-x1, y1-y2))
 	
-	-- gr:SetWidth()
-	-- gr:SetHeight()
+	gr:Show()
+end
+
+function guideView:UpdatePull(deg)
+	r=self.gestOverlays[2]
+
+	r:SetAlpha(deg)
+end
+
+function guideView:UpdateCenter(deg)
+	r=self.gestOverlays[1]
+
+	r:SetAlpha(deg)	
+end
+
+function guideView:ShowGestureCenter(r1, r2)
+	local gr = self.gestOverlays[1] --this is the pull one
+	x1,y1 = r1:Center()
+	x2,y2 = r2:Center()
+
+	gr:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
+	gr.t:SetRotation(math.atan2(x2-x1, y1-y2))
+	gr:MoveToTop()
+	
 	gr:Show()
 end
 
