@@ -40,6 +40,7 @@ dofile(DocumentPath("urTWEventBubble.lua"))	-- event notification view
 
 dofile(DocumentPath("urTapperwareMenu.lua"))	-- old menu system, need rewrite
 dofile(DocumentPath("urTWMenu.lua"))	-- new cleaner simple menu
+dofile(DocumentPath("urTWGestureMenu.lua"))	-- new cleaner simple menu
 dofile(DocumentPath("urTWLink.lua"))	-- needs menu, links
 dofile(DocumentPath("urTWRegion.lua"))
 

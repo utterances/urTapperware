@@ -18,9 +18,10 @@ function bubbleView:Init()
 	self.r.t:SetBlendMode("BLEND")
 	
 	self.r.tl = self.r:TextLabel()
-	self.r.tl:SetFontHeight(20)
+	self.r.tl:SetFontHeight(19)
 	self.r.tl:SetFont("Avenir Next Condensed")
 	self.r.tl:SetColor(255,255,255,255)
+	self.r.tl:SetShadowColor(0,0,0,0)
 	self.r.tl:SetHorizontalAlign("CENTER")
 	-- self.r.tl:SetVerticalAlign("MIDDLE")
 	self.r.timer = 0
@@ -84,9 +85,8 @@ function bubbleView:OnTouchDown()
 
 		cmdlist = {{'Move',nil, nil},
 			{'Touch', nil, nil},
-			{'More...', nil, nil},
-			{'Cancel', nil, nil}}
-		menu = loadSimpleMenu(cmdlist, 'select events')
+			{'More...', nil, nil}}
+		menu = loadGestureMenu(cmdlist, 'select events')
 		menu:present(self:Center())
 		
 	end

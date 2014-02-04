@@ -6,6 +6,8 @@ BUTTONSIZE = 54	-- on screen size in points/pixels
 BUTTONOFFSET = 3
 BUTTONIMAGESIZE = 80		-- size of the square icon image
 
+GROUPMARGIN = 30
+
 recycledGroupMenu = {}
 
 function ToggleLockGroup(regions)
@@ -120,7 +122,7 @@ function Group:new(o)
 	
 	o.r:EnableInput(true)
 	o.r:EnableMoving(true)
-	o.r:EnableResizing(false)
+	o.r:EnableResizing(true)
 	o.r:Hide()
 	o.regions = {}
 	
@@ -159,6 +161,11 @@ function Group:Draw()
 		maxX = math.max(maxX, x + w/2)
 		maxY = math.max(maxY, y + h/2)
 	end
+	maxX = maxX + GROUPMARGIN
+	maxY = maxY + GROUPMARGIN
+	minX = minX - GROUPMARGIN
+	minY = minY - GROUPMARGIN
+	
 	self.r.w = maxX - minX
 	self.r.h = maxY - minY
 	self.r:SetWidth(self.r.w)
@@ -170,10 +177,7 @@ function Group:Draw()
 	for i = 1, #self.regions do
 		r = self.regions[i]
 		x,y = r:Center()
-		if r.canBeMoved then
-			r:EnableMoving(false)
-			r:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', x - minX, y - minY)
-		end
+		r:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', x - minX, y - minY)
 		r:MoveToTop()
 	end
 	
