@@ -76,7 +76,9 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 	-- recording gesture here if we are enabled:
 	if self.mode == LEARN_OFF then
 		-- only show event notification here if we are not doing learning
-		bubbleView:ShowEvent('moved X Y', region)
+		bubbleView:ShowEvent('moved '..region.relativeX..' '..region.relativeY, region)
+		
+		
 		
 		return
 	elseif self.mode == LEARN_ON and region ~= self.holding then

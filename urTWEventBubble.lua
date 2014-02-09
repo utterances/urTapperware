@@ -18,7 +18,7 @@ function bubbleView:Init()
 	self.r.t:SetBlendMode("BLEND")
 	
 	self.r.tl = self.r:TextLabel()
-	self.r.tl:SetFontHeight(19)
+	self.r.tl:SetFontHeight(20)
 	self.r.tl:SetFont("Avenir Next Condensed")
 	self.r.tl:SetColor(255,255,255,255)
 	self.r.tl:SetShadowColor(0,0,0,0)

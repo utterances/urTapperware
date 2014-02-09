@@ -315,17 +315,47 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	self.x = x
 	self.y = y
 	
+	
+	if self.group ~= nil then
+		-- also anchor movement here within group
+		minX = self.group.r.x - self.group.r.w/2
+		minY = self.group.r.y - self.group.r.h/2
+		if self.x < minX or self.x > self.group.r.x + self.group.r.w/2 then
+			-- DPrint('out of x bound')
+			-- self:SetAnchor('CENTER', self.group.r, 'BOTTOMLEFT', self.oldx - minX,
+			-- 	 self.y - minY)
+			-- self.x = self.oldx
+		end		
+
+		if self.x < minY or self.y > self.group.r.y + self.group.r.h/2 then
+			-- DPrint('out of y bound')
+			-- self:SetAnchor('CENTER', self.group.r, 'BOTTOMLEFT', self.x - minX,
+			-- 	 self.oldy - minY)
+			-- self.y = self.oldy
+		end		
+
+		
+		self.relativeX = self.x - (self.group.r.x - self.group.r.w/2)
+		self.relativeY = self.y - (self.group.r.y - self.group.r.h/2)
+	else
+		self.relativeX = x
+		self.relativeY = y		
+	end
+
+	
 	gestureManager:Dragged(self, dx, dy, x, y)
 	self.holdTimer = 0
 	self.updateEnv()
 	
 	self:CallEvents('OnDragging', {dx,dy})
 
-	self.oldx = x
 	
 	if not self.canBeMoved then
-		self:SetAnchor('CENTER',x,self.oldy)
+		self:SetAnchor('CENTER',self.oldx, self.oldy)
+		self.x = self.oldx
+		self.y = self.oldy
 	else
+		self.oldx = x
 		self.oldy = y
 	end
 	
