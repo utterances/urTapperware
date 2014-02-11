@@ -34,7 +34,7 @@ end
 
 function bubbleView:ShowEvent(text, region)
 	if self.r:IsVisible() and region == self.r.region then
-		self.r.tl:SetLabel('event:\n'..text..'\n')
+		self.r.tl:SetLabel(text)
 		self.r:SetAlpha(1)
 		self.r.timer = STAY_TIME
 		return
@@ -45,7 +45,7 @@ function bubbleView:ShowEvent(text, region)
 -- region:SetAnchor("anchorLocation", relativeRegion, "relativeAnchorLocation", offsetX, offsetY)
 	self.r:Show()
 	self.r:SetAlpha(1)
-	self.r.tl:SetLabel('event:\n'..text..'\n')
+	self.r.tl:SetLabel(text)
 	self.r:MoveToTop()
 	
 	self.r.timer = STAY_TIME

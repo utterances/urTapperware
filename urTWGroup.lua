@@ -6,7 +6,7 @@ BUTTONSIZE = 54	-- on screen size in points/pixels
 BUTTONOFFSET = 3
 BUTTONIMAGESIZE = 80		-- size of the square icon image
 
-GROUPMARGIN = 30
+GROUPMARGIN = 40
 
 recycledGroupMenu = {}
 
@@ -118,7 +118,6 @@ function Group:new(o)
 	o.r:Handle("OnTouchDown", nil)
 	o.r:Handle("OnTouchUp", nil)
 	o.r:Handle("OnLeave", nil)
-	o.r:Handle("OnSizeChanged", nil)
 	
 	o.r:EnableInput(true)
 	o.r:EnableMoving(true)

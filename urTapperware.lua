@@ -75,7 +75,7 @@ function bgTouchUp(self)
 				end
 			end
 		end
-		if #tempSelected > 1 then
+		if #tempSelected > 0 then
 			selectedRegions = tempSelected
 			x,y = InputPosition()
 			OpenGroupMenu(lassoGroupMenu, x, y, selectedRegions)

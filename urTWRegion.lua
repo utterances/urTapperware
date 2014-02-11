@@ -318,28 +318,29 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	
 	if self.group ~= nil then
 		-- also anchor movement here within group
-		minX = self.group.r.x - self.group.r.w/2
-		minY = self.group.r.y - self.group.r.h/2
-		if self.x < minX or self.x > self.group.r.x + self.group.r.w/2 then
-			-- DPrint('out of x bound')
+		
+		self.relativeX = (self.x - self.group.r.x)/(self.group.r.w - self.w)*2
+		self.relativeY = (self.y - self.group.r.y)/(self.group.r.h - self.h)*2
+		
+		if self.relativeX > 1 or self.relativeX < -1 then
+			bubbleView:ShowEvent('out of bound', region)
+			
 			-- self:SetAnchor('CENTER', self.group.r, 'BOTTOMLEFT', self.oldx - minX,
 			-- 	 self.y - minY)
 			-- self.x = self.oldx
 		end		
 
-		if self.x < minY or self.y > self.group.r.y + self.group.r.h/2 then
-			-- DPrint('out of y bound')
+		if self.relativeY > 1 or self.relativeY < -1 then
+			bubbleView:ShowEvent('out of bound', region)
+			
 			-- self:SetAnchor('CENTER', self.group.r, 'BOTTOMLEFT', self.x - minX,
 			-- 	 self.oldy - minY)
 			-- self.y = self.oldy
-		end		
-
+		end
 		
-		self.relativeX = self.x - (self.group.r.x - self.group.r.w/2)
-		self.relativeY = self.y - (self.group.r.y - self.group.r.h/2)
 	else
-		self.relativeX = x
-		self.relativeY = y		
+		self.relativeX = (x - ScreenWidth()/2)/(ScreenWidth()-self.w)*2
+		self.relativeY = (y - ScreenHeight()/2)/(ScreenHeight()-self.h)*2
 	end
 
 	
