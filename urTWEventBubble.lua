@@ -4,10 +4,10 @@
 -- event notification bubble, should later be turn into a draggable menu
 -- singleton class, or not really a class, just a table, always on top region
 
-FADE_RATE = .8
-STAY_TIME = 3.0
+FADE_RATE = 1.5
+STAY_TIME = 2.0
 bubbleView = {}
-
+menu = {}
 function bubbleView:Init()
 	self.r = Region('region', 'event', UIParent)
 	self.r:SetLayer("TOOLTIP")
@@ -26,13 +26,15 @@ function bubbleView:Init()
 	-- self.r.tl:SetVerticalAlign("MIDDLE")
 	self.r.timer = 0
 	self.r.region=NULL
+	self.r.o = self
 	
 	self.r:Handle("OnTouchDown", bubbleView.OnTouchDown)
 	self.r:Handle("OnTouchUp", bubbleView.OnTouchUp)
 
 end
 
-function bubbleView:ShowEvent(text, region)
+function bubbleView:ShowEvent(text, region, menu)
+	self.showMenu = menu
 	if self.r:IsVisible() and region == self.r.region then
 		self.r.tl:SetLabel(text)
 		self.r:SetAlpha(1)
@@ -69,7 +71,7 @@ function bubbleUpdate(self, e)
 	end
 	
 	if self:Alpha() > 0 then
-		self:SetAlpha(self:Alpha() - self:Alpha() * e/FADE_RATE)
+		self:SetAlpha(self:Alpha() - self:Alpha() * e * FADE_RATE)
 	else
 		self:Hide()
 		self:EnableInput(false)
@@ -79,20 +81,40 @@ function bubbleUpdate(self, e)
 end
 
 function bubbleView:OnTouchDown()
-	if self:IsVisible() then
-		self:SetAlpha(1)
-		self.timer = STAY_TIME
-
-		cmdlist = {{'Move',nil, nil},
-			{'Touch', nil, nil},
-			{'More...', nil, nil}}
-		menu = loadGestureMenu(cmdlist, 'select events')
-		menu:present(self:Center())
-		
-	end
+	-- if self:IsVisible() then
+	-- 	self:SetAlpha(1)
+	-- 	self.timer = STAY_TIME
+	-- 
+	-- 	cmdlist = {{'Move',nil, nil},
+	-- 		{'Touch', nil, nil},
+	-- 		{'More...', nil, nil}}
+	-- 	menu = loadGestureMenu(cmdlist, 'select events')
+	-- 	menu:present(self:Center())
+	-- 	
+	-- end
 end
 
 
 function bubbleView:OnTouchUp()
+	if self:IsVisible() and self.o.showMenu then
+		self:SetAlpha(1)
+		self.timer = STAY_TIME
+	
+		if self.region.canBeMoved then
+			cmdname = 'Restrict Movement'
+		else
+			cmdname = 'Free Movement'
+		end
+		DPrint(self.region:Name())
+		cmdlist = {{cmdname, toggleMoveRetriction, self.region},
+			{'Cancel', nil, nil}}
+					
+		menu = loadSimpleMenu(cmdlist, 'Restrict Movement within Container?')
+		menu:present(self:Center())		
+	end
+end
 
+function toggleMoveRetriction(input)
+	menu:dismiss()
+	input:ToggleAnchor()
 end

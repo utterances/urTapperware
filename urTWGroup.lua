@@ -118,6 +118,7 @@ function Group:new(o)
 	o.r:Handle("OnTouchDown", nil)
 	o.r:Handle("OnTouchUp", nil)
 	o.r:Handle("OnLeave", nil)
+	o.r:Handle("OnSizeChanged", Group.OnSizeChanged)
 	
 	o.r:EnableInput(true)
 	o.r:EnableMoving(true)
@@ -187,6 +188,47 @@ function Group:Draw()
 	self.menu.item:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', 0, 0)
 	self.menu.item:EnableInput(false)
 end
+
+
+
+function Group:OnSizeChanged()
+	-- the user changed the size, make sure it's not too small:
+	-- here, self is group.r, not group
+	
+	minX = -1
+	minY = -1
+	maxX = -1
+	maxY = -1
+	
+	for i = 1, #self.groupObj.regions do
+		x,y = self.groupObj.regions[i]:Center()
+		w = self.groupObj.regions[i]:Width()
+		h = self.groupObj.regions[i]:Height()
+		
+		if minX < 0 or minX > x - w/2 then
+			minX = x - w/2
+		end
+		if minY < 0 or minY > y - h/2 then
+			minY = y - h/2
+		end
+		maxX = math.max(maxX, x + w/2)
+		maxY = math.max(maxY, y + h/2)
+	end
+	
+	if self:Width() < maxX - minX or self:Height() < maxY - minY then
+	
+		self.w = maxX - minX
+		self.h = maxY - minY
+		self:SetWidth(self.r.w)
+		self:SetHeight(self.r.h)	
+	
+		self:SetAnchor('CENTER', (maxX+minX)/2, (maxY+minY)/2)
+	end	
+	
+	self.w = self:Width()
+	self.h = self:Height()
+end
+
 
 function Group:Hide()
 	self:Hide()

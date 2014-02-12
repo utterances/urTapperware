@@ -322,15 +322,16 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 		-- self.relativeX = (self.x - self.group.r.x)/(self.group.r.w - self.w)*2
 		-- self.relativeY = (self.y - self.group.r.y)/(self.group.r.h - self.h)*2
 		-- DPrint(self.relativeX, self.relativeY)
+		
+		-- if self.canBeMoved then
 		if self.relativeX > 1 or self.relativeX < -1 then
-			bubbleView:ShowEvent('crossing boundary', self)
-			
-		end		
+			bubbleView:ShowEvent('crossing boundary', self, true)
+		end
 
 		if self.relativeY > 1 or self.relativeY < -1 then
-			bubbleView:ShowEvent('crossing boundary', self)
-
+			bubbleView:ShowEvent('crossing boundary', self, true)
 		end
+		-- end
 	-- 
 	-- 	if not self.canBeMoved and 
 	-- 		(self.relativeY >= 1 or self.relativeY <= -1 or
@@ -506,12 +507,21 @@ function TWRegion:Update(elapsed)
 			self.relativeX = (self.x - self.group.r.x)/(self.group.r.w - self.w)*2
 			self.relativeY = (self.y - self.group.r.y)/(self.group.r.h - self.h)*2
 
-			if not self.canBeMoved and
-				(self.relativeY >= 1 or self.relativeY <= -1 or
-				self.relativeX >= 1 or self.relativeX <= -1) then
+			if not self.canBeMoved then
+				if self.relativeY >= 1 or self.relativeY <= -1 then
+					self.y = self.oldy
+				else
+					self.oldy = y
+				end
+				
+				if self.relativeX >= 1 or self.relativeX <= -1 then
+					self.x = self.oldx
+				else
+					self.oldx = x
+				end
 				self:SetAnchor('CENTER', self.group.r, 'CENTER', self.oldx - self.group.r.x, self.oldy - self.group.r.y)
-				self.x = self.oldx
-				self.y = self.oldy
+				-- self.x = self.oldx
+				-- self.y = self.oldy
 			else
 				self.oldx = self.x
 				self.oldy = self.y
@@ -577,7 +587,7 @@ end
 
 function TWRegion:TouchUp()
 	gestureManager:EndGestureOnRegion(self)
-	bubbleView:ShowEvent('Touch Up', self)
+	-- bubbleView:ShowEvent('Touch Up', self)
 	
 	if self.isHeld and self.holdTimer < TIME_TO_HOLD then
 		-- a true tap without moving/dragging
