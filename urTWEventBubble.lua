@@ -4,8 +4,8 @@
 -- event notification bubble, should later be turn into a draggable menu
 -- singleton class, or not really a class, just a table, always on top region
 
-FADE_RATE = 1.5
-STAY_TIME = 2.0
+FADE_RATE = 2
+STAY_TIME = 1.0
 bubbleView = {}
 menu = {}
 function bubbleView:Init()

@@ -215,15 +215,22 @@ function Group:OnSizeChanged()
 		maxY = math.max(maxY, y + h/2)
 	end
 	
-	if self:Width() < maxX - minX or self:Height() < maxY - minY then
-	
+	restricted = false
+	if self:Width() < maxX - minX then
 		self.w = maxX - minX
-		self.h = maxY - minY
-		self:SetWidth(self.r.w)
-		self:SetHeight(self.r.h)	
+		self:SetWidth(self.w)
+		restricted = true
+	end
 	
-		self:SetAnchor('CENTER', (maxX+minX)/2, (maxY+minY)/2)
-	end	
+	if self:Height() < maxY - minY then
+		self.h = maxY - minY
+		self:SetHeight(self.h)	
+		restricted = true
+	end
+	
+	-- if restricted then
+	-- 	self:SetAnchor('CENTER', (maxX+minX)/2, (maxY+minY)/2)
+	-- end	
 	
 	self.w = self:Width()
 	self.h = self:Height()
