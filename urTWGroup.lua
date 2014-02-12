@@ -171,6 +171,7 @@ function Group:Draw()
 	self.r:SetHeight(self.r.h)	
 	
 	self.r:SetAnchor('CENTER', (maxX+minX)/2, (maxY+minY)/2)
+	self.r.x, self.r.y = self.r:Center()
 	self.r:SetLayer("LOW")
 	self.r:MoveToTop()
 	for i = 1, #self.regions do

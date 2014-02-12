@@ -312,35 +312,39 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	else
 		return
 	end
-	self.x = x
-	self.y = y
+	-- self.x = x
+	-- self.y = y
 	
 	
 	if self.group ~= nil then
 		-- also anchor movement here within group
 		
-		self.relativeX = (self.x - self.group.r.x)/(self.group.r.w - self.w)*2
-		self.relativeY = (self.y - self.group.r.y)/(self.group.r.h - self.h)*2
-		
+		-- self.relativeX = (self.x - self.group.r.x)/(self.group.r.w - self.w)*2
+		-- self.relativeY = (self.y - self.group.r.y)/(self.group.r.h - self.h)*2
+		-- DPrint(self.relativeX, self.relativeY)
 		if self.relativeX > 1 or self.relativeX < -1 then
-			bubbleView:ShowEvent('out of bound', region)
+			bubbleView:ShowEvent('crossing boundary', self)
 			
-			-- self:SetAnchor('CENTER', self.group.r, 'BOTTOMLEFT', self.oldx - minX,
-			-- 	 self.y - minY)
-			-- self.x = self.oldx
 		end		
 
 		if self.relativeY > 1 or self.relativeY < -1 then
-			bubbleView:ShowEvent('out of bound', region)
-			
-			-- self:SetAnchor('CENTER', self.group.r, 'BOTTOMLEFT', self.x - minX,
-			-- 	 self.oldy - minY)
-			-- self.y = self.oldy
+			bubbleView:ShowEvent('crossing boundary', self)
+
 		end
-		
-	else
-		self.relativeX = (x - ScreenWidth()/2)/(ScreenWidth()-self.w)*2
-		self.relativeY = (y - ScreenHeight()/2)/(ScreenHeight()-self.h)*2
+	-- 
+	-- 	if not self.canBeMoved and 
+	-- 		(self.relativeY >= 1 or self.relativeY <= -1 or
+	-- 		self.relativeX >= 1 or self.relativeX <= -1) then
+	-- 		self:SetAnchor('CENTER', self.group.r, 'CENTER', self.oldx - self.group.r.x, self.oldy - self.group.r.y)
+	-- 		self.x = self.oldx
+	-- 		self.y = self.oldy
+	-- 		
+	-- 	end
+	-- 
+	-- 	
+	-- else
+	-- 	self.relativeX = (x - ScreenWidth()/2)/(ScreenWidth()-self.w)*2
+	-- 	self.relativeY = (y - ScreenHeight()/2)/(ScreenHeight()-self.h)*2
 	end
 
 	
@@ -348,17 +352,19 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	self.holdTimer = 0
 	self.updateEnv()
 	
-	self:CallEvents('OnDragging', {dx,dy})
+	self:CallEvents('OnDragging', {self.relativeX, self.relativeY})
 
 	
-	if not self.canBeMoved then
-		self:SetAnchor('CENTER',self.oldx, self.oldy)
-		self.x = self.oldx
-		self.y = self.oldy
-	else
-		self.oldx = x
-		self.oldy = y
-	end
+	-- if not self.canBeMoved then
+	-- 	self:SetAnchor('CENTER',self.oldx, self.oldy)
+	-- 	self.x = self.oldx
+	-- 	self.y = self.oldy
+	-- else
+	-- 	self.oldx = x
+	-- 	self.oldy = y
+	-- end
+	-- self.oldx = x
+	-- self.oldy = y
 	
 end
 
@@ -416,6 +422,8 @@ function TWRegion:Update(elapsed)
 		-- self.dy = self.dy + (self.oldy - y)*elapsed
 		
 	end
+	
+	
 -- move if we have none zero speed
 	-- newx = x
 	-- newy = y
@@ -486,13 +494,38 @@ function TWRegion:Update(elapsed)
 		end
 	end
 		
-	-- if self.oldx ~= x or self.oldy ~= y then
-	-- 	-- if we moved:
-	-- 	self.updateEnv()
-	-- end
-	-- 
-	-- self.oldx = x
-	-- self.oldy = y
+	if self.oldx ~= x or self.oldy ~= y then
+		self.x = x
+		self.y = y
+		-- if we moved:
+		-- self.updateEnv()
+
+		if self.group ~= nil then
+			-- also anchor movement here within group
+		
+			self.relativeX = (self.x - self.group.r.x)/(self.group.r.w - self.w)*2
+			self.relativeY = (self.y - self.group.r.y)/(self.group.r.h - self.h)*2
+
+			if not self.canBeMoved and
+				(self.relativeY >= 1 or self.relativeY <= -1 or
+				self.relativeX >= 1 or self.relativeX <= -1) then
+				self:SetAnchor('CENTER', self.group.r, 'CENTER', self.oldx - self.group.r.x, self.oldy - self.group.r.y)
+				self.x = self.oldx
+				self.y = self.oldy
+			else
+				self.oldx = self.x
+				self.oldy = self.y
+			end
+			
+		else
+			self.relativeX = (x - ScreenWidth()/2)/(ScreenWidth()-self.w)*2
+			self.relativeY = (y - ScreenHeight()/2)/(ScreenHeight()-self.h)*2
+			
+			self.oldx = self.x
+			self.oldy = self.y
+		end
+
+	end
 end
 
 function TWRegion:CallEvents(signal, elapsed)
@@ -700,12 +733,12 @@ function TWRegion:UpdateVal(message)
 	if self.regionType == RTYPE_VAR then
 		
 		if message ~= 'OnTouchUp' then
-			incre = message[1]
+			-- TODO: right now it shows x axis
+			self.value = message[1]
 		else
 			incre = 1
+			self.value = self.value + incre
 		end
-
-		self.value = self.value + incre
 		self.tl:SetLabel(self.value)
 	end	
 end
@@ -726,7 +759,6 @@ function TWRegion:Move(message, linkdata)
 	self.oldx = x + moveX
 	self.oldy = y + moveY
 	self:SetAnchor('CENTER',self.oldx,self.oldy)
-	
 	self:CallEvents('OnDragging', {moveX, moveY})
 end
 
