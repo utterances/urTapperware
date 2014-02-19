@@ -31,7 +31,7 @@ function LoadInspector(self)
 			table.insert(cmdlist, {name, nil, name})
 		end
 	end
-	table.insert('Cancel', nil, nil)
+	table.insert(cmdlist,{'Cancel', nil, nil})
 	local menu = loadSimpleMenu(cmdlist, 'Choose Texture File:')
 	menu:present(self)	
 end
