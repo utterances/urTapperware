@@ -94,7 +94,7 @@ function linkLayer:Update()
 				OpenLinkMenu(link.menu)
 			else
 				self.t:SetBrushColor(100,120,120,100)
-				self.t:SetBrushSize(5)
+				self.t:SetBrushSize(3)
 				self.t:Line(X1,Y1,X2,Y2)
 				HideLinkMenu(link.menu)
 			end

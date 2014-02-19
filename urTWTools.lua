@@ -21,6 +21,18 @@ function tableHasObj( t, obj )
 	return false
 end
 
+-- return index of object in a table, or 0 if not in table
+function tableIndexOf( t, obj )
+	for i = 1, #t do
+		if t[i] == obj then
+			return i
+		end
+	end
+	return 0
+end
+
+
+
 -- check if table is empty
 function tableIsEmpty (self)
     for _, _ in pairs(self) do
@@ -42,3 +54,32 @@ end
 
 function deltax(_dx, _dy) return _dx end
 function deltay(_dx, _dy) return _dy end
+
+
+
+-- ====================
+-- = rounding numbers =
+-- ====================
+-- http://lua-users.org/wiki/FormattingNumbers
+
+function round(val, decimal)
+  if (decimal) then
+    return math.floor( (val * 10^decimal) + 0.5) / (10^decimal)
+  else
+    return math.floor(val+0.5)
+  end
+end
+
+
+-- ============================
+-- = scan directory for files =
+-- ============================
+-- http://stackoverflow.com/questions/5303174/get-list-of-directory-in-a-lua
+function scandir(directory)
+    local i, t, popen = 0, {}, io.popen
+    for filename in popen('ls -a "'..directory..'"'):lines() do
+        i = i + 1
+        t[i] = filename
+    end
+    return t
+end

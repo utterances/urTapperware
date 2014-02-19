@@ -35,7 +35,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self.alpha = 1 --target alpha for animation
 	self.menu = nil --contextual menu nil when not active
 	self.regionType = RTYPE_BLANK	--default blank type
-	self.value = 0
+	self.value = {0}
 	self.isHeld = false -- if the r is held by tap currently
 	self.holdTimer = 0
 	self.isSelected = false
@@ -235,21 +235,41 @@ function TWRegion:RaiseToTop()
 	self:SetLayer("LOW")
 end
 
-function TWRegion:Copy(cx, cy)
+function TWRegion:Copy(cx, cy, groupregion)
 	-- return a copy
 	
 	if self.regionType == RTYPE_GROUP then
 		notifyView:ShowTimedText('Copying Group')
 		-- copy all the group's child, then regroup them and move to new place
-		newRegions = {}	
+		local newRegions = {}	
 		for _,r in ipairs(self.groupObj.regions) do
 			-- find position delta first
 			x,y = self:Center()
 			x2,y2 = r:Center()
 			
-			table.insert(newRegions, r:Copy(cx+x2-x,cy+y2-y))
+			table.insert(newRegions, r:Copy(cx+x2-x,cy+y2-y, self))
 		end
-		return ToggleLockGroup(newRegions)
+	
+		-- create inner links here, use region list as a map
+		for _,r in ipairs(self.groupObj.regions) do
+			
+			for _,link in ipairs(r.inlinks) do
+				local i = tableIndexOf(self.groupObj.regions, link.sender)
+				if i>0 then
+					local j = tableIndexOf(self.groupObj.regions, r)
+					
+					local newlink = link:new(newRegions[i], newRegions[j], link.event, link.action)
+					newlink.data = link.data
+				end
+			end
+	
+		end
+				
+		local group_copy = ToggleLockGroup(newRegions)
+		group_copy.r.h = self:Height()
+		group_copy.r.w = self:Width()
+
+		return group_copy
 	end
 	
 	local newRegion = TWRegion:new(nil, updateEnv)
@@ -263,15 +283,20 @@ function TWRegion:Copy(cx, cy)
 		newRegion:SetAnchor("CENTER",x+INITSIZE+20,y)
 	end
 	
-	-- copy all links
-	for _,link in ipairs(self.inlinks) do
-		local newlink = link:new(link.sender, newRegion, link.event, link.action)
-		newlink.data = link.data
+	-- copy all links, except when we are dealing with groups
+	-- FIXME: needs deduplication of inner links
+	for _,link in ipairs(self.inlinks) do		
+		if not (groupregion and link.sender.group == groupregion.groupObj) then
+			local newlink = link:new(link.sender, newRegion, link.event, link.action)
+			newlink.data = link.data
+		end
 	end
 	
 	for _,link in ipairs(self.outlinks) do
-		local newlink = link:new(newRegion, link.receiver, link.event, link.action)
-		newlink.data = link.data
+		if not (groupregion and link.receiver.group == groupregion.groupObj) then
+			local newlink = link:new(newRegion, link.receiver, link.event, link.action)
+			newlink.data = link.data
+		end
 	end
 	
 	newRegion.movepath = self.movepath
@@ -280,7 +305,8 @@ function TWRegion:Copy(cx, cy)
 	if self.regionType == RTYPE_VAR then
 		newRegion:SwitchRegionType()
 		newRegion.value = self.value
-		newRegion.tl:SetLabel(newRegion.value)
+		-- newRegion.tl:SetLabel(newRegion.value)
+		newRegion.tl:SetLabel(0)
 	else
 		newRegion.h = self.h
 		newRegion.w = self.w
@@ -309,8 +335,6 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	
 	if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
 		self.isHeld = false	-- cancel hold gesture if over tolerance
-	else
-		return
 	end
 	-- self.x = x
 	-- self.y = y
@@ -675,8 +699,9 @@ function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
 		-- switch from normal region to a counter
 		self.t:SetTexture("tw_roundrec_slate.png")
 		-- self.tl = self:TextLabel()
-		self.tl:SetLabel(self.value)
-		self.tl:SetFontHeight(42)
+		self.value = {0}
+		self.tl:SetLabel(self.value[1])
+		self.tl:SetFontHeight(32)
 		self.tl:SetColor(255,255,255,255) 
 		self.tl:SetHorizontalAlign("JUSTIFY")
 		self.tl:SetVerticalAlign("MIDDLE")
@@ -743,13 +768,16 @@ function TWRegion:UpdateVal(message)
 	if self.regionType == RTYPE_VAR then
 		
 		if message ~= 'OnTouchUp' then
-			-- TODO: right now it shows x axis
-			self.value = message[1]
+			-- TODO: right now it shows x,y
+			if table.getn(message) > 1 then
+				self.value = message
+				self.tl:SetLabel(round(message[1],3)..'\n'..round(message[2],3))
+			end
 		else
 			incre = 1
-			self.value = self.value + incre
+			self.value[1] = self.value[1] + incre
+			self.tl:SetLabel(self.value[1])
 		end
-		self.tl:SetLabel(self.value)
 	end	
 end
 

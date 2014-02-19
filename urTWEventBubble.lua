@@ -114,7 +114,9 @@ function bubbleView:OnTouchUp()
 	end
 end
 
-function toggleMoveRetriction(input)
+function toggleMoveRetriction(r)
 	menu:dismiss()
-	input:ToggleAnchor()
+	r:ToggleAnchor()
+	r:SetAnchor('CENTER', r.group.r, 'CENTER', 0, 0)	
+	
 end

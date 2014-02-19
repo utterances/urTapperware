@@ -168,8 +168,8 @@ function Group:Draw()
 	
 	self.r.w = maxX - minX
 	self.r.h = maxY - minY
-	self.r:SetWidth(self.r.w)
-	self.r:SetHeight(self.r.h)	
+	-- self.r:SetWidth(self.r.w)
+	-- self.r:SetHeight(self.r.h)	
 	
 	self.r:SetAnchor('CENTER', (maxX+minX)/2, (maxY+minY)/2)
 	self.r.x, self.r.y = self.r:Center()

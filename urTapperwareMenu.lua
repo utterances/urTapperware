@@ -21,6 +21,21 @@ function testMenu(self)
 	DPrint("touched menu on"..self:Name())
 end
 
+-- TODO refactor, move this into its own class, loading file and inspector?
+function LoadInspector(self)
+	local files = scandir(DocumentPath("texture"))
+	
+	cmdlist = {}
+	for _,name in ipairs(files) do
+		if string.sub(name,1,1) ~= '.' then
+			table.insert(cmdlist, {name, nil, name})
+		end
+	end
+	table.insert('Cancel', nil, nil)
+	local menu = loadSimpleMenu(cmdlist, 'Choose Texture File:')
+	menu:present(self)	
+end
+
 function CloseRegion(self)
 	RemoveRegion(self)
 	CloseMenu(self)
@@ -92,8 +107,8 @@ regionMenu.cmdList = {
 	{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag},
 	{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
 	{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag},
-	{"", LockPos, 6, "tw_unlock.png"}
-	-- {"", testMenu, 7, "tw_paint.png"}
+	{"", LockPos, 6, "tw_unlock.png"},
+	{"", LoadInspector, 7, "tw_paint.png"}
 	--{"", testMenu, 8, "tw_run.png"}
 	-- {"", CloseMenu, 8, "tw_socket1.png"}
 }

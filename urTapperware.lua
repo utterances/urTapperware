@@ -12,7 +12,7 @@
 -- ==================================
 
 CREATION_MARGIN = 40	-- margin for creating via tapping
-INITSIZE = 120	-- initial size for regions
+INITSIZE = 115	-- initial size for regions
 MENUHOLDWAIT = 0.4 -- seconds to wait for hold to menu
 
 FADEINTIME = .2 -- seconds for things to fade in, TESTING for now
@@ -388,10 +388,10 @@ function ChooseEvent(self)
 end
 
 function ChooseAction(message)
-	linkEvent = message	
+	linkEvent = message
 	menu:dismiss()
 	
-	cmdlist = {{'Counter',FinishLink, TWRegion.UpdateVal},
+	cmdlist = {{'Show Value',FinishLink, TWRegion.UpdateVal},
 		{'Move Left', FinishLink, MoveLeft},
 		{'Move Right', FinishLink, MoveRight},
 		{'Move', FinishLink, TWRegion.Move},
