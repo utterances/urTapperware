@@ -23,14 +23,15 @@ end
 
 -- TODO refactor, move this into its own class, loading file and inspector?
 function LoadInspector(self)
-	local files = scandir(DocumentPath("texture"))
 	
 	cmdlist = {}
-	for _,name in ipairs(files) do
-		if string.sub(name,1,1) ~= '.' then
-			table.insert(cmdlist, {name, nil, name})
+	
+	for file in lfs.dir(DocumentPath("texture")) do
+		if string.sub(file,1,1) ~= "." then
+			table.insert(cmdlist, {file, nil, file})				
 		end
 	end
+	
 	table.insert(cmdlist,{'Cancel', nil, nil})
 	local menu = loadSimpleMenu(cmdlist, 'Choose Texture File:')
 	menu:present(self)	

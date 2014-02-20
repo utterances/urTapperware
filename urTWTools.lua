@@ -70,16 +70,3 @@ function round(val, decimal)
   end
 end
 
-
--- ============================
--- = scan directory for files =
--- ============================
--- http://stackoverflow.com/questions/5303174/get-list-of-directory-in-a-lua
-function scandir(directory)
-    local i, t, popen = 0, {}, io.popen
-    for filename in popen('ls -a "'..directory..'"'):lines() do
-        i = i + 1
-        t[i] = filename
-    end
-    return t
-end
