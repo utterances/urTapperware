@@ -35,15 +35,23 @@ function gestureManager:Reset()
 end
 
 function gestureManager:BeginGestureOnRegion(region)
-	table.insert(self.allRegions, region)
+	if not tableHasObj(self.allRegions, region) then
+		table.insert(self.allRegions, region)
+		-- DPrint('add '..#self.allRegions)
+	end
 end
 
 function gestureManager:EndGestureOnRegion(region)
 	tableRemoveObj(self.allRegions, region)
+	-- DPrint('rem '..#self.allRegions)
 	
 	if self.mode == LEARN_GROUP then
+		self.mode = LEARN_OFF
+		-- two things here, turn last region into a group, then add the current region into this group
 		
 		groupRegion = self.allRegions[1]
+		self:Reset()
+		
 		if groupRegion==nil then
 			return
 		end
@@ -60,13 +68,10 @@ function gestureManager:EndGestureOnRegion(region)
 			groupRegion.h = groupRegion.oldh
 			groupRegion.w = groupRegion.oldw
 			groupRegion.groupObj:AddRegion(region)
+			
 		end	
 		
-		-- two things here, turn last region into a group, then add the current region into this group
 		
-		self.mode = LEARN_OFF
-		guideView:Disable()
-		-- self:Reset()
 	end
 end
 
@@ -121,7 +126,9 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 			
 -- http://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
 			if r1.x-r1.w/2 < r2.x+r2.w/2 and r1.x+r1.w/2 > r2.x-r2.w/2 and
-			    r1.y-r1.h/2 < r2.y+r2.h/2 and r1.y+r1.h/2 > r2.y-r2.h/2 then
+				r1.y-r1.h/2 < r2.y+r2.h/2 and r1.y+r1.h/2 > r2.y-r2.h/2 and
+				math.abs(r1.dx)+math.abs(r1.dy)
+				+math.abs(r2.dx)+math.abs(r2.dy)>2 then
 				-- DPrint('overlap!')
 				self.mode = LEARN_GROUP
 				local groupR, otherR

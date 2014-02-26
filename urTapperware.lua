@@ -391,7 +391,6 @@ function DuplicateRegion(r, cx, cy)
 	
 	linkLayer:Draw()
 	if r.regionType ~= RTYPE_GROUP then
-		DPrint(r.regionType)
 		newRegion:RaiseToTop()
 	end
 	

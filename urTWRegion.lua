@@ -42,6 +42,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self.isSelected = false
 	self.canBeMoved = true
 	self.group = nil
+	self.textureFile = nil
 
 	self.animationPlaying = -1
 	-- -1 or 0 for not playing, otherwise increment for each frame
@@ -255,6 +256,8 @@ function TWRegion:Copy(cx, cy, groupregion)
 		end
 	
 		-- create inner links here, use region list as a map
+		-- FIXME: needs deduplication of inner links
+		
 		for _,r in ipairs(self.groupObj.regions) do
 			
 			for _,link in ipairs(r.inlinks) do
@@ -287,8 +290,7 @@ function TWRegion:Copy(cx, cy, groupregion)
 		newRegion:SetAnchor("CENTER",x+INITSIZE+20,y)
 	end
 	
-	-- copy all links, except when we are dealing with groups
-	-- FIXME: needs deduplication of inner links
+	-- copy all links
 	for _,link in ipairs(self.inlinks) do		
 		if not (groupregion and link.sender.group == groupregion.groupObj) then
 			local newlink = link:new(link.sender, newRegion, link.event, link.action)
@@ -312,6 +314,7 @@ function TWRegion:Copy(cx, cy, groupregion)
 		-- newRegion.tl:SetLabel(newRegion.value)
 		newRegion.tl:SetLabel(0)
 	else
+		newRegion:LoadTexture(self.textureFile)
 		newRegion.h = self.h
 		newRegion.w = self.w
 	end
@@ -668,8 +671,7 @@ end
 
 function TWRegion:OnLeave()
  	gestureManager:EndHold(self)
-	
-	-- tableRemoveObj(heldRegions, self)
+	-- gestureManager:EndGestureOnRegion(self)
 	self.isHeld = false
 	self.holdTimer = 0
 end
@@ -683,7 +685,7 @@ end
 
 function TWRegion:OnSizeChanged()
 	-- the user changed the size, so let's fix it 
-	DPrint('size changed')
+	-- DPrint('size changed')
 	self.w = self:Width()
 	self.h = self:Height()
 	self.shadow:SetWidth(self.w + SHADOW_MARGIN)
@@ -739,10 +741,13 @@ function TWRegion:ToggleAnchor()
 	-- self:EnableMoving(self.canBeMoved)
 end
 
--- function TWRegion:LoadTexture(self, file)
--- 	DPrint("set "..file)
-	-- self.t:SetTexture(file)
--- end
+function TWRegion:LoadTexture(filename)
+	if filename ~= nil then
+		self.textureFile = filename
+		self.t:SetTexture(filename)
+		notifyView:ShowTimedText("texture changed to "..filename)
+	end
+end
 
 -- #################################################################
 -- #################################################################

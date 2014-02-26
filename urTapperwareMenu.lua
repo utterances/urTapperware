@@ -40,8 +40,8 @@ function LoadInspector(self)
 end
 
 function LoadTexture(filename)
-	menu:dismiss()	
-	inspectedRegion.t:SetTexture(filename)
+	menu:dismiss()
+	inspectedRegion:LoadTexture(filename)
 	inspectedRegion = nil
 end
 
