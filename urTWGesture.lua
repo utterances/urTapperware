@@ -14,6 +14,8 @@ LEARN_DRAG = 2
 LEARN_LINK = 3
 LEARN_GROUP = 4
 
+DROP_EXPAND_SIZE = 80
+
 gestureManager = {}
 
 function gestureManager:Init()
@@ -29,6 +31,7 @@ function gestureManager:Reset()
 	self.ry = -1
 	self.mode = LEARN_OFF
 	self.recording = {}
+	guideView:Disable()
 end
 
 function gestureManager:BeginGestureOnRegion(region)
@@ -40,7 +43,19 @@ function gestureManager:EndGestureOnRegion(region)
 	
 	if self.mode == LEARN_GROUP then
 		DPrint('got group')
+		
+		if r2.oldh < r2.h then
+			r2.h = r2.oldh
+			r2.w = r2.oldw
+		else
+			r1.h = r1.oldh
+			r1.w = r1.oldw
+		end
+		
 		-- two things here, turn last region into a group, then add the current region into this group
+			
+		
+		self:Reset()
 	end
 end
 
@@ -95,24 +110,24 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 -- http://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
 			if r1.x-r1.w/2 < r2.x+r2.w/2 and r1.x+r1.w/2 > r2.x-r2.w/2 and
 			    r1.y-r1.h/2 < r2.y+r2.h/2 and r1.y+r1.h/2 > r2.y-r2.h/2 then
-				DPrint('overlap!')
+				-- DPrint('overlap!')
 				self.mode = LEARN_GROUP
 
 				if math.abs(r1.dx)+math.abs(r1.dy) > math.abs(r2.dx)+math.abs(r2.dy) then
 					-- r1 faster, expand r2
 					r1:RaiseToTop()
 					r2.oldh = r2.h
-					r2.h = r2.h + 40
+					r2.h = r2.h + DROP_EXPAND_SIZE
 					r2.oldw = r2.w
-					r2.w = r2.w + 40
+					r2.w = r2.w + DROP_EXPAND_SIZE
 					
 				else
 					-- r2 faster, expand r1
 					r2:RaiseToTop()
 					r1.oldh = r1.h
-					r1.h = r1.h + 40
+					r1.h = r1.h + DROP_EXPAND_SIZE
 					r1.oldw = r1.w
-					r1.w = r1.w + 40
+					r1.w = r1.w + DROP_EXPAND_SIZE
 				end
 				
 			end
@@ -120,12 +135,20 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		
 		return
 		
-	elseif self.mode == LEARN_GROUP then
+	elseif self.mode == LEARN_GROUP and #self.allRegions == 2 then
 		r1 = self.allRegions[1]
 		r2 = self.allRegions[2]
 		if r1.x-r1.w/2 > r2.x+r2.w/2 or r1.x+r1.w/2 < r2.x-r2.w/2 or
 		    r1.y-r1.h/2 > r2.y+r2.h/2 or r1.y+r1.h/2 < r2.y-r2.h/2 then
-			 self.mode = LEARN_OFF
+			self.mode = LEARN_OFF
+			
+			if r2.oldh < r2.h then
+				r2.h = r2.oldh
+				r2.w = r2.oldw
+			else
+				r1.h = r1.oldh
+				r1.w = r1.oldw
+			end
 		end
 		return
 	elseif self.mode == LEARN_ON and region ~= self.holding then
@@ -253,10 +276,8 @@ function gestureManager:EndHold(region)
 			regions[i]:AnimateShaking(false)
 		end
 		
-		self.mode = LEARN_OFF
 		self:Reset()
 		notifyView:Dismiss()
-		guideView:Disable()
 	end
 end
 

@@ -34,6 +34,7 @@ touchStateDown = false
 selectionPoly = {}
 selectedRegions = {}
 
+dofile(DocumentPath("urLog.lua"))
 dofile(DocumentPath("urTWTools.lua"))	--misc helper func and obj
 dofile(DocumentPath("urTWNotify.lua"))	-- text notification view
 dofile(DocumentPath("urTWEventBubble.lua"))	-- event notification view

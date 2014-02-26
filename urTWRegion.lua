@@ -336,6 +336,7 @@ function TWRegion:OnMove(x,y,dx,dy)
 end
 
 function TWRegion:OnDrag(x,y,dx,dy,e)
+	-- Log:print('drag '..self:Name()..' '..x..' '..y)
 	
 	if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
 		self.isHeld = false	-- cancel hold gesture if over tolerance
