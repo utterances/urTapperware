@@ -29,7 +29,7 @@ function LoadInspector(self)
 	
 	for file in lfs.dir(DocumentPath("texture")) do
 		if string.sub(file,1,1) ~= "." then
-			table.insert(cmdlist, {file, loadtexture, "texture/"..file})				
+			table.insert(cmdlist, {file, LoadTexture, "texture/"..file})				
 		end
 	end
 	
@@ -39,7 +39,7 @@ function LoadInspector(self)
 	inspectedRegion = self
 end
 
-function loadtexture(filename)
+function LoadTexture(filename)
 	menu:dismiss()	
 	inspectedRegion.t:SetTexture(filename)
 	inspectedRegion = nil

@@ -27,6 +27,7 @@ heldRegions = {}
 -- ==============
 -- = Parameters =
 -- ==============
+SHADOW_MARGIN = 60
 TIME_TO_HOLD = .6	--time to wait to activate hold behaviour (not for hold event)
 HOLD_SHIFT_TOR = 2 --pixel to tolerate for holding
 
@@ -115,8 +116,8 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	local r_s = Region(ttype,"drops"..id,parent)
 	r_s.t = r_s:Texture("tw_shadow.png")
 	r_s.t:SetBlendMode("BLEND")
-	r_s:SetWidth(INITSIZE + 60)
-	r_s:SetHeight(INITSIZE + 60)
+	r_s:SetWidth(INITSIZE + SHADOW_MARGIN)
+	r_s:SetHeight(INITSIZE + SHADOW_MARGIN)
 	r_s:SetLayer("LOW")
 	r_s:Show() 
 
@@ -171,7 +172,6 @@ end
 
 function RemoveRegion(self)
 	CloseMenu(self)
-	
 	
 	if self.regionType == RTYPE_GROUP then
 		-- remove all the children if needed
@@ -336,8 +336,9 @@ function TWRegion:OnMove(x,y,dx,dy)
 end
 
 function TWRegion:OnDrag(x,y,dx,dy,e)
-	-- Log:print('drag '..self:Name()..' '..x..' '..y)
-	
+	if LOGGING then
+		Log:print('drag '..self:Name()..' '..x..' '..y)
+	end
 	if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
 		self.isHeld = false	-- cancel hold gesture if over tolerance
 	end
@@ -482,6 +483,8 @@ function TWRegion:Update(elapsed)
 	if sizeChanged then
 		self.tl:SetHorizontalAlign("JUSTIFY")
 		self.tl:SetVerticalAlign("MIDDLE")
+		self.shadow:SetWidth(self.w + SHADOW_MARGIN)
+		self.shadow:SetHeight(self.h + SHADOW_MARGIN)
 	end
 	-- animate move if we are not at x,y
 	-- if self.x ~= x or self.y ~= y then
@@ -574,12 +577,16 @@ function TWRegion:CallEvents(signal, elapsed)
 end
 
 function TWRegion:OnTouchDown()
-	self.isHeld = true
 	gestureManager:BeginGestureOnRegion(self)
+	if self.regionType == RTYPE_GROUP then
+		return
+	end
+	
+	self.isHeld = true
 	self.holdTimer = 0
 	self:CallEvents("OnTouchDown")
 	self:RaiseToTop()
-	self.alpha = .6
+	self.alpha = .9
 	-- isHoldingRegion = true
 	-- table.insert(heldRegions, self)
 
@@ -599,6 +606,9 @@ end
 
 function TWRegion:TouchUp()
 	gestureManager:EndGestureOnRegion(self)
+	if self.regionType == RTYPE_GROUP then
+		return
+	end
 	-- bubbleView:ShowEvent('Touch Up', self)
 	
 	if self.isHeld and self.holdTimer < TIME_TO_HOLD then
@@ -676,6 +686,8 @@ function TWRegion:OnSizeChanged()
 	DPrint('size changed')
 	self.w = self:Width()
 	self.h = self:Height()
+	self.shadow:SetWidth(self.w + SHADOW_MARGIN)
+	self.shadow:SetHeight(self.h + SHADOW_MARGIN)
 end
 
 function TWRegion:SwitchRegionType() -- TODO: change method name to reflect

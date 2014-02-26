@@ -4,7 +4,6 @@
 -- event notification bubble, should later be turn into a draggable menu
 -- singleton class, or not really a class, just a table, always on top region
 
-FADE_RATE = 500
 STAY_TIME = 1.5
 bubbleView = {}
 menu = {}
@@ -92,17 +91,20 @@ function bubbleUpdate(self, e)
 		return
 	end
 	
+	
 	if self:Alpha() > 0 then
-		self:SetAlpha(self:Alpha() - e * FADE_RATE)
-		if self:Alpha()< 0.6 then
+		if self:Alpha() < EPSILON then -- just set if it's close enough
+			self:SetAlpha(0)
+			self:Hide()
 			self:EnableInput(false)
+			self:Handle("OnUpdate", nil)
+		else
+			self:SetAlpha(self:Alpha() - self:Alpha() * e/FADEINTIME)
+			if self:Alpha()< 0.6 then
+				self:EnableInput(false)
+			end			
 		end
-	else
-		self:Hide()
-		self:EnableInput(false)
-		
-		self:Handle("OnUpdate", nil)
-	end
+	end	
 end
 
 function bubbleView:OnTouchDown()

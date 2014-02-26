@@ -42,18 +42,31 @@ function gestureManager:EndGestureOnRegion(region)
 	tableRemoveObj(self.allRegions, region)
 	
 	if self.mode == LEARN_GROUP then
-		DPrint('got group')
 		
 		if r2.oldh < r2.h then
-			r2.h = r2.oldh
-			r2.w = r2.oldw
+			groupRegion = r2
+			insertRegion = r1
 		else
-			r1.h = r1.oldh
-			r1.w = r1.oldw
+ 			groupRegion = r1
+			insertRegion = r2
 		end
 		
+		if groupRegion.regionType ~= RTYPE_GROUP then
+			-- create new group, set sizes
+			newGroup = ToggleLockGroup({insertRegion})
+			newGroup.h = groupRegion.h
+			newGroup.w = groupRegion.w
+			newGroup.r:SetAnchor("CENTER", groupRegion.x, groupRegion.y)
+			RemoveRegion(groupRegion)
+		else
+			groupRegion.h = groupRegion.oldh
+			groupRegion.w = groupRegion.oldw
+			DPrint('already a group')
+		end	
+		
 		-- two things here, turn last region into a group, then add the current region into this group
-			
+		
+		
 		
 		self:Reset()
 	end
@@ -105,31 +118,39 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		
 		if #self.allRegions == 2 then
 			-- check for overlap, if exist check movement speed
-			r1 = self.allRegions[1]
-			r2 = self.allRegions[2]
+			local r1 = self.allRegions[1]
+			local r2 = self.allRegions[2]
+			
 -- http://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
 			if r1.x-r1.w/2 < r2.x+r2.w/2 and r1.x+r1.w/2 > r2.x-r2.w/2 and
 			    r1.y-r1.h/2 < r2.y+r2.h/2 and r1.y+r1.h/2 > r2.y-r2.h/2 then
-				-- DPrint('overlap!')
+				DPrint('overlap!')
 				self.mode = LEARN_GROUP
-
-				if math.abs(r1.dx)+math.abs(r1.dy) > math.abs(r2.dx)+math.abs(r2.dy) then
-					-- r1 faster, expand r2
-					r1:RaiseToTop()
-					r2.oldh = r2.h
-					r2.h = r2.h + DROP_EXPAND_SIZE
-					r2.oldw = r2.w
-					r2.w = r2.w + DROP_EXPAND_SIZE
-					
-				else
-					-- r2 faster, expand r1
-					r2:RaiseToTop()
-					r1.oldh = r1.h
-					r1.h = r1.h + DROP_EXPAND_SIZE
-					r1.oldw = r1.w
-					r1.w = r1.w + DROP_EXPAND_SIZE
+				local groupR, otherR
+				if r1.regionType==RTYPE_GROUP and r2.regionType~=RTYPE_GROUP then
+					groupR = r1
+					otherR = r2
+				elseif r2.regionType==RTYPE_GROUP and r1.regionType~=RTYPE_GROUP
+					then
+					groupR = r2
+					otherR = r1
+				elseif r1.regionType~=RTYPE_GROUP and r2.regionType~=RTYPE_GROUP
+					then
+					if math.abs(r1.dx)+math.abs(r1.dy) >
+					math.abs(r2.dx)+math.abs(r2.dy) then
+						groupR = r2
+						otherR = r1
+					else
+						groupR = r1
+						otherR = r2
+					end
 				end
 				
+				otherR:RaiseToTop()
+				groupR.oldh = groupR.h
+				groupR.h = groupR.h + DROP_EXPAND_SIZE
+				groupR.oldw = groupR.w
+				groupR.w = groupR.w + DROP_EXPAND_SIZE
 			end
 		end
 		

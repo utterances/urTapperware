@@ -18,6 +18,7 @@ MENUHOLDWAIT = 0.4 -- seconds to wait for hold to menu
 FADEINTIME = .2 -- seconds for things to fade in, TESTING for now
 EPSILON = 0.001	--small number for rounding
 
+LOGGING = false
 -- selection param
 LASSOSEPDISTANCE = 20 -- pixels between each point when drawing selection lasso
 
@@ -34,7 +35,7 @@ touchStateDown = false
 selectionPoly = {}
 selectedRegions = {}
 
-dofile(DocumentPath("urLog.lua"))
+dofile(DocumentPath("urLog.lua")) --log user input to file
 dofile(DocumentPath("urTWTools.lua"))	--misc helper func and obj
 dofile(DocumentPath("urTWNotify.lua"))	-- text notification view
 dofile(DocumentPath("urTWEventBubble.lua"))	-- event notification view
@@ -287,47 +288,6 @@ function ToggleMenu(self)
 	end
 	linkLayer:Draw()
 end
-
--- function HoldToTrigger(self, elapsed) -- for long tap
--- 	x,y = self:Center()
--- 	
--- 	if self.holdtime <= 0 then
--- 		self.x = x 
--- 		self.y = y
--- 		DPrint("trying menu")
--- 		if self.menu == nil then
--- 			OpenRegionMenu(self)
--- 		else
--- 			CloseMenu(self)
--- 		end
--- 		self:Handle("OnUpdate",nil)
--- 	else 
--- 		if math.abs(self.x - x) > 10 or math.abs(self.y - y) > 10 then
--- 			self:Handle("OnUpdate", nil)
--- 			self:Handle("OnUpdate", self.Update)
--- 		end
--- 		if self.holdtime < MENUHOLDWAIT/2 then
--- 			DPrint("hold for menu")
--- 		end
--- 		self.holdtime = self.holdtime - elapsed
--- 	end
--- end
-
--- function HoldTrigger(self) -- for long tap
--- 	DPrint("starting hold")
--- 	self.holdtime = MENUHOLDWAIT
--- 	self.x,self.y = self:Center()
--- 	self:Handle("OnUpdate", nil)
--- 	self:Handle("OnUpdate", HoldToTrigger)
--- 	self:Handle("OnLeave", DeTrigger)
--- end
--- 
--- function DeTrigger(self) -- for long tap
--- 	self.eventlist["OnUpdate"].currentevent = nil
--- 	self:Handle("OnUpdate", nil)
--- 	self:Handle("OnUpdate", self.Update)
--- end
----------------
 
 function ChangeSelectionStateRegion(self, select)
 	if select ~= self.isSelected then
