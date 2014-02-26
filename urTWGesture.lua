@@ -43,32 +43,30 @@ function gestureManager:EndGestureOnRegion(region)
 	
 	if self.mode == LEARN_GROUP then
 		
-		if r2.oldh < r2.h then
-			groupRegion = r2
-			insertRegion = r1
-		else
- 			groupRegion = r1
-			insertRegion = r2
+		groupRegion = self.allRegions[1]
+		if groupRegion==nil then
+			return
 		end
-		
+				
 		if groupRegion.regionType ~= RTYPE_GROUP then
 			-- create new group, set sizes
-			newGroup = ToggleLockGroup({insertRegion})
+			newGroup = ToggleLockGroup({region})
 			newGroup.h = groupRegion.h
 			newGroup.w = groupRegion.w
 			newGroup.r:SetAnchor("CENTER", groupRegion.x, groupRegion.y)
 			RemoveRegion(groupRegion)
+			
 		else
 			groupRegion.h = groupRegion.oldh
 			groupRegion.w = groupRegion.oldw
-			DPrint('already a group')
+			groupRegion.groupObj:AddRegion(region)
 		end	
 		
 		-- two things here, turn last region into a group, then add the current region into this group
 		
-		
-		
-		self:Reset()
+		self.mode = LEARN_OFF
+		guideView:Disable()
+		-- self:Reset()
 	end
 end
 
@@ -124,7 +122,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 -- http://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
 			if r1.x-r1.w/2 < r2.x+r2.w/2 and r1.x+r1.w/2 > r2.x-r2.w/2 and
 			    r1.y-r1.h/2 < r2.y+r2.h/2 and r1.y+r1.h/2 > r2.y-r2.h/2 then
-				DPrint('overlap!')
+				-- DPrint('overlap!')
 				self.mode = LEARN_GROUP
 				local groupR, otherR
 				if r1.regionType==RTYPE_GROUP and r2.regionType~=RTYPE_GROUP then
@@ -157,8 +155,8 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		return
 		
 	elseif self.mode == LEARN_GROUP and #self.allRegions == 2 then
-		r1 = self.allRegions[1]
-		r2 = self.allRegions[2]
+		local r1 = self.allRegions[1]
+		local r2 = self.allRegions[2]
 		if r1.x-r1.w/2 > r2.x+r2.w/2 or r1.x+r1.w/2 < r2.x-r2.w/2 or
 		    r1.y-r1.h/2 > r2.y+r2.h/2 or r1.y+r1.h/2 < r2.y-r2.h/2 then
 			self.mode = LEARN_OFF
@@ -190,15 +188,15 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		-- end
 	elseif self.mode == LEARN_LINK and #self.allRegions == 2 then
 		-- compute how much are we off into each gesture and update vis guide
-		r1 = self.allRegions[1]
-		r2 = self.allRegions[2]
-		x1,y1 = r1:Center()
-		x2,y2 = r2:Center()
+		local r1 = self.allRegions[1]
+		local r2 = self.allRegions[2]
+		local x1,y1 = r1:Center()
+		local x2,y2 = r2:Center()
 		-- cx = (r1.rx + r2.rx)/2
 		-- cy = (r1.ry + r2.ry)/2
-		olddist = math.abs(r1.rx - r2.rx) + math.abs(r1.ry - r2.ry)
-		newdist = math.abs(x1 - x2) + math.abs(y1 - y2)
-		gestDeg = newdist - olddist -- positive if pulling, negative if pinching
+		local olddist = math.abs(r1.rx - r2.rx) + math.abs(r1.ry - r2.ry)
+		local newdist = math.abs(x1 - x2) + math.abs(y1 - y2)
+		local gestDeg = newdist - olddist -- positive if pulling, negative if pinching
 		
 		-- update gesture guide here:
 		guideView:UpdatePull(-(olddist/3 - gestDeg)/(olddist/3))

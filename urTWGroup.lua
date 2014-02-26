@@ -139,6 +139,16 @@ function Group:SetRegions(listOfRegions)
 	end
 end
 
+function Group:AddRegion(region)
+	table.insert(self.regions, region)
+	region.group = self
+	
+	x,y = region:Center()
+	region:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', 
+		region.x - self.r.x + self.r.w/2, region.y - self.r.y + self.r.h/2)
+	region:RaiseToTop()
+end
+
 function Group:Draw()
 	-- find out how big the group region needs to be, then resize and draw
 	-- we need to anchor the regions to the group to enforce spatial unity
@@ -177,7 +187,7 @@ function Group:Draw()
 		r = self.regions[i]
 		x,y = r:Center()
 		r:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', x - minX, y - minY)
-		r:MoveToTop()
+		r:RaiseToTop()
 	end
 	
 	-- now show everything
