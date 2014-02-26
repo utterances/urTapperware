@@ -317,7 +317,7 @@ function TWRegion:Copy(cx, cy, groupregion)
 end
 
 function TWRegion:OnMove(x,y,dx,dy)
-	DPrint('moving '..dx..' '..dy)
+	-- DPrint('moving '..dx..' '..dy)
 	
 	-- for k,v in pairs(self.outlinks) do
 	-- 	if(v.event == "_Move") then
@@ -475,14 +475,14 @@ function TWRegion:Update(elapsed)
 
 
 -- animate size if needed:
+	local sizeChanged = false
 	if self.w ~= self:Width() then
 		if math.abs(self:Width() - self.w) < EPSILON then -- close enough
 			self:SetWidth(self.w)
 		else
 			self:SetWidth(self:Width() + (self.w-self:Width()) * elapsed/FADEINTIME)
 		end
-		self.tl:SetHorizontalAlign("JUSTIFY")
-		self.tl:SetVerticalAlign("MIDDLE")
+		sizeChanged = true
 	end
 	
 	if self.h ~= self:Height() then
@@ -491,10 +491,13 @@ function TWRegion:Update(elapsed)
 		else
 			self:SetHeight(self:Height() + (self.h-self:Height()) * elapsed/FADEINTIME)
 		end
+		sizeChanged = true
+	end
+
+	if sizeChanged then
 		self.tl:SetHorizontalAlign("JUSTIFY")
 		self.tl:SetVerticalAlign("MIDDLE")
 	end
-	
 	-- animate move if we are not at x,y
 	-- if self.x ~= x or self.y ~= y then
 	-- 	if math.abs(self.x - x) < EPSILON and math.abs(self.y - y) < EPSILON then
@@ -781,6 +784,8 @@ function TWRegion:UpdateVal(message)
 	end	
 end
 
+-- FIXME: learned linked movement is not working correctly, when dragging
+-- but it works for animation
 function TWRegion:Move(message, linkdata)
 	x,y = self:Center()
 	
@@ -796,7 +801,7 @@ function TWRegion:Move(message, linkdata)
 	moveY = sinT*dx + cosT*dy
 	self.oldx = x + moveX
 	self.oldy = y + moveY
-	self:SetAnchor('CENTER',self.oldx,self.oldy)
+	self:SetAnchor('CENTER', self.oldx, self.oldy)
 	self:CallEvents('OnDragging', {moveX, moveY})
 end
 

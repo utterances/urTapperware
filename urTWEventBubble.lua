@@ -4,15 +4,13 @@
 -- event notification bubble, should later be turn into a draggable menu
 -- singleton class, or not really a class, just a table, always on top region
 
-FADE_RATE = 2
-STAY_TIME = 1.0
+FADE_RATE = 500
+STAY_TIME = 1
 bubbleView = {}
 menu = {}
 function bubbleView:Init()
 	self.r = Region('region', 'event', UIParent)
 	self.r:SetLayer("TOOLTIP")
-	self.r:SetWidth(120)
-	self.r:SetHeight(120)
 	self.r:SetAnchor('CENTER',ScreenWidth()/2,ScreenHeight()-25)
 	self.r.t = self.r:Texture("texture/tw_bubble.png")
 	self.r.t:SetBlendMode("BLEND")
@@ -27,10 +25,13 @@ function bubbleView:Init()
 	self.r.timer = 0
 	self.r.region=NULL
 	self.r.o = self
+
+	self.r.sizeChangeSpeed = 0
+	self.r.w = 120
+	self.r.h = 120
 	
 	self.r:Handle("OnTouchDown", bubbleView.OnTouchDown)
 	self.r:Handle("OnTouchUp", bubbleView.OnTouchUp)
-
 end
 
 function bubbleView:ShowEvent(text, region, menu)
@@ -44,14 +45,17 @@ function bubbleView:ShowEvent(text, region, menu)
 	
 	self.r:SetAnchor('BOTTOM', region,'TOP')
 	self.r.region = region
--- region:SetAnchor("anchorLocation", relativeRegion, "relativeAnchorLocation", offsetX, offsetY)
+	self.r:SetWidth(10)
+	self.r:SetHeight(10)	
+	self.r.sizeChangeSpeed = 15
+
 	self.r:Show()
 	self.r:SetAlpha(1)
 	self.r.tl:SetLabel(text)
 	self.r:MoveToTop()
 	
 	self.r.timer = STAY_TIME
-	self.r:Handle("OnUpdate", notifyUpdate)
+	self.r:Handle("OnUpdate", bubbleUpdate)
 	self.r:EnableInput(true)
 	
 end
@@ -65,13 +69,34 @@ function bubbleView:Dismiss()
 end
 
 function bubbleUpdate(self, e)
+	-- FIXME this animation code isn't working yet, add spring physics
+	-- 
+	
+	if self:Height() < self.h then
+		local curH = self:Height()
+		local curW = self:Width()
+		-- DPrint('trying to animate'..self.h..' '..self:Height())
+		
+		curH = curH + e*(self.h-curH)*self.sizeChangeSpeed
+		curW = curW + e*(self.w-curW)*self.sizeChangeSpeed
+
+		self:SetHeight(curH)
+		self:SetWidth(curW)
+		self.tl:SetHorizontalAlign("JUSTIFY")
+		self.tl:SetVerticalAlign("MIDDLE")
+	end
+	
+	
 	if self.timer > 0 then
 		self.timer = math.max(self.timer - e, 0)
 		return
 	end
 	
 	if self:Alpha() > 0 then
-		self:SetAlpha(self:Alpha() - self:Alpha() * e * FADE_RATE)
+		self:SetAlpha(self:Alpha() - e * FADE_RATE)
+		if self:Alpha()< 0.6 then
+			self:EnableInput(false)
+		end
 	else
 		self:Hide()
 		self:EnableInput(false)

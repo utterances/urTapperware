@@ -56,6 +56,7 @@ function gestureManager:StartHold(region)
 	-- elseif self.mode == LEARN_ON then
 	-- 	gestureManager:EndHold(region)
 	elseif self.mode == LEARN_OFF and #self.allRegions == 2 then
+		DPrint('two!')
 		-- exactly two holds, let's do linking gesture instead
 		self.mode = LEARN_LINK
 		-- first store their locations
@@ -76,9 +77,10 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 	-- recording gesture here if we are enabled:
 	if self.mode == LEARN_OFF then
 		-- only show event notification here if we are not doing learning
-		-- bubbleView:ShowEvent('moved\n'..region.relativeX..' '..region.relativeY, region)
 		
-		
+		if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
+			bubbleView:ShowEvent(round(region.relativeX,3)..' '..round(region.relativeY,3), region)
+		end
 		
 		return
 	elseif self.mode == LEARN_ON and region ~= self.holding then
