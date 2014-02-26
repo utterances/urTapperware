@@ -50,6 +50,9 @@ dofile(DocumentPath("urTWLinkLayer.lua"))	-- needs menu, visual links
 dofile(DocumentPath("urTWGroup.lua"))	-- needs TWRegion
 dofile(DocumentPath("urTWGesture.lua"))	--gesture manager
 dofile(DocumentPath("urTWGuide.lua"))		--gesture visual guide
+
+dofile(DocumentPath("urTWSound.lua"))
+
 -- ============
 -- = Backdrop =
 -- ============
@@ -353,8 +356,10 @@ function ChooseAction(message)
 	menu:dismiss()
 	
 	cmdlist = {{'Show Value',FinishLink, TWRegion.UpdateVal},
-		{'Move Left', FinishLink, MoveLeft},
-		{'Move Right', FinishLink, MoveRight},
+		{'Show X', FinishLink, TWRegion.UpdateX},
+		{'Show Y', FinishLink, TWRegion.UpdateY},
+		-- {'Move Left', FinishLink, MoveLeft},
+		-- {'Move Right', FinishLink, MoveRight},
 		{'Move', FinishLink, TWRegion.Move},
 		{'Cancel', nil, nil}}
 	menu = loadSimpleMenu(cmdlist, 'Choose Action to respond')

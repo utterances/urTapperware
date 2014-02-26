@@ -14,7 +14,7 @@ LEARN_DRAG = 2
 LEARN_LINK = 3
 LEARN_GROUP = 4
 
-DROP_EXPAND_SIZE = 80
+DROP_EXPAND_SIZE = 60
 
 gestureManager = {}
 
@@ -52,7 +52,7 @@ function gestureManager:EndGestureOnRegion(region)
 		groupRegion = self.allRegions[1]
 		self:Reset()
 		
-		if groupRegion==nil then
+		if groupRegion==nil or region.regionType==RTYPE_GROUP then
 			return
 		end
 				
@@ -68,7 +68,8 @@ function gestureManager:EndGestureOnRegion(region)
 			groupRegion.h = groupRegion.oldh
 			groupRegion.w = groupRegion.oldw
 			groupRegion.groupObj:AddRegion(region)
-			
+			-- put group back for consecutive add
+			table.insert(self.allRegions, groupRegion)
 		end	
 		
 		

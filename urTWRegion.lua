@@ -791,6 +791,36 @@ function TWRegion:UpdateVal(message)
 	end	
 end
 
+function TWRegion:UpdateX(message)
+	if self.regionType == RTYPE_VAR then
+		if message == 'OnTouchUp' then
+			self:UpdateVal(message)			
+		else
+			if table.getn(message) > 1 then
+				self.value = message[1]
+				self.tl:SetLabel(round(self.value,3))
+				sendValue(self.value,1) 
+			end
+		end
+	end
+end
+
+function TWRegion:UpdateY(message)
+	if self.regionType == RTYPE_VAR then
+		if message == 'OnTouchUp' then
+			self:UpdateVal(message)			
+		else
+			if table.getn(message) > 1 then
+				self.value = message[2]
+				self.tl:SetLabel(round(self.value,3))
+				sendValue(self.value,2)	
+			end
+		end
+	end
+end
+
+
+
 -- FIXME: learned linked movement is not working correctly, when dragging
 -- but it works for animation
 function TWRegion:Move(message, linkdata)
