@@ -18,7 +18,6 @@ MENUHOLDWAIT = 0.4 -- seconds to wait for hold to menu
 FADEINTIME = .2 -- seconds for things to fade in, TESTING for now
 EPSILON = 0.001	--small number for rounding
 
-LOGGING = false
 -- selection param
 LASSOSEPDISTANCE = 20 -- pixels between each point when drawing selection lasso
 
@@ -186,6 +185,11 @@ guideView:ShowPing(200,300)
 gestureManager:Init()
 
 bubbleView:Init()
+
+Log:start()
+-- Log:stop()
+
+
 
 function selectionLayer:DrawSelectionPoly()
 	if #selectionPoly < 2 then	-- need at least two points to draw

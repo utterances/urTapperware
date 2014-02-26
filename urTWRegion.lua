@@ -173,6 +173,7 @@ end
 
 function RemoveRegion(self)
 	CloseMenu(self)
+	Log:print('removed '..self:Name())
 	
 	if self.regionType == RTYPE_GROUP then
 		-- remove all the children if needed
@@ -210,6 +211,7 @@ function TWRegion:new(o, updateEnv)
 	setmetatable(o, self)
 	self.__index = self
 	o.updateEnv = updateEnv
+	Log:print('created '..o:Name())
 	return o
 end
 
@@ -276,6 +278,8 @@ function TWRegion:Copy(cx, cy, groupregion)
 		group_copy.r.h = self:Height()
 		group_copy.r.w = self:Width()
 
+		Log:print('copied group with '..self.groupObj.regions[1]:Name())
+
 		return group_copy
 	end
 	
@@ -320,6 +324,8 @@ function TWRegion:Copy(cx, cy, groupregion)
 	end
 	
 	notifyView:ShowTimedText("Copied")
+	Log:print('copied '..self:Name()..' to '..newRegion:Name())
+	
 	return newRegion
 end
 
@@ -339,9 +345,7 @@ function TWRegion:OnMove(x,y,dx,dy)
 end
 
 function TWRegion:OnDrag(x,y,dx,dy,e)
-	if LOGGING then
-		Log:print('drag '..self:Name()..' '..x..' '..y)
-	end
+	Log:print('drag '..self:Name()..' '..x..' '..y)
 	if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
 		self.isHeld = false	-- cancel hold gesture if over tolerance
 	end

@@ -15,6 +15,7 @@ function ToggleLockGroup(regions)
 	newGroup = Group:new()
 	newGroup:SetRegions(regions)
 	newGroup:Draw()
+	Log:print('created group with '..regions[1]:Name())
 	return newGroup
 end
 
@@ -147,6 +148,7 @@ function Group:AddRegion(region)
 	region:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', 
 		region.x - self.r.x + self.r.w/2, region.y - self.r.y + self.r.h/2)
 	region:RaiseToTop()
+	Log:print('added '..region:Name()..' to group')
 end
 
 function Group:Draw()
