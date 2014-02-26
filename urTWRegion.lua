@@ -50,15 +50,19 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self.loopmove = false
 	self.shaking = false
 	
-	-- self.dx = 0  -- compute storing current movement speed, for gesture detection
-	-- self.dy = 0
+	self.dx = 0  -- compute storing current movement speed, for gesture detection
+	self.dy = 0
 	x,y = self:Center()
 	self.oldx = x
 	self.oldy = y
 	self.x = x
 	self.y = y
+	self.relativeX = 0
+	self.relativeY = 0
 	self.w = INITSIZE
 	self.h = INITSIZE
+	self.oldw = self.w
+	self.oldh = self.h
 
 -- event handling
 	self.inlinks = {}
@@ -336,18 +340,13 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
 		self.isHeld = false	-- cancel hold gesture if over tolerance
 	end
-	-- self.x = x
-	-- self.y = y
-	
+
+	self.dx = dx
+	self.dy = dy
 	
 	if self.group ~= nil then
 		-- also anchor movement here within group
 		
-		-- self.relativeX = (self.x - self.group.r.x)/(self.group.r.w - self.w)*2
-		-- self.relativeY = (self.y - self.group.r.y)/(self.group.r.h - self.h)*2
-		-- DPrint(self.relativeX, self.relativeY)
-		
-		-- if self.canBeMoved then
 		if self.relativeX > 1 or self.relativeX < -1 then
 			bubbleView:ShowEvent('crossing boundary', self, true)
 		end
@@ -378,19 +377,6 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	self.updateEnv()
 	
 	self:CallEvents('OnDragging', {self.relativeX, self.relativeY})
-
-	
-	-- if not self.canBeMoved then
-	-- 	self:SetAnchor('CENTER',self.oldx, self.oldy)
-	-- 	self.x = self.oldx
-	-- 	self.y = self.oldy
-	-- else
-	-- 	self.oldx = x
-	-- 	self.oldy = y
-	-- end
-	-- self.oldx = x
-	-- self.oldy = y
-	
 end
 
 -- function TWRegion:OnHScroll(scrollspeedX)
@@ -412,7 +398,6 @@ function TWRegion:Update(elapsed)
 	if self.animationPlaying > 0 then
 		local delta = self.movepath[self.animationPlaying]
 		
-		-- DPrint(delta(dx)..','..delta(dy))
 		self:SetAnchor('CENTER',x+delta(deltax),y+delta(deltay))
 		self:CallEvents('OnDragging', {delta(deltax), delta(deltay)})
 		if self.animationPlaying < #self.movepath then
@@ -441,8 +426,7 @@ function TWRegion:Update(elapsed)
 		-- 
 		-- self:SetAnchor('CENTER',x+self.dx*elapsed, y+self.dy*elapsed)
 		-- 
-		-- -- DPrint('shaking '..self:Name()..' @'..self.oldx..' '..self.oldy..' d '..self.dx..' '..self.dy)
-		-- -- x,y has current value
+		-- x,y has current value
 		-- self.dx = self.dx + (self.oldx - x)*elapsed
 		-- self.dy = self.dy + (self.oldy - y)*elapsed
 		
@@ -741,6 +725,11 @@ function TWRegion:ToggleAnchor()
 	self.canBeMoved = not self.canBeMoved
 	-- self:EnableMoving(self.canBeMoved)
 end
+
+-- function TWRegion:LoadTexture(self, file)
+-- 	DPrint("set "..file)
+	-- self.t:SetTexture(file)
+-- end
 
 -- #################################################################
 -- #################################################################

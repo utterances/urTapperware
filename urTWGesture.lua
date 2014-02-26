@@ -12,6 +12,7 @@ LEARN_OFF = 0
 LEARN_ON = 1
 LEARN_DRAG = 2
 LEARN_LINK = 3
+LEARN_GROUP = 4
 
 gestureManager = {}
 
@@ -36,6 +37,11 @@ end
 
 function gestureManager:EndGestureOnRegion(region)
 	tableRemoveObj(self.allRegions, region)
+	
+	if self.mode == LEARN_GROUP then
+		DPrint('got group')
+		-- two things here, turn last region into a group, then add the current region into this group
+	end
 end
 
 function gestureManager:StartHold(region)
@@ -56,20 +62,20 @@ function gestureManager:StartHold(region)
 	-- elseif self.mode == LEARN_ON then
 	-- 	gestureManager:EndHold(region)
 	elseif self.mode == LEARN_OFF and #self.allRegions == 2 then
-		DPrint('two!')
+		-- TODO disabled for now, do this later
 		-- exactly two holds, let's do linking gesture instead
-		self.mode = LEARN_LINK
-		-- first store their locations
-		for i = 1,2 do
-			self.allRegions[i].rx, self.allRegions[i].ry = self.allRegions[i]:Center()
-		end
-		r1 = self.allRegions[1]
-		r2 = self.allRegions[2]
-		
-		-- draw the guide overlay
-		guideView:ShowGesturePull(r1, r2)
-		guideView:ShowGestureCenter(r1, r2)
-		
+		-- self.mode = LEARN_LINK
+		-- -- first store their locations
+		-- for i = 1,2 do
+		-- 	self.allRegions[i].rx, self.allRegions[i].ry = self.allRegions[i]:Center()
+		-- end
+		-- r1 = self.allRegions[1]
+		-- r2 = self.allRegions[2]
+		-- 
+		-- -- draw the guide overlay
+		-- guideView:ShowGesturePull(r1, r2)
+		-- guideView:ShowGestureCenter(r1, r2)
+		-- 
 	end
 end
 
@@ -78,10 +84,49 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 	if self.mode == LEARN_OFF then
 		-- only show event notification here if we are not doing learning
 		
-		if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
-			bubbleView:ShowEvent(round(region.relativeX,3)..' '..round(region.relativeY,3), region)
+		-- if math.abs(dx) > HOLD_SHIFT_TOR*10 or math.abs(dy) > HOLD_SHIFT_TOR*10 then
+		-- 	bubbleView:ShowEvent(round(region.relativeX,3)..' '..round(region.relativeY,3), region)
+		-- end
+		
+		if #self.allRegions == 2 then
+			-- check for overlap, if exist check movement speed
+			r1 = self.allRegions[1]
+			r2 = self.allRegions[2]
+-- http://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
+			if r1.x-r1.w/2 < r2.x+r2.w/2 and r1.x+r1.w/2 > r2.x-r2.w/2 and
+			    r1.y-r1.h/2 < r2.y+r2.h/2 and r1.y+r1.h/2 > r2.y-r2.h/2 then
+				DPrint('overlap!')
+				self.mode = LEARN_GROUP
+
+				if math.abs(r1.dx)+math.abs(r1.dy) > math.abs(r2.dx)+math.abs(r2.dy) then
+					-- r1 faster, expand r2
+					r1:RaiseToTop()
+					r2.oldh = r2.h
+					r2.h = r2.h + 40
+					r2.oldw = r2.w
+					r2.w = r2.w + 40
+					
+				else
+					-- r2 faster, expand r1
+					r2:RaiseToTop()
+					r1.oldh = r1.h
+					r1.h = r1.h + 40
+					r1.oldw = r1.w
+					r1.w = r1.w + 40
+				end
+				
+			end
 		end
 		
+		return
+		
+	elseif self.mode == LEARN_GROUP then
+		r1 = self.allRegions[1]
+		r2 = self.allRegions[2]
+		if r1.x-r1.w/2 > r2.x+r2.w/2 or r1.x+r1.w/2 < r2.x-r2.w/2 or
+		    r1.y-r1.h/2 > r2.y+r2.h/2 or r1.y+r1.h/2 < r2.y-r2.h/2 then
+			 self.mode = LEARN_OFF
+		end
 		return
 	elseif self.mode == LEARN_ON and region ~= self.holding then
 		self.mode = LEARN_DRAG
@@ -99,7 +144,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		-- 	p = Point(dx,dy)
 		-- 	table.insert(region.movepath, p)
 		-- end
-	elseif self.mode == LEARN_LINK then
+	elseif self.mode == LEARN_LINK and #self.allRegions == 2 then
 		-- compute how much are we off into each gesture and update vis guide
 		r1 = self.allRegions[1]
 		r2 = self.allRegions[2]

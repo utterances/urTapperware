@@ -9,6 +9,7 @@ BUTTONOFFSET = 3
 BUTTONIMAGESIZE = 80		-- size of the square icon image
 
 recycledLinkMenu = {}
+inspectedRegion = nil
 
 -- function Menu:new (o)
 --    o = o or {}   -- create object if user does not provide one
@@ -28,13 +29,20 @@ function LoadInspector(self)
 	
 	for file in lfs.dir(DocumentPath("texture")) do
 		if string.sub(file,1,1) ~= "." then
-			table.insert(cmdlist, {file, nil, file})				
+			table.insert(cmdlist, {file, loadtexture, "texture/"..file})				
 		end
 	end
 	
 	table.insert(cmdlist,{'Cancel', nil, nil})
-	local menu = loadSimpleMenu(cmdlist, 'Choose Texture File:')
-	menu:present(self)	
+	menu = loadSimpleMenu(cmdlist, 'Choose Texture File:')
+	menu:present(self)
+	inspectedRegion = self
+end
+
+function loadtexture(filename)
+	menu:dismiss()	
+	inspectedRegion.t:SetTexture(filename)
+	inspectedRegion = nil
 end
 
 function CloseRegion(self)

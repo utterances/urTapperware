@@ -87,7 +87,7 @@ function bgTouchUp(self)
 	
 	-- only create if we are not too close to the edge
 	if not touchStateDown then
-		DPrint('not down yet')
+		-- DPrint('not down yet')
 		return
 	end
 	local x,y = InputPosition()

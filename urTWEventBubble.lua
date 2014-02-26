@@ -5,7 +5,7 @@
 -- singleton class, or not really a class, just a table, always on top region
 
 FADE_RATE = 500
-STAY_TIME = 1
+STAY_TIME = 1.5
 bubbleView = {}
 menu = {}
 function bubbleView:Init()
