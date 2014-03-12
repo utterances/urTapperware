@@ -492,17 +492,7 @@ function TWRegion:Update(elapsed)
 		self.shadow:SetWidth(self.w + SHADOW_MARGIN)
 		self.shadow:SetHeight(self.h + SHADOW_MARGIN)
 	end
-	-- animate move if we are not at x,y
-	-- if self.x ~= x or self.y ~= y then
-	-- 	if math.abs(self.x - x) < EPSILON and math.abs(self.y - y) < EPSILON then
-	-- 		self:SetAnchor('CENTER', self.x, self.y)
-	-- 	else
-	-- 		newx = self.x + (self.x - x)*elapsed/FADEINTIME
-	-- 		newy = self.y + (self.y - y)*elapsed/FADEINTIME
-	-- 		self:SetAnchor('CENTER', newx, newy)
-	-- 	end
-	-- end
-		
+	
 	self:CallEvents("OnUpdate", elapsed)
 	if self.isHeld then
 		
@@ -515,7 +505,7 @@ function TWRegion:Update(elapsed)
 			self.holdTimer = self.holdTimer + elapsed
 		end
 	end
-		
+	
 	if self.oldx ~= x or self.oldy ~= y then
 		self.x = x
 		self.y = y
@@ -551,6 +541,17 @@ function TWRegion:Update(elapsed)
 		else
 			self.relativeX = (x - ScreenWidth()/2)/(ScreenWidth()-self.w)*2
 			self.relativeY = (y - ScreenHeight()/2)/(ScreenHeight()-self.h)*2
+			
+			-- animate move if we are not at x,y
+			if self.x ~= x or self.y ~= y then
+				if math.abs(self.x - x) < EPSILON and math.abs(self.y - y) < EPSILON then
+					self:SetAnchor('CENTER', self.x, self.y)
+				else
+					newx = self.x + (self.x - x)*elapsed/FADEINTIME
+					newy = self.y + (self.y - y)*elapsed/FADEINTIME
+					self:SetAnchor('CENTER', newx, newy)
+				end
+			end
 			
 			self.oldx = self.x
 			self.oldy = self.y

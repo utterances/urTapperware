@@ -15,6 +15,8 @@ LEARN_LINK = 3
 LEARN_GROUP = 4
 
 DROP_EXPAND_SIZE = 60
+GESTURE_ACTIVE_DIST = 30
+GESTURE_THRES_DIST = 10
 
 gestureManager = {}
 
@@ -65,7 +67,10 @@ function gestureManager:EndGestureOnRegion(region)
 			newGroup = ToggleLockGroup({region})
 			newGroup.h = groupRegion.h
 			newGroup.w = groupRegion.w
-			newGroup.r:SetAnchor("CENTER", groupRegion.x, groupRegion.y)
+			-- newGroup.r:SetAnchor("CENTER", groupRegion.rx, groupRegion.ry)
+			newGroup.r.x = groupRegion.rx
+			newGroup.r.y = groupRegion.ry
+			
 			RemoveRegion(groupRegion)
 			
 		else
@@ -142,16 +147,18 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 				+math.abs(r2.dx)+math.abs(r2.dy)>2 then
 					-- DPrint('overlap!')
 					self.mode = LEARN_GROUP
+					
 					local groupR, otherR
-					if r1.regionType==RTYPE_GROUP and r2.regionType~=RTYPE_GROUP then
+					if r1.regionType==RTYPE_GROUP and 
+						r2.regionType~=RTYPE_GROUP then
 						groupR = r1
 						otherR = r2
-					elseif r2.regionType==RTYPE_GROUP and r1.regionType~=RTYPE_GROUP
-						then
+					elseif r2.regionType==RTYPE_GROUP and
+						r1.regionType~=RTYPE_GROUP then
 						groupR = r2
 						otherR = r1
-					elseif r1.regionType~=RTYPE_GROUP and r2.regionType~=RTYPE_GROUP
-						then
+					elseif r1.regionType~=RTYPE_GROUP and
+						r2.regionType~=RTYPE_GROUP then
 						if math.abs(r1.dx)+math.abs(r1.dy) >
 						math.abs(r2.dx)+math.abs(r2.dy) then
 							groupR = r2
@@ -161,7 +168,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 							otherR = r2
 						end
 					end
-				
+			
 					otherR:RaiseToTop()
 					groupR.oldh = groupR.h
 					groupR.h = groupR.h + DROP_EXPAND_SIZE
@@ -170,22 +177,47 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 				end
 			else -- if regions are not overlapping
 				-- show guide here, when user move
-				local groupR, otherR
-				if math.abs(r1.dx)+math.abs(r1.dy) >
-				math.abs(r2.dx)+math.abs(r2.dy) then
-					groupR = r2
-					otherR = r1
-				else
-					groupR = r1
-					otherR = r2
+				-- also detect which gesture user is performing based on offsets
+				-- compute offsets first
+				local ox1 = r1.x - r1.rx
+				local oy1 = r1.y - r1.ry
+				local ox2 = r2.x - r2.rx
+				local oy2 = r2.y - r2.ry
+				
+				if math.max(math.abs(ox1)+math.abs(oy1),
+					math.abs(ox1)+math.abs(oy1)) > GESTURE_ACTIVE_DIST then
+					-- DPrint(ox1..' '..oy1..' vs '..ox2..' '..oy2)
+					if math.abs(ox1)+math.abs(oy1) < GESTURE_THRES_DIST or
+						math.abs(ox2)+math.abs(oy2) < GESTURE_THRES_DIST then
+						if r1.regionType==RTYPE_GROUP and 
+							r2.regionType~=RTYPE_GROUP then
+							self.groupR = r1
+							self.otherR = r2
+						elseif r2.regionType==RTYPE_GROUP and
+							r1.regionType~=RTYPE_GROUP then
+							self.groupR = r2
+							self.otherR = r1
+						elseif r1.regionType~=RTYPE_GROUP and
+							r2.regionType~=RTYPE_GROUP then
+							if math.abs(ox1)+math.abs(oy1) < GESTURE_THRES_DIST then
+								self.groupR = r2
+								self.otherR = r1
+							else
+								self.groupR = r1
+								self.otherR = r2
+							end
+						end
+						-- self.mode = LEARN_GROUP
+						DPrint('group mode')
+						
+					else -- in this case we are doing linking
+						self.mode = LEARN_LINK
+						DPrint('link mode')
+						
+					end
 				end
-			
 			end
-			
-			
-			
 		end
-		
 		return
 		
 	elseif self.mode == LEARN_GROUP and #self.allRegions == 2 then

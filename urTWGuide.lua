@@ -6,7 +6,7 @@
 PING_TIME = .7
 PING_RATE = 900
 PATH_Y_OFFSET = 20
-ANIMATED_GUIDE_TIMER = 4
+ANIMATED_GUIDE_TIMER = 3.5
 guideView = {}
 
 function guideView:Init()	
