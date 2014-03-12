@@ -6,6 +6,7 @@
 PING_TIME = .7
 PING_RATE = 900
 PATH_Y_OFFSET = 20
+ANIMATED_GUIDE_TIMER = 4
 guideView = {}
 
 function guideView:Init()	
@@ -32,6 +33,7 @@ function guideView:Init()
 	self.r.pingsize = 0
 	
 	self.r.needsUpdate = false
+	self.r.aniGuideTimer = -1
 	self.isDrawing = false
 	
 	self.regions = {}
@@ -75,6 +77,44 @@ function guideView:Init()
 		r:Hide()
 		table.insert(self.arrows, r)
 	end
+
+
+	self.touchGuides = {}
+	for i=1,2 do
+		local r = Region('region', 'tg', self.r)
+		r:SetLayer("TOOLTIP")
+		r:SetWidth(90)
+		r:SetHeight(90)
+		r.t = r:Texture("texture/tw_gestTouch.png")
+		r.t:SetBlendMode("BLEND")
+		r:SetAlpha(.8)
+		r:Hide()
+		table.insert(self.touchGuides, r)
+	end
+
+	
+	-- init focus/spotlight
+	-- self.linkGuide = Region('region', 'focus', self.r)
+	-- self.linkGuide:SetLayer("TOOLTIP")
+	-- self.linkGuide:SetWidth(2000)
+	-- self.linkGuide:SetHeight(2000)
+	-- self.linkGuide.t = self.linkGuide:Texture("texture/tw_linkGuide.png")
+	-- self.linkGuide.t:SetBlendMode("BLEND")
+	-- self.linkGuide:Hide()
+	-- self.linkGuide:SetAlpha(0)
+	-- self.linkGuide:EnableInput(false)
+	
+	-- init focus/spotlight
+	self.dropGuide = Region('region', 'focus', self.r)
+	self.dropGuide:SetLayer("TOOLTIP")
+	self.dropGuide:SetWidth(300)
+	self.dropGuide:SetHeight(300)
+	self.dropGuide.t = self.dropGuide:Texture("texture/tw_dropGuideZone.png")
+	self.dropGuide.t:SetBlendMode("BLEND")
+	self.dropGuide:SetAlpha(.9)
+	self.dropGuide:EnableInput(false)
+	self.dropGuide:Hide()
+	
 end
 
 function guideView:ShowPing(x,y)
@@ -114,8 +154,8 @@ end
 
 function guideView:ShowGesturePull(r1, r2)
 	local gr = self.gestOverlays[2] --this is the pull one
-	x1,y1 = r1:Center()
-	x2,y2 = r2:Center()
+	local x1,y1 = r1:Center()
+	local x2,y2 = r2:Center()
 
 	gr:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
 	gr.t:SetRotation(math.atan2(x2-x1, y1-y2))
@@ -137,8 +177,8 @@ end
 
 function guideView:ShowGestureCenter(r1, r2)
 	local gr = self.gestOverlays[1] --this is the pull one
-	x1,y1 = r1:Center()
-	x2,y2 = r2:Center()
+	local x1,y1 = r1:Center()
+	local x2,y2 = r2:Center()
 
 	gr:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
 	gr.t:SetRotation(math.atan2(x2-x1, y1-y2))
@@ -148,7 +188,84 @@ function guideView:ShowGestureCenter(r1, r2)
 end
 
 function guideView:ShowTwoTouchGestureGuide(r1, r2)
+	-- set up animated guides, moving path
+	if self.r.aniGuideTimer >=0 then
+		return
+	end
+	local x1,y1 = r1:Center()
+	local x2,y2 = r2:Center()
+	self.r.s_x = {x1,x2}
+	self.r.s_y = {y1,y2}
 	
+	local dx = math.abs(x1-x2)/2.5
+	local dy = math.abs(y1-y2)/2.5
+	
+	if r1:HasLinkTo(r2) or r2:HasLinkTo(r1) then
+		-- show disconnect link guide instead
+		dx = -dx
+		dy = -dy
+		self.r.guideText = 'Pull Apart to Disconnect'
+	else
+		self.r.guideText = 'Push Together to Connect'
+	end
+	
+	if x1 > x2 then
+		self.r.e_x = {x1-dx,x2+dx}
+	else
+		self.r.e_x = {x1+dx,x2-dx}
+	end
+	
+	if y1 > y2 then
+		self.r.e_y = {y1-dy,y2+dy}
+	else
+		self.r.e_y = {y1+dy,y2-dy}
+	end
+	
+	self.r.aniGuideTimer = 0
+	self.r:Handle("OnUpdate", guideUpdateAniGuide)
+end
+
+function guideUpdateAniGuide(self, e)	
+	-- onUpdate handle for touch animated guides
+	
+	if self.aniGuideTimer < ANIMATED_GUIDE_TIMER/4 then
+		-- first half, do pinch/pull
+		self.parent.dropGuide:Hide()
+		
+		for i =1,2 do
+			local dPercent = self.aniGuideTimer/ANIMATED_GUIDE_TIMER*4
+			local newx = self.s_x[i] + dPercent*(self.e_x[i] - self.s_x[i])
+			local newy = self.s_y[i] + dPercent*(self.e_y[i] - self.s_y[i])
+			
+			self.parent.touchGuides[i]:SetAnchor('CENTER',newx,newy)
+			self.parent.touchGuides[i]:Show()
+		end
+		notifyView:ShowTimedText(self.guideText)
+	elseif self.aniGuideTimer > ANIMATED_GUIDE_TIMER/2 and self.aniGuideTimer < ANIMATED_GUIDE_TIMER/4*3 then
+		-- second half, do drop
+		self.parent.dropGuide:SetAnchor('CENTER', self.s_x[1], self.s_y[1])
+		self.parent.dropGuide:Show()
+		
+		self.parent.touchGuides[2]:Hide()
+		local dPercent = self.aniGuideTimer/ANIMATED_GUIDE_TIMER*4-2
+		local newx = self.s_x[2] + dPercent*(self.s_x[1] - self.s_x[2])
+		local newy = self.s_y[2] + dPercent*(self.s_y[1] - self.s_y[2])
+		
+		self.parent.touchGuides[1]:SetAnchor('CENTER',newx,newy)
+		self.parent.touchGuides[1]:Show()
+		
+		notifyView:ShowTimedText('Drop to create Container')
+	else
+		for i =1,2 do
+			self.parent.touchGuides[i]:Hide()
+		end
+		self.parent.dropGuide:Hide()
+	end
+	
+	self.aniGuideTimer = self.aniGuideTimer + e
+	if self.aniGuideTimer > ANIMATED_GUIDE_TIMER then
+		self.aniGuideTimer = 0
+	end
 end
 
 function guideView:Disable()
@@ -158,13 +275,18 @@ function guideView:Disable()
 	-- if self.timer == 0 then
 	self.r:Handle("OnUpdate", nil)
 	self.r:Hide()
+	self.r.aniGuideTimer = -1
+	
 	-- end
 	self.arrows[1]:Hide()
 	self.focusOverlay:Hide()
 	
 	for i =1,2 do
 		self.gestOverlays[i]:Hide()
+		self.touchGuides[i]:Hide()
 	end
+	self.dropGuide:Hide()
+	
 end
 
 function guideUpdate(self, e)
@@ -186,12 +308,12 @@ function guideUpdate(self, e)
 		-- draw guide path here, vector possibly too
 		self.t:Clear(0,0,0,0)
 		for i = 1,#self.parent.regions do
-			x1 = self.parent.regions[i].rx
-			y1 = self.parent.regions[i].ry + PATH_Y_OFFSET
+			local x1 = self.parent.regions[i].rx
+			local y1 = self.parent.regions[i].ry + PATH_Y_OFFSET
 			
 			for j = 1,#self.parent.regions[i].movepath do
-				x2=x1 + self.parent.regions[i].movepath[j](deltax)
-				y2=y1 + self.parent.regions[i].movepath[j](deltay)
+				local x2=x1 + self.parent.regions[i].movepath[j](deltax)
+				local y2=y1 + self.parent.regions[i].movepath[j](deltay)
 
 				self.t:SetBrushSize(3)
 				self.t:Line(x1,y1,x2,y2)

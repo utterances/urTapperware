@@ -39,6 +39,10 @@ function gestureManager:BeginGestureOnRegion(region)
 		table.insert(self.allRegions, region)
 		-- DPrint('add '..#self.allRegions)
 	end
+	
+	if #self.allRegions ~= 2 then
+		guideView:Disable()
+	end
 end
 
 function gestureManager:EndGestureOnRegion(region)
@@ -70,10 +74,11 @@ function gestureManager:EndGestureOnRegion(region)
 			groupRegion.groupObj:AddRegion(region)
 			-- put group back for consecutive add
 			table.insert(self.allRegions, groupRegion)
-		end	
-		
-		
+		end
+	elseif #self.allRegions ~= 2 then
+		guideView:Disable()
 	end
+	
 end
 
 function gestureManager:StartHold(region)
@@ -107,6 +112,10 @@ function gestureManager:StartHold(region)
 		-- -- draw the guide overlay
 		-- guideView:ShowGesturePull(r1, r2)
 		-- guideView:ShowGestureCenter(r1, r2)
+
+
+		r1 = self.allRegions[1]
+		r2 = self.allRegions[2]
 		
 		guideView:ShowTwoTouchGestureGuide(r1, r2)
 	end

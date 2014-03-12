@@ -54,7 +54,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	
 	self.dx = 0  -- compute storing current movement speed, for gesture detection
 	self.dy = 0
-	x,y = self:Center()
+	local x,y = self:Center()
 	self.oldx = x
 	self.oldy = y
 	self.x = x
@@ -231,9 +231,19 @@ function TWRegion:RemoveOutgoingLink(l)
 	tableRemoveObj(self.outlinks,l)
 end
 
-function TWRegion:SendMessage(sender,message)
--- Respond to incoming message from sender
+function TWRegion:HasLinkTo(r)
+	-- see if there exist a link to region r
+	for _,link in ipairs(self.outlinks) do
+		if (link.receiver == r) then
+			return true
+		end
+	end
+	return false
 end
+
+-- function TWRegion:SendMessage(sender,message)
+-- -- Respond to incoming message from sender
+-- end
 
 function TWRegion:RaiseToTop()
 	self.shadow:MoveToTop()
@@ -251,8 +261,8 @@ function TWRegion:Copy(cx, cy, groupregion)
 		local newRegions = {}	
 		for _,r in ipairs(self.groupObj.regions) do
 			-- find position delta first
-			x,y = self:Center()
-			x2,y2 = r:Center()
+			local x,y = self:Center()
+			local x2,y2 = r:Center()
 			
 			table.insert(newRegions, r:Copy(cx+x2-x,cy+y2-y, self))
 		end
@@ -295,7 +305,7 @@ function TWRegion:Copy(cx, cy, groupregion)
 	end
 	
 	-- copy all links
-	for _,link in ipairs(self.inlinks) do		
+	for _,link in ipairs(self.inlinks) do
 		if not (groupregion and link.sender.group == groupregion.groupObj) then
 			local newlink = link:new(link.sender, newRegion, link.event, link.action)
 			newlink.data = link.data
@@ -363,23 +373,12 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 		if self.relativeY > 1 or self.relativeY < -1 then
 			bubbleView:ShowEvent('crossing boundary', self, true)
 		end
-		-- end
-	-- 
-	-- 	if not self.canBeMoved and 
-	-- 		(self.relativeY >= 1 or self.relativeY <= -1 or
-	-- 		self.relativeX >= 1 or self.relativeX <= -1) then
-	-- 		self:SetAnchor('CENTER', self.group.r, 'CENTER', self.oldx - self.group.r.x, self.oldy - self.group.r.y)
-	-- 		self.x = self.oldx
-	-- 		self.y = self.oldy
-	-- 		
-	-- 	end
-	-- 
-	-- 	
-	-- else
-	-- 	self.relativeX = (x - ScreenWidth()/2)/(ScreenWidth()-self.w)*2
-	-- 	self.relativeY = (y - ScreenHeight()/2)/(ScreenHeight()-self.h)*2
 	end
 
+	if not self.canBeMoved then
+		self.x = self.oldx
+		self.y = self.oldy
+	end
 	
 	gestureManager:Dragged(self, dx, dy, x, y)
 	self.holdTimer = 0
@@ -750,6 +749,8 @@ function TWRegion:LoadTexture(filename)
 	if filename ~= nil then
 		self.textureFile = filename
 		self.t:SetTexture(filename)
+		self.tl:SetLabel('')
+		self.shadow:Hide()
 		notifyView:ShowTimedText("texture changed to "..filename)
 		Log:print(self:Name()..' texture changed to '..filename)
 	end
@@ -790,7 +791,7 @@ function TWRegion:UpdateVal(message)
 				self.tl:SetLabel(round(message[1],3)..'\n'..round(message[2],3))
 			end
 		else
-			incre = 1
+			local incre = 1
 			self.value[1] = self.value[1] + incre
 			self.tl:SetLabel(self.value[1])
 		end
@@ -830,18 +831,18 @@ end
 -- FIXME: learned linked movement is not working correctly, when dragging
 -- but it works for animation
 function TWRegion:Move(message, linkdata)
-	x,y = self:Center()
+	local x,y = self:Center()
 	
-	dx,dy = unpack(message)
-	cosT = 1
-	sinT = 0
+	local dx,dy = unpack(message)
+	local cosT = 1
+	local sinT = 0
 	
 	if #linkdata > 0 then
 		cosT,sinT = unpack(linkdata)
 	end
 	
-	moveX = cosT*dx - sinT*dy
-	moveY = sinT*dx + cosT*dy
+	local moveX = cosT*dx - sinT*dy
+	local moveY = sinT*dx + cosT*dy
 	self.oldx = x + moveX
 	self.oldy = y + moveY
 	self:SetAnchor('CENTER', self.oldx, self.oldy)
@@ -849,16 +850,17 @@ function TWRegion:Move(message, linkdata)
 end
 
 function MoveLeft(self, message)
-	e = tonumber(message) or 2	
-	x,y = self:Center()
+	local e = tonumber(message) or 2	
+	local x,y = self:Center()
 	self.oldx = x - 5*e
 	self.oldy = y
 	self:SetAnchor('CENTER',x-10,y)
 	linkLayer:Draw()
 end
+
 function MoveRight(self, message)
-	e = tonumber(message) or 2
-	x,y = self:Center()
+	local e = tonumber(message) or 2
+	local x,y = self:Center()
 	self.oldx = x + 5*e
 	self.oldy = y
 	self:SetAnchor('CENTER',x+10,y)

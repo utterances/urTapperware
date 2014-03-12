@@ -98,7 +98,7 @@ function bgTouchUp(self)
 	
 	if x>CREATION_MARGIN and x<ScreenWidth()-CREATION_MARGIN and 
 		y>CREATION_MARGIN and y<ScreenHeight()-CREATION_MARGIN then
-		local region = TWRegion:new(nil,updateEnv)		
+		local region = TWRegion:new(nil,updateEnv)
 		region:Show()
 		region:SetAnchor("CENTER",x,y)
 		region.oldx = x
