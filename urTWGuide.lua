@@ -147,6 +147,10 @@ function guideView:ShowGestureCenter(r1, r2)
 	gr:Show()
 end
 
+function guideView:ShowTwoTouchGestureGuide(r1, r2)
+	
+end
+
 function guideView:Disable()
 	self.r.needsUpdate = false
 	self.isDrawing = false

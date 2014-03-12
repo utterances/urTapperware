@@ -24,7 +24,6 @@ end
 
 -- TODO refactor, move this into its own class, loading file and inspector?
 function LoadInspector(self)
-	
 	cmdlist = {}
 	
 	for file in lfs.dir(DocumentPath("texture")) do
@@ -49,6 +48,13 @@ function CloseRegion(self)
 	RemoveRegion(self)
 	CloseMenu(self)
 	-- CloseRegionWrapper(self)
+end
+
+function MiscMenu(self)
+	cmdlist = {{'Add to group', addGroupPicker, self},
+					{'Cancel', nil, nil}}
+	menu = loadSimpleMenu(cmdlist, 'command menu example')
+	menu:present(self)
 end
 
 function StartLinkRegionAction(r, draglet)
@@ -117,8 +123,8 @@ regionMenu.cmdList = {
 	{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
 	{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag},
 	{"", LockPos, 6, "tw_unlock.png"},
-	{"", LoadInspector, 7, "tw_paint.png"}
-	--{"", testMenu, 8, "tw_run.png"}
+	{"", LoadInspector, 7, "tw_paint.png"},
+	{"", MiscMenu, 8, "tw_more.png"}
 	-- {"", CloseMenu, 8, "tw_socket1.png"}
 }
 

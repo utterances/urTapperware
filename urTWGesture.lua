@@ -107,7 +107,8 @@ function gestureManager:StartHold(region)
 		-- -- draw the guide overlay
 		-- guideView:ShowGesturePull(r1, r2)
 		-- guideView:ShowGestureCenter(r1, r2)
-		-- 
+		
+		guideView:ShowTwoTouchGestureGuide(r1, r2)
 	end
 end
 
@@ -127,37 +128,53 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 			
 -- http://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
 			if r1.x-r1.w/2 < r2.x+r2.w/2 and r1.x+r1.w/2 > r2.x-r2.w/2 and
-				r1.y-r1.h/2 < r2.y+r2.h/2 and r1.y+r1.h/2 > r2.y-r2.h/2 and
-				math.abs(r1.dx)+math.abs(r1.dy)
+				r1.y-r1.h/2 < r2.y+r2.h/2 and r1.y+r1.h/2 > r2.y-r2.h/2 then
+				if math.abs(r1.dx)+math.abs(r1.dy)
 				+math.abs(r2.dx)+math.abs(r2.dy)>2 then
-				-- DPrint('overlap!')
-				self.mode = LEARN_GROUP
-				local groupR, otherR
-				if r1.regionType==RTYPE_GROUP and r2.regionType~=RTYPE_GROUP then
-					groupR = r1
-					otherR = r2
-				elseif r2.regionType==RTYPE_GROUP and r1.regionType~=RTYPE_GROUP
-					then
-					groupR = r2
-					otherR = r1
-				elseif r1.regionType~=RTYPE_GROUP and r2.regionType~=RTYPE_GROUP
-					then
-					if math.abs(r1.dx)+math.abs(r1.dy) >
-					math.abs(r2.dx)+math.abs(r2.dy) then
-						groupR = r2
-						otherR = r1
-					else
+					-- DPrint('overlap!')
+					self.mode = LEARN_GROUP
+					local groupR, otherR
+					if r1.regionType==RTYPE_GROUP and r2.regionType~=RTYPE_GROUP then
 						groupR = r1
 						otherR = r2
+					elseif r2.regionType==RTYPE_GROUP and r1.regionType~=RTYPE_GROUP
+						then
+						groupR = r2
+						otherR = r1
+					elseif r1.regionType~=RTYPE_GROUP and r2.regionType~=RTYPE_GROUP
+						then
+						if math.abs(r1.dx)+math.abs(r1.dy) >
+						math.abs(r2.dx)+math.abs(r2.dy) then
+							groupR = r2
+							otherR = r1
+						else
+							groupR = r1
+							otherR = r2
+						end
 					end
-				end
 				
-				otherR:RaiseToTop()
-				groupR.oldh = groupR.h
-				groupR.h = groupR.h + DROP_EXPAND_SIZE
-				groupR.oldw = groupR.w
-				groupR.w = groupR.w + DROP_EXPAND_SIZE
+					otherR:RaiseToTop()
+					groupR.oldh = groupR.h
+					groupR.h = groupR.h + DROP_EXPAND_SIZE
+					groupR.oldw = groupR.w
+					groupR.w = groupR.w + DROP_EXPAND_SIZE
+				end
+			else -- if regions are not overlapping
+				-- show guide here, when user move
+				local groupR, otherR
+				if math.abs(r1.dx)+math.abs(r1.dy) >
+				math.abs(r2.dx)+math.abs(r2.dy) then
+					groupR = r2
+					otherR = r1
+				else
+					groupR = r1
+					otherR = r2
+				end
+			
 			end
+			
+			
+			
 		end
 		
 		return

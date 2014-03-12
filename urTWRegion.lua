@@ -584,6 +584,7 @@ function TWRegion:CallEvents(signal, elapsed)
 end
 
 function TWRegion:OnTouchDown()
+	self.rx, self.ry = self:Center()
 	gestureManager:BeginGestureOnRegion(self)
 	if self.regionType == RTYPE_GROUP then
 		return
@@ -675,7 +676,6 @@ end
 
 function TWRegion:OnLeave()
  	gestureManager:EndHold(self)
-	-- gestureManager:EndGestureOnRegion(self)
 	self.isHeld = false
 	self.holdTimer = 0
 end
@@ -694,6 +694,7 @@ function TWRegion:OnSizeChanged()
 	self.h = self:Height()
 	self.shadow:SetWidth(self.w + SHADOW_MARGIN)
 	self.shadow:SetHeight(self.h + SHADOW_MARGIN)
+	Log:print(self:Name()..' resized to '..self.w..' '..self.h)
 end
 
 function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
@@ -750,6 +751,7 @@ function TWRegion:LoadTexture(filename)
 		self.textureFile = filename
 		self.t:SetTexture(filename)
 		notifyView:ShowTimedText("texture changed to "..filename)
+		Log:print(self:Name()..' texture changed to '..filename)
 	end
 end
 
