@@ -73,10 +73,10 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 -- initialize for events and signals
 	self.eventlist = {}
 	-- self.eventlist["OnTouchDown"] = {HoldTrigger}
-	self.eventlist["OnTouchUp"] = {}
+	-- self.eventlist["OnTouchUp"] = {}
 	self.eventlist["OnDoubleTap"] = {ToggleMenu}
-	self.eventlist["OnUpdate"] = {} 
-	self.eventlist["OnUpdate"].currentevent = nil
+	-- self.eventlist["OnUpdate"] = {} 
+	-- self.eventlist["OnUpdate"].currentevent = nil
 	
 	self.t:SetBlendMode("BLEND")
 	self.tl:SetLabel(self:Name())
@@ -384,7 +384,7 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	self.holdTimer = 0
 	self.updateEnv()
 	
-	self:CallEvents('OnDragging', {self.relativeX, self.relativeY})
+	self:CallEvents('OnDragging', {dx, dy, self.relativeX, self.relativeY})
 end
 
 -- function TWRegion:OnHScroll(scrollspeedX)
@@ -400,7 +400,7 @@ function TWRegion:Update(elapsed)
 		end
 		self.shadow:SetAlpha(self:Alpha())
 	end
-	x,y = self:Center()
+	local x,y = self:Center()
 
 	-- movements if we are playing back animation
 	if self.animationPlaying > 0 then
@@ -506,12 +506,21 @@ function TWRegion:Update(elapsed)
 		end
 	end
 	
+	-- -- animate move if we are not at x,y
+	-- if self.x ~= x or self.y ~= y then
+	-- 	if math.abs(self.x - x) < EPSILON and math.abs(self.y - y) < EPSILON then
+	-- 		self:SetAnchor('CENTER', self.x, self.y)
+	-- 	else
+	-- 		local newx = self.x + (self.x - x)*elapsed/FADEINTIME
+	-- 		local newy = self.y + (self.y - y)*elapsed/FADEINTIME
+	-- 		self:SetAnchor('CENTER', newx, newy)
+	-- 	end
+	-- end
+	
 	if self.oldx ~= x or self.oldy ~= y then
 		self.x = x
 		self.y = y
-		-- if we moved:
-		-- self.updateEnv()
-
+		
 		if self.group ~= nil then
 			-- also anchor movement here within group
 		
@@ -534,6 +543,8 @@ function TWRegion:Update(elapsed)
 				-- self.x = self.oldx
 				-- self.y = self.oldy
 			else
+				self:SetAnchor('CENTER', self.group.r, 'CENTER', self.x - self.group.r.x, self.y - self.group.r.y)
+				
 				self.oldx = self.x
 				self.oldy = self.y
 			end
@@ -547,16 +558,6 @@ function TWRegion:Update(elapsed)
 		end
 
 	else -- didn't move by user
-		-- animate move if we are not at x,y
-		if self.x ~= x or self.y ~= y then
-			if math.abs(self.x - x) < EPSILON and math.abs(self.y - y) < EPSILON then
-				self:SetAnchor('CENTER', self.x, self.y)
-			else
-				newx = self.x + (self.x - x)*elapsed/FADEINTIME
-				newy = self.y + (self.y - y)*elapsed/FADEINTIME
-				self:SetAnchor('CENTER', newx, newy)
-			end
-		end
 	end
 end
 
@@ -565,15 +566,18 @@ function TWRegion:CallEvents(signal, elapsed)
 
 	-- if current_mode == modes[1] then
 	list = self.eventlist[signal]
+	-- DPrint(#list..' '..signal)
 	-- else
 	-- 	list = vv.reventlist[signal]
 	-- end
 	
-	if list~=nil then
+	if list~=nil and #list>0 then
 		for k = 1,#list do
 			list[k](self)
 		end
 	end
+	
+	-- TODO: remove legacy above^^
 	
 	for k,v in pairs(self.outlinks) do
 		if(v.event == signal) then
@@ -758,10 +762,16 @@ function TWRegion:LoadTexture(filename)
 end
 
 function TWRegion:SetPosition(x,y)
+	if self.group == nil then
+		self:SetAnchor('CENTER', x, y)
+		self.oldx = x
+		self.oldy = y
+	else
+		self:SetAnchor('CENTER', self.group.r, 'CENTER', 
+			x - self.group.r.x, y - self.group.r.y)
+	end
 	self.x = x
 	self.y = y
-	self.oldx = x
-	self.oldy = y
 end
 
 -- #################################################################
@@ -794,9 +804,9 @@ function TWRegion:UpdateVal(message)
 		
 		if message ~= 'OnTouchUp' then
 			-- TODO: right now it shows x,y
-			if table.getn(message) > 1 then
+			if #message == 4 then
 				self.value = message
-				self.tl:SetLabel(round(message[1],3)..'\n'..round(message[2],3))
+				self.tl:SetLabel(round(message[3],3)..'\n'..round(message[4],3))
 			end
 		else
 			local incre = 1
@@ -811,8 +821,8 @@ function TWRegion:UpdateX(message)
 		if message == 'OnTouchUp' then
 			self:UpdateVal(message)			
 		else
-			if table.getn(message) > 1 then
-				self.value = message[1]
+			if #message == 4 then
+				self.value = message[3]
 				self.tl:SetLabel(round(self.value,3))
 				sendValue(self.value,1) 
 			end
@@ -825,8 +835,8 @@ function TWRegion:UpdateY(message)
 		if message == 'OnTouchUp' then
 			self:UpdateVal(message)			
 		else
-			if table.getn(message) > 1 then
-				self.value = message[2]
+			if #message == 4 then
+				self.value = message[4]
 				self.tl:SetLabel(round(self.value,3))
 				sendValue(self.value,2)	
 			end
@@ -839,6 +849,7 @@ end
 -- FIXME: learned linked movement is not working correctly, when dragging
 -- but it works for animation
 function TWRegion:Move(message, linkdata)
+	-- DPrint(message[1]..' '..message[2])
 	local x,y = self:Center()
 	
 	local dx,dy = unpack(message)
@@ -851,11 +862,10 @@ function TWRegion:Move(message, linkdata)
 	
 	local moveX = cosT*dx - sinT*dy
 	local moveY = sinT*dx + cosT*dy
-	self.oldx = x + moveX
-	self.oldy = y + moveY
-	self:SetPosition(self.oldx, self.oldy)
+	self:SetPosition(x + moveX, y + moveY)
 	-- self:SetAnchor('CENTER', self.oldx, self.oldy)
 	self:CallEvents('OnDragging', {moveX, moveY})
+	-- TODO: fix this, send relative values too
 end
 
 function MoveLeft(self, message)
