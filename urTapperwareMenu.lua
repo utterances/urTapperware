@@ -51,8 +51,9 @@ function CloseRegion(self)
 end
 
 function MiscMenu(self)
-	cmdlist = {{'Add to group', addGroupPicker, self},
-					{'Cancel', nil, nil}}
+	cmdlist = {{'Add link to region', addGroupPicker, self},
+		{'Add to group', addGroupPicker, self},
+		{'Cancel', nil, nil}}
 	menu = loadSimpleMenu(cmdlist, 'command menu example')
 	menu:present(self)
 end

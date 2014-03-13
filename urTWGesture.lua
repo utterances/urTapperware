@@ -1,9 +1,7 @@
 -- ===================
 -- = gesture manager =
 -- ===================
--- 
 -- receive hold events and do learning/recording of causal links for regions
-
 
 FADE_RATE = .8
 
@@ -14,8 +12,8 @@ LEARN_DRAG = 2
 LEARN_LINK = 3
 LEARN_GROUP = 4
 
-DROP_EXPAND_SIZE = 60
-GESTURE_ACTIVE_DIST = 30
+DROP_EXPAND_SIZE = 70
+GESTURE_ACTIVE_DIST = 50
 GESTURE_THRES_DIST = 10
 
 gestureManager = {}
@@ -32,14 +30,15 @@ function gestureManager:Reset()
 	self.rx = -1
 	self.ry = -1
 	self.mode = LEARN_OFF
+	self.gestureMode = LEARN_OFF
 	self.recording = {}
+	self.sender = nil
 	guideView:Disable()
 end
 
 function gestureManager:BeginGestureOnRegion(region)
 	if not tableHasObj(self.allRegions, region) then
 		table.insert(self.allRegions, region)
-		-- DPrint('add '..#self.allRegions)
 	end
 	
 	if #self.allRegions ~= 2 then
@@ -49,10 +48,10 @@ end
 
 function gestureManager:EndGestureOnRegion(region)
 	tableRemoveObj(self.allRegions, region)
-	-- DPrint('rem '..#self.allRegions)
-	
+	-- DPrint('rem '..#self.allRegions)	
 	if self.mode == LEARN_GROUP then
 		self.mode = LEARN_OFF
+		self.gestureMode = LEARN_OFF
 		-- two things here, turn last region into a group, then add the current region into this group
 		
 		groupRegion = self.allRegions[1]
@@ -72,7 +71,6 @@ function gestureManager:EndGestureOnRegion(region)
 			newGroup.r.y = groupRegion.ry
 			
 			RemoveRegion(groupRegion)
-			
 		else
 			groupRegion.h = groupRegion.oldh
 			groupRegion.w = groupRegion.oldw
@@ -81,9 +79,37 @@ function gestureManager:EndGestureOnRegion(region)
 			table.insert(self.allRegions, groupRegion)
 		end
 	elseif #self.allRegions ~= 2 then
+		if self.gestureMode == LEARN_LINK then
+			self.gestureMode = LEARN_OFF
+			self.mode = LEARN_OFF
+			local r1 = self.sender
+			local r2 = self.receiver
+			-- check if we are breaking or making links:
+			local oldD = (r1.rx - r2.rx)^2 + (r1.ry - r2.ry)^2
+			local newD = (r1.x - r2.x)^2 + (r1.y - r2.y)^2
+			local deg = 2.0*(newD - oldD)/oldD
+			
+			if deg > .9 then
+				for _,link in ipairs(r1.outlinks) do
+					if link.receiver == r2 then
+						link:destroy()
+					end
+				end
+				notifyView:ShowTimedText("remove links")				
+			elseif deg < -.9 then
+				notifyView:Dismiss()
+				initialLinkRegion = self.sender
+				finishLinkRegion = self.receiver
+				FinishLink(TWRegion.Move)
+			end
+						
+			r1:SetPosition(r1.rx, r1.ry)
+			r2:SetPosition(r2.rx, r2.ry)
+		end
+		
+		-- don't cancel if it's group mode, we want the drop behaviour to persist
 		guideView:Disable()
-	end
-	
+	end	
 end
 
 function gestureManager:StartHold(region)
@@ -118,10 +144,8 @@ function gestureManager:StartHold(region)
 		-- guideView:ShowGesturePull(r1, r2)
 		-- guideView:ShowGestureCenter(r1, r2)
 
-
 		r1 = self.allRegions[1]
-		r2 = self.allRegions[2]
-		
+		r2 = self.allRegions[2]		
 		guideView:ShowTwoTouchGestureGuide(r1, r2)
 	end
 end
@@ -131,9 +155,9 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 	if self.mode == LEARN_OFF then
 		-- only show event notification here if we are not doing learning
 		
-		-- if math.abs(dx) > HOLD_SHIFT_TOR*10 or math.abs(dy) > HOLD_SHIFT_TOR*10 then
-		-- 	bubbleView:ShowEvent(round(region.relativeX,3)..' '..round(region.relativeY,3), region)
-		-- end
+		if math.abs(dx) > HOLD_SHIFT_TOR*20 or math.abs(dy) > HOLD_SHIFT_TOR*20 then
+			bubbleView:ShowEvent(round(region.relativeX,3)..' '..round(region.relativeY,3), region)
+		end
 		
 		if #self.allRegions == 2 then
 			-- check for overlap, if exist check movement speed
@@ -143,10 +167,11 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 -- http://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
 			if r1.x-r1.w/2 < r2.x+r2.w/2 and r1.x+r1.w/2 > r2.x-r2.w/2 and
 				r1.y-r1.h/2 < r2.y+r2.h/2 and r1.y+r1.h/2 > r2.y-r2.h/2 then
+				-- DPrint('overlap!')
 				if math.abs(r1.dx)+math.abs(r1.dy)
 				+math.abs(r2.dx)+math.abs(r2.dy)>2 then
-					-- DPrint('overlap!')
 					self.mode = LEARN_GROUP
+					guideView:Disable()
 					
 					local groupR, otherR
 					if r1.regionType==RTYPE_GROUP and 
@@ -168,53 +193,68 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 							otherR = r2
 						end
 					end
-			
+					
 					otherR:RaiseToTop()
 					groupR.oldh = groupR.h
 					groupR.h = groupR.h + DROP_EXPAND_SIZE
 					groupR.oldw = groupR.w
 					groupR.w = groupR.w + DROP_EXPAND_SIZE
 				end
-			else -- if regions are not overlapping
+			else
+				-- if regions are not overlapping
 				-- show guide here, when user move
 				-- also detect which gesture user is performing based on offsets
 				-- compute offsets first
+				if self.gestureMode == LEARN_GROUP then
+					return -- don't do nothing if we already know the mode
+				end
+
 				local ox1 = r1.x - r1.rx
 				local oy1 = r1.y - r1.ry
 				local ox2 = r2.x - r2.rx
 				local oy2 = r2.y - r2.ry
-				
-				if math.max(math.abs(ox1)+math.abs(oy1),
-					math.abs(ox1)+math.abs(oy1)) > GESTURE_ACTIVE_DIST then
-					-- DPrint(ox1..' '..oy1..' vs '..ox2..' '..oy2)
-					if math.abs(ox1)+math.abs(oy1) < GESTURE_THRES_DIST or
-						math.abs(ox2)+math.abs(oy2) < GESTURE_THRES_DIST then
-						if r1.regionType==RTYPE_GROUP and 
-							r2.regionType~=RTYPE_GROUP then
-							self.groupR = r1
-							self.otherR = r2
-						elseif r2.regionType==RTYPE_GROUP and
-							r1.regionType~=RTYPE_GROUP then
-							self.groupR = r2
-							self.otherR = r1
-						elseif r1.regionType~=RTYPE_GROUP and
-							r2.regionType~=RTYPE_GROUP then
-							if math.abs(ox1)+math.abs(oy1) < GESTURE_THRES_DIST then
-								self.groupR = r2
-								self.otherR = r1
-							else
-								self.groupR = r1
-								self.otherR = r2
-							end
-						end
-						-- self.mode = LEARN_GROUP
-						DPrint('group mode')
-						
-					else -- in this case we are doing linking
-						self.mode = LEARN_LINK
-						DPrint('link mode')
-						
+				if (math.abs(ox1)+math.abs(oy1) > GESTURE_ACTIVE_DIST and
+					math.abs(ox2)+math.abs(oy2) > GESTURE_ACTIVE_DIST) or
+					self.gestureMode == LEARN_LINK then
+					-- show link guide, lock into link mode
+					self.gestureMode = LEARN_LINK
+					-- draw the guide overlay
+					local oldD = (r1.rx - r2.rx)^2 + (r1.ry - r2.ry)^2
+					local newD = (r1.x - r2.x)^2 + (r1.y - r2.y)^2
+					
+					guideView:ShowGestureLink(r1, r2, 2.0*(newD - oldD)/oldD)
+					if self.sender == nil then
+						self.sender = r1
+						self.receiver = r2
 					end
+
+					
+					-- if math.abs(ox1)+math.abs(oy1) < GESTURE_THRES_DIST or
+					-- 	math.abs(ox2)+math.abs(oy2) < GESTURE_THRES_DIST then
+						-- if r1.regionType==RTYPE_GROUP and 
+						-- 	r2.regionType~=RTYPE_GROUP then
+						-- 	self.groupR = r1
+						-- 	self.otherR = r2
+						-- elseif r2.regionType==RTYPE_GROUP and
+						-- 	r1.regionType~=RTYPE_GROUP then
+						-- 	self.groupR = r2
+						-- 	self.otherR = r1
+						-- elseif r1.regionType~=RTYPE_GROUP and
+						-- 	r2.regionType~=RTYPE_GROUP then
+						-- 	if math.abs(ox1)+math.abs(oy1) < GESTURE_THRES_DIST then
+						-- 		self.groupR = r2
+						-- 		self.otherR = r1
+						-- 	else
+						-- 		self.groupR = r1
+						-- 		self.otherR = r2
+						-- 	end
+						-- end
+						-- self.gestureMode = LEARN_GROUP
+						-- DPrint('group')
+					-- else -- in this case we are doing linking
+						-- learn group mode
+						
+					-- end
 				end
 			end
 		end
@@ -254,19 +294,21 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		-- end
 	elseif self.mode == LEARN_LINK and #self.allRegions == 2 then
 		-- compute how much are we off into each gesture and update vis guide
-		local r1 = self.allRegions[1]
-		local r2 = self.allRegions[2]
-		local x1,y1 = r1:Center()
-		local x2,y2 = r2:Center()
-		-- cx = (r1.rx + r2.rx)/2
-		-- cy = (r1.ry + r2.ry)/2
-		local olddist = math.abs(r1.rx - r2.rx) + math.abs(r1.ry - r2.ry)
-		local newdist = math.abs(x1 - x2) + math.abs(y1 - y2)
-		local gestDeg = newdist - olddist -- positive if pulling, negative if pinching
+		-- DPrint('in link mode!')
+		-- local r1 = self.allRegions[1]
+		-- local r2 = self.allRegions[2]
+		-- local x1,y1 = r1:Center()
+		-- local x2,y2 = r2:Center()
+		-- -- cx = (r1.rx + r2.rx)/2
+		-- -- cy = (r1.ry + r2.ry)/2
+		-- local olddist = math.abs(r1.rx - r2.rx) + math.abs(r1.ry - r2.ry)
+		-- local newdist = math.abs(x1 - x2) + math.abs(y1 - y2)
+		-- local gestDeg = newdist - olddist -- positive if pulling, negative if pinching
 		
 		-- update gesture guide here:
-		guideView:UpdatePull(-(olddist/3 - gestDeg)/(olddist/3))
-		guideView:UpdateCenter(-(gestDeg - olddist/3)/(olddist/3))
+		
+		-- guideView:UpdatePull(-(olddist/3 - gestDeg)/(olddist/3))
+		-- guideView:UpdateCenter(-(gestDeg - olddist/3)/(olddist/3))
 		
 		return
 	end	
@@ -356,6 +398,7 @@ function gestureManager:EndHold(region)
 		guideView:Disable()
 		
 	elseif region == self.holding then
+		-- DPrint('stop hold')
 		-- cancel everything, initial region stops holding
 		for i = 1,#regions do
 			regions[i]:AnimateShaking(false)
@@ -363,6 +406,7 @@ function gestureManager:EndHold(region)
 		
 		self:Reset()
 		notifyView:Dismiss()
+		guideView:Disable()
 	end
 end
 

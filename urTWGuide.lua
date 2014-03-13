@@ -55,6 +55,8 @@ function guideView:Init()
 		r:SetLayer("TOOLTIP")
 		if i==1 then
 			r.t = r:Texture("texture/tw_gestCenter.png")
+			r:SetWidth(330)
+			r:SetHeight(330)
 		else
 			r.t = r:Texture("texture/tw_gestRed.png")
 			r:SetWidth(1100)
@@ -87,7 +89,7 @@ function guideView:Init()
 		r:SetHeight(90)
 		r.t = r:Texture("texture/tw_gestTouch.png")
 		r.t:SetBlendMode("BLEND")
-		r:SetAlpha(.8)
+		r:SetAlpha(.6)
 		r:Hide()
 		table.insert(self.touchGuides, r)
 	end
@@ -115,6 +117,8 @@ function guideView:Init()
 	self.dropGuide:EnableInput(false)
 	self.dropGuide:Hide()
 	
+	self.showDrop = true
+	self.showLink = true
 end
 
 function guideView:ShowPing(x,y)
@@ -152,39 +156,29 @@ function guideView:ShowSpotlight(region)
 	self.focusOverlay:Show()
 end
 
-function guideView:ShowGesturePull(r1, r2)
-	local gr = self.gestOverlays[2] --this is the pull one
+function guideView:ShowGestureLink(r1, r2, deg)
 	local x1,y1 = r1:Center()
-	local x2,y2 = r2:Center()
-
-	gr:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
-	gr.t:SetRotation(math.atan2(x2-x1, y1-y2))
+	local x2,y2 = r2:Center()	
 	
-	gr:Show()
+	for i =1,2 do
+		local gr = self.gestOverlays[i]
+
+		-- compute alpha 1- center, 2- outter
+		if i==1 then
+			gr:SetAlpha(-deg*.7+.3) -- little overlap here
+		else
+			gr:SetAlpha(deg*.7+.3)
+		end
+		gr:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
+		gr.t:SetRotation(math.atan2(x2-x1, y1-y2))
+		
+		gr:Show()
+	end
 end
 
-function guideView:UpdatePull(deg)
-	r=self.gestOverlays[2]
-
-	r:SetAlpha(deg)
-end
-
-function guideView:UpdateCenter(deg)
+function guideView:UpdateLinkGuide(deg)
 	r=self.gestOverlays[1]
-
 	r:SetAlpha(deg)	
-end
-
-function guideView:ShowGestureCenter(r1, r2)
-	local gr = self.gestOverlays[1] --this is the pull one
-	local x1,y1 = r1:Center()
-	local x2,y2 = r2:Center()
-
-	gr:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
-	gr.t:SetRotation(math.atan2(x2-x1, y1-y2))
-	gr:MoveToTop()
-	
-	gr:Show()
 end
 
 function guideView:ShowTwoTouchGestureGuide(r1, r2)
@@ -192,6 +186,10 @@ function guideView:ShowTwoTouchGestureGuide(r1, r2)
 	if self.r.aniGuideTimer >=0 then
 		return
 	end
+	
+	self.showDrop = true
+	self.showLink = true
+	
 	local x1,y1 = r1:Center()
 	local x2,y2 = r2:Center()
 	self.r.s_x = {x1,x2}
@@ -221,6 +219,9 @@ function guideView:ShowTwoTouchGestureGuide(r1, r2)
 		self.r.e_y = {y1+dy,y2-dy}
 	end
 	
+	for i=1,2 do
+		self.touchGuides[i]:MoveToTop()
+	end
 	self.r.aniGuideTimer = 0
 	self.r:Handle("OnUpdate", guideUpdateAniGuide)
 end
@@ -228,7 +229,7 @@ end
 function guideUpdateAniGuide(self, e)	
 	-- onUpdate handle for touch animated guides
 	
-	if self.aniGuideTimer < ANIMATED_GUIDE_TIMER/4 then
+	if self.aniGuideTimer < ANIMATED_GUIDE_TIMER/4 and self.parent.showLink then
 		-- first half, do pinch/pull
 		self.parent.dropGuide:Hide()
 		
@@ -241,7 +242,7 @@ function guideUpdateAniGuide(self, e)
 			self.parent.touchGuides[i]:Show()
 		end
 		notifyView:ShowTimedText(self.guideText)
-	elseif self.aniGuideTimer > ANIMATED_GUIDE_TIMER/2 and self.aniGuideTimer < ANIMATED_GUIDE_TIMER/4*3 then
+	elseif self.aniGuideTimer > ANIMATED_GUIDE_TIMER/2 and self.aniGuideTimer < ANIMATED_GUIDE_TIMER/4*3 and self.parent.showDrop then
 		-- second half, do drop
 		self.parent.dropGuide:SetAnchor('CENTER', self.s_x[1], self.s_y[1])
 		self.parent.dropGuide:Show()

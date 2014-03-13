@@ -287,6 +287,7 @@ function TWRegion:Copy(cx, cy, groupregion)
 		local group_copy = ToggleLockGroup(newRegions)
 		group_copy.r.h = self:Height()
 		group_copy.r.w = self:Width()
+		group_copy.r:LoadTexture(self.textureFile)
 
 		Log:print('copied group with '..self.groupObj.regions[1]:Name())
 
@@ -297,9 +298,8 @@ function TWRegion:Copy(cx, cy, groupregion)
 	newRegion:Show()	
 	
 	if cx ~= nil then
-		newRegion:SetAnchor("CENTER", cx, cy)
-		newRegion.oldx = cx
-		newRegion.oldy = cy
+		newRegion:SetAnchor("CENTER",cx,cy)
+		newRegion:SetPosition(cx, cy)
 	else
 		newRegion:SetAnchor("CENTER",x+INITSIZE+20,y)
 	end
@@ -541,22 +541,22 @@ function TWRegion:Update(elapsed)
 		else
 			self.relativeX = (x - ScreenWidth()/2)/(ScreenWidth()-self.w)*2
 			self.relativeY = (y - ScreenHeight()/2)/(ScreenHeight()-self.h)*2
-			
-			-- animate move if we are not at x,y
-			if self.x ~= x or self.y ~= y then
-				if math.abs(self.x - x) < EPSILON and math.abs(self.y - y) < EPSILON then
-					self:SetAnchor('CENTER', self.x, self.y)
-				else
-					newx = self.x + (self.x - x)*elapsed/FADEINTIME
-					newy = self.y + (self.y - y)*elapsed/FADEINTIME
-					self:SetAnchor('CENTER', newx, newy)
-				end
-			end
-			
+						
 			self.oldx = self.x
 			self.oldy = self.y
 		end
 
+	else -- didn't move by user
+		-- animate move if we are not at x,y
+		if self.x ~= x or self.y ~= y then
+			if math.abs(self.x - x) < EPSILON and math.abs(self.y - y) < EPSILON then
+				self:SetAnchor('CENTER', self.x, self.y)
+			else
+				newx = self.x + (self.x - x)*elapsed/FADEINTIME
+				newy = self.y + (self.y - y)*elapsed/FADEINTIME
+				self:SetAnchor('CENTER', newx, newy)
+			end
+		end
 	end
 end
 
@@ -757,6 +757,13 @@ function TWRegion:LoadTexture(filename)
 	end
 end
 
+function TWRegion:SetPosition(x,y)
+	self.x = x
+	self.y = y
+	self.oldx = x
+	self.oldy = y
+end
+
 -- #################################################################
 -- #################################################################
 
@@ -846,7 +853,8 @@ function TWRegion:Move(message, linkdata)
 	local moveY = sinT*dx + cosT*dy
 	self.oldx = x + moveX
 	self.oldy = y + moveY
-	self:SetAnchor('CENTER', self.oldx, self.oldy)
+	self:SetPosition(self.oldx, self.oldy)
+	-- self:SetAnchor('CENTER', self.oldx, self.oldy)
 	self:CallEvents('OnDragging', {moveX, moveY})
 end
 

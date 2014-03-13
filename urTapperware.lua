@@ -100,10 +100,8 @@ function bgTouchUp(self)
 		y>CREATION_MARGIN and y<ScreenHeight()-CREATION_MARGIN then
 		local region = TWRegion:new(nil,updateEnv)
 		region:Show()
-		region:SetAnchor("CENTER",x,y)
-		region.oldx = x
-		region.oldy = y
-		-- DPrint(region:Name().." created at "..x..", "..y)
+		region:SetAnchor("CENTER",x,y) --only time to anchor directly		
+		region:SetPosition(x,y)
 	end
 	touchStateDown = false
 	-- startedSelection = false
