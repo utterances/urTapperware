@@ -137,7 +137,7 @@ function bubbleView:OnTouchUp()
 			{'Cancel', nil, nil}}
 					
 		menu = loadSimpleMenu(cmdlist, 'Restrict Movement within Container?')
-		menu:present(self:Center())		
+		menu:present(self:Center())
 	end
 end
 

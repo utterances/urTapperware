@@ -158,6 +158,43 @@ backdrop.t:SetTexCoord(0,ScreenWidth()/1024.0,1.0,0.0)
 backdrop.t:SetBlendMode("BLEND")
 backdrop:Show()
 
+-- ==================================
+-- = load file button on background =
+-- ==================================
+loadButton = Region('region', 'load button', backdrop)
+loadButton:SetWidth(64)
+loadButton:SetHeight(64)
+loadButton:SetLayer("LOW")
+loadButton:SetAnchor('CENTER',ScreenWidth()/2, 40)
+loadButton:Handle("OnDoubleTap", loadButtonTouchUp)
+loadButton:EnableInput(true)
+
+loadButton:EnableMoving(false)
+loadButton.t = loadButton:Texture("texture/tw_load_button.png")
+loadButton.t:SetBlendMode("BLEND")
+loadButton:Show()
+
+function loadButtonTouchUp()
+	-- DPrint('pressed load')
+	cmdlist = {}
+	
+	for file in lfs.dir(DocumentPath("projects")) do
+		if string.sub(file,1,1) ~= "." then
+			table.insert(cmdlist, {file, loadProjectAction, "projects/"..file})
+		end
+	end
+	
+	table.insert(cmdlist,{'Close', nil, nil})
+	menu = loadSimpleMenu(cmdlist, 'Load Project')
+	menu:present(ScreenWidth()/2, 200)
+end
+
+function loadProjectAction(filepath)
+	menu:dismiss()
+	dofile(DocumentPath(filepath))
+	notifyView:ShowTimedText('project loaded:'..filepath)
+end
+
 -- set up shadow for when tap down and hold, show future region creation location
 shadow = Region('region', 'shadow', UIParent)
 shadow:SetLayer("BACKGROUND")
@@ -384,10 +421,10 @@ function FinishLink(linkAction, data)
 		menu:dismiss()
 	end
 	
-	local link = link:new(initialLinkRegion,finishLinkRegion,linkEvent,linkAction)
-	if data ~= nil then
-		link.data = data
-	end
+	local link = link:new(initialLinkRegion,finishLinkRegion,linkEvent,linkAction,data)
+	-- if data ~= nil then
+	-- 	link.data = data
+	-- end
 	linkLayer:ResetPotentialLink()
 	linkLayer:Draw()
 	-- add notification
@@ -460,6 +497,7 @@ function AddRegionToGroup(region)
 		initialGroupRegion=nil
 	end
 end
+
 
 
 ----------------- v11.pagebutton -------------------

@@ -112,17 +112,21 @@ end
 function SimpleMenu:present(x, y)
 	local lx = x
 	local ly = y
-	
-	if self.r:Width()/2 + x > ScreenWidth() then
-		lx = x - self.r:Width()/2
-	elseif x < self.r:Width()/2 then
-		lx = x + self.r:Width()/2
-	end
-	
-	if self.r:Height()/2 + x > ScreenHeight() then
-		ly = y - self.r:Height()/2
-	elseif y < self.r:Height()/2 then
-		ly = y + self.r:Height()/2
+	if x~=nil then
+		if self.r:Width()/2 + x > ScreenWidth() then
+			lx = x - self.r:Width()/2
+		elseif x < self.r:Width()/2 then
+			lx = x + self.r:Width()/2
+		end
+
+		if self.r:Height()/2 + x > ScreenHeight() then
+			ly = y - self.r:Height()/2
+		elseif y < self.r:Height()/2 then
+			ly = y + self.r:Height()/2
+		end
+	else
+		lx = ScreenWidth()/2
+		ly = ScreenHeight()/2
 	end
 	
 	self.r:SetAnchor('CENTER',lx,ly)

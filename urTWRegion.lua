@@ -750,7 +750,9 @@ end
 function TWRegion:ToggleAnchor()
 	notifyView:ShowTimedText("toggled movement")
 	self.canBeMoved = not self.canBeMoved
-	-- self:EnableMoving(self.canBeMoved)
+	if self.group==nil then
+		self:EnableMoving(self.canBeMoved)
+	end
 end
 
 function TWRegion:LoadTexture(filename)

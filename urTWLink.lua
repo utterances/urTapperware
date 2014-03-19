@@ -4,7 +4,7 @@
 
 link = {}
 
-function link:new(initialLinkRegion, finishLinkRegion, event, action)
+function link:new(initialLinkRegion, finishLinkRegion, event, action, data)
 	o = {}
 	setmetatable(o,self)
 	self.__index = self
@@ -12,7 +12,7 @@ function link:new(initialLinkRegion, finishLinkRegion, event, action)
 	o:AddReceiver(finishLinkRegion)
 	o.event = event
 	o.action = action
-	o.data = {}
+	o.data = data or {}
 	o.menu = newLinkMenu(o)
 	linkLayer:Add(o)
 	return o
