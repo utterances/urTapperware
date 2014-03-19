@@ -384,12 +384,8 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	self.holdTimer = 0
 	self.updateEnv()
 	
-	self:CallEvents('OnDragging', {dx, dy, self.relativeX, self.relativeY})
+	-- self:CallEvents('OnDragging', {dx, dy, self.relativeX, self.relativeY})
 end
-
--- function TWRegion:OnHScroll(scrollspeedX)
--- 	DPrint(scrollspeedX)
--- end
 
 function TWRegion:Update(elapsed)
 	if self:Alpha() ~= self.alpha then
@@ -518,6 +514,8 @@ function TWRegion:Update(elapsed)
 	-- end
 	
 	if self.oldx ~= x or self.oldy ~= y then
+		local oldoldx = self.oldx
+		local oldoldy = self.oldy
 		self.x = x
 		self.y = y
 		
@@ -556,7 +554,8 @@ function TWRegion:Update(elapsed)
 			self.oldx = self.x
 			self.oldy = self.y
 		end
-
+		
+		self:CallEvents('OnDragging', {self.x - oldoldx, self.y - oldoldy, self.relativeX, self.relativeY})
 	else -- didn't move by user
 	end
 end
@@ -591,6 +590,8 @@ function TWRegion:OnTouchDown()
 	self.rx, self.ry = self:Center()
 	gestureManager:BeginGestureOnRegion(self)
 	if self.regionType == RTYPE_GROUP then
+		self.isHeld = true
+		self.holdTimer = -1
 		return
 	end
 	
@@ -618,10 +619,6 @@ end
 
 function TWRegion:TouchUp()
 	gestureManager:EndGestureOnRegion(self)
-	if self.regionType == RTYPE_GROUP then
-		return
-	end
-	-- bubbleView:ShowEvent('Touch Up', self)
 	
 	if self.isHeld and self.holdTimer < TIME_TO_HOLD then
 		-- a true tap without moving/dragging
@@ -629,10 +626,16 @@ function TWRegion:TouchUp()
 	else
 		gestureManager:EndHold(self)
 	end
+	
+	
 	self.isHeld = false
 	
 	self.holdTimer = 0
 	self.alpha = 1
+
+	if self.regionType == RTYPE_GROUP then
+		return
+	end
 
 	-- if initialLinkRegion == nil then
 		--DPrint("")

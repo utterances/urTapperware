@@ -148,7 +148,29 @@ function Group:AddRegion(region)
 	region:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', 
 		region.x - self.r.x + self.r.w/2, region.y - self.r.y + self.r.h/2)
 	region:RaiseToTop()
+	CloseMenu(region)
 	Log:print('added '..region:Name()..' to group')
+end
+
+function Group:NestRegionInto(r1, r2)
+	-- nest r1 into r2, change r2 into a group if not already one
+	if r2.regionType ~= RTYPE_GROUP then
+		-- create new group, set sizes
+		newGroup = ToggleLockGroup({r1})
+		newGroup.h = r2.h
+		newGroup.w = r2.w
+		-- newGroup.r:SetAnchor("CENTER", groupRegion.rx, groupRegion.ry)
+		-- newGroup.r.x = r2.rx
+		-- newGroup.r.y = r2.ry
+
+		if r2.textureFile~=nil then
+			newGroup.r:LoadTexture(r2.textureFile)
+		end
+
+		RemoveRegion(r2)
+	else
+		r2.groupObj:AddRegion(r1)
+	end
 end
 
 function Group:Draw()
@@ -199,8 +221,6 @@ function Group:Draw()
 	self.menu.item:EnableInput(false)
 end
 
-
-
 function Group:OnSizeChanged()
 	-- the user changed the size, make sure it's not too small:
 	-- here, self is group.r, not group
@@ -245,7 +265,6 @@ function Group:OnSizeChanged()
 	self.w = self:Width()
 	self.h = self:Height()
 end
-
 
 function Group:Hide()
 	self:Hide()

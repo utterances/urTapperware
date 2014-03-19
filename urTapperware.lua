@@ -65,6 +65,9 @@ end
 
 function bgTouchUp(self)
 	shadow:Hide()
+	notifyView:Dismiss()
+	gestureManager:SetSelector(nil)
+	
 	if startedSelection then
 		startedSelection = false
 		local tempSelected = {}
@@ -426,29 +429,35 @@ end
 
 function addGroupPicker(region)
 	initialGroupRegion = region
-	notifyView:ShowTimedText("Tap a region or group to add")
+	-- if menu~=nil then
+	menu:dismiss()
+	-- end
+	notifyView:ShowText("Tap a region or group to add")
 	gestureManager:SetSelector(AddRegionToGroup)
 end
 
 function AddRegionToGroup(region)
 	if initialGroupRegion~=nil then
-		if menu~=nil then
-			menu:dismiss()
-		end
-		
 		if region.regionType ~= RTYPE_GROUP then
-			-- create new group, set sizes
-			newGroup = ToggleLockGroup({initialGroupRegion})
-			newGroup.h = region.h
-			newGroup.w = region.w
-			-- newGroup.r:SetAnchor("CENTER", groupRegion.rx, groupRegion.ry)
-			newGroup.r.x = region.rx
-			newGroup.r.y = region.ry
+			if region.group==nil then
+				-- create new group, set sizes
+				newGroup = ToggleLockGroup({initialGroupRegion})
+				newGroup.r.h = region.h
+				newGroup.r.w = region.w
+				newGroup.r:SetAnchor("CENTER", region.x, region.y)
+				newGroup.r.x = region.x
+				newGroup.r.y = region.y
 			
-			RemoveRegion(region)
+				if region.textureFile~=nil then
+					newGroup.r:LoadTexture(region.textureFile)
+				end
+
+				RemoveRegion(region)
+			end
 		else
 			region.groupObj:AddRegion(initialGroupRegion)
 		end
+		initialGroupRegion=nil
 	end
 end
 

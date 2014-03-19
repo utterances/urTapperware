@@ -165,9 +165,9 @@ function guideView:ShowGestureLink(r1, r2, deg)
 
 		-- compute alpha 1- center, 2- outter
 		if i==1 then
-			gr:SetAlpha(-deg*.7+.3) -- little overlap here
+			gr:SetAlpha(-deg*.6+.4) -- little overlap here
 		else
-			gr:SetAlpha(deg*.7+.3)
+			gr:SetAlpha(deg*.6+.4)
 		end
 		gr:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
 		gr.t:SetRotation(math.atan2(x2-x1, y1-y2))
@@ -267,6 +267,12 @@ function guideUpdateAniGuide(self, e)
 	if self.aniGuideTimer > ANIMATED_GUIDE_TIMER then
 		self.aniGuideTimer = 0
 	end
+end
+
+function guideView:ShowMenuDragletGuide(r)
+	
+	
+	
 end
 
 function guideView:Disable()

@@ -34,7 +34,7 @@ function LoadInspector(self)
 	
 	table.insert(cmdlist,{'Cancel', nil, nil})
 	menu = loadSimpleMenu(cmdlist, 'Choose Texture File:')
-	menu:present(self)
+	menu:present(self:Center())
 	inspectedRegion = self
 end
 
@@ -54,8 +54,8 @@ function MiscMenu(self)
 	cmdlist = {{'Add link to region', StartLinkRegion, self},
 		{'Add to group', addGroupPicker, self},
 		{'Cancel', nil, nil}}
-	menu = loadSimpleMenu(cmdlist, 'command menu example')
-	menu:present(self)
+	menu = loadSimpleMenu(cmdlist, 'Command Menu')
+	menu:present(self:Center())
 end
 
 function StartLinkRegionAction(r, draglet)

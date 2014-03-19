@@ -13,7 +13,7 @@ LEARN_LINK = 3
 LEARN_GROUP = 4
 
 DROP_EXPAND_SIZE = 70
-GESTURE_ACTIVE_DIST = 50
+GESTURE_ACTIVE_DIST = 40
 GESTURE_THRES_DIST = 10
 
 gestureManager = {}
@@ -64,11 +64,15 @@ function gestureManager:EndGestureOnRegion(region)
 		if groupRegion.regionType ~= RTYPE_GROUP then
 			-- create new group, set sizes
 			newGroup = ToggleLockGroup({region})
-			newGroup.h = groupRegion.h
-			newGroup.w = groupRegion.w
+			newGroup.r.h = groupRegion.h
+			newGroup.r.w = groupRegion.w
 			-- newGroup.r:SetAnchor("CENTER", groupRegion.rx, groupRegion.ry)
 			newGroup.r.x = groupRegion.rx
 			newGroup.r.y = groupRegion.ry
+			
+			if region.textureFile~=nil then
+				newGroup.r:LoadTexture(region.textureFile)
+			end
 			
 			RemoveRegion(groupRegion)
 		else
