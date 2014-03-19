@@ -335,7 +335,11 @@ function StartLinkRegion(self, draglet)
 		OpenRegionMenu(self)
 	else
 		-- otherwise ask for a target
-		DPrint("Tap another region to link")
+		if menu~=nil then
+			menu:dismiss()
+		end
+		notifyView:ShowTimedText("Tap another region to link")
+		gestureManager:SetSelector(ChooseEvent)
 	end
 end
 
@@ -405,10 +409,6 @@ function DuplicateRegion(r, cx, cy)
 	OpenRegionMenu(r)
 end
 
--- function SwitchRegionType(self)
--- 	self:SwitchRegionType()
--- end
-
 function ShowPotentialLink(region, draglet)
 	linkLayer:DrawPotentialLink(region, draglet)
 end
@@ -420,13 +420,38 @@ function RegionOverLap(r1, r2)
 	(r1:Height() + r2:Height())/1.8 > math.abs(y1-y2)
 end
 
-function sendEvent(region, event) 
-	region:event()
-end
-
 function updateEnv()
 	linkLayer:Draw()
 end
+
+function addGroupPicker(region)
+	initialGroupRegion = region
+	notifyView:ShowTimedText("Tap a region or group to add")
+	gestureManager:SetSelector(AddRegionToGroup)
+end
+
+function AddRegionToGroup(region)
+	if initialGroupRegion~=nil then
+		if menu~=nil then
+			menu:dismiss()
+		end
+		
+		if region.regionType ~= RTYPE_GROUP then
+			-- create new group, set sizes
+			newGroup = ToggleLockGroup({initialGroupRegion})
+			newGroup.h = region.h
+			newGroup.w = region.w
+			-- newGroup.r:SetAnchor("CENTER", groupRegion.rx, groupRegion.ry)
+			newGroup.r.x = region.rx
+			newGroup.r.y = region.ry
+			
+			RemoveRegion(region)
+		else
+			region.groupObj:AddRegion(initialGroupRegion)
+		end
+	end
+end
+
 
 ----------------- v11.pagebutton -------------------
 local pagebutton=Region('region', 'pagebutton', UIParent)

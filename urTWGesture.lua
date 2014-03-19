@@ -336,6 +336,11 @@ end
 
 function gestureManager:Tapped(region)
 	if self.mode == LEARN_OFF then
+		-- do selector stuff if selector is active
+		if self.selector~=nil then
+			self.selector(region)
+			self.selector=nil
+		end
 		return
 	end
 	if region ~= self.holding then
@@ -409,6 +414,10 @@ function gestureManager:EndHold(region)
 		notifyView:Dismiss()
 		guideView:Disable()
 	end
+end
+
+function gestureManager:SetSelector(selectorFunc)
+	self.selector=selectorFunc
 end
 
 -- function gestureManager:EndHold(region)

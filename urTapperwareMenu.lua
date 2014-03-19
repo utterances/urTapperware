@@ -51,7 +51,7 @@ function CloseRegion(self)
 end
 
 function MiscMenu(self)
-	cmdlist = {{'Add link to region', addGroupPicker, self},
+	cmdlist = {{'Add link to region', StartLinkRegion, self},
 		{'Add to group', addGroupPicker, self},
 		{'Cancel', nil, nil}}
 	menu = loadSimpleMenu(cmdlist, 'command menu example')
@@ -91,7 +91,11 @@ function LockPos(r)
 end
 
 function DupOnDrag(r)
-	-- DPrint("drag dup")
+	DPrint("drag dup")
+end
+
+function JumpGuide(region, draglet)
+	
 end
 
 function DeleteLinkAction(link)
@@ -120,9 +124,9 @@ local regionMenu = {}
 -- label, func, anchor relative to region, image file, draggable or not
 regionMenu.cmdList = {
 	{"", CloseRegion, 1, "tw_closebox.png"},
-	{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag},
+	{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, JumpGuide},
 	{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
-	{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag},
+	{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, JumpGuide},
 	{"", LockPos, 6, "tw_unlock.png"},
 	{"", LoadInspector, 7, "tw_paint.png"},
 	{"", MiscMenu, 8, "tw_more.png"}
@@ -257,7 +261,7 @@ function OpenMenu(self)
 	for i = 1,#regionMenu.items do
 		if regionMenu.items[i].draglet ~= nil then
 			regionMenu.items[i]:EnableMoving(true)
-			regionMenu.items[i]:Handle("OnUpdate", regionMenu.items[i].draglet)
+			regionMenu.items[i]:Handle("OnDragging", regionMenu.items[i].draglet)
 		end
 				
 		-- regionMenu.items[i]:Handle("OnTouchDown", testMenu)
