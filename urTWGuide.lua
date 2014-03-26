@@ -50,9 +50,10 @@ function guideView:Init()
 	
 	-- init gesture overlays, these fade out or in depends
 	self.gestOverlays = {}
-	for i=1,3 do
+	-- 1: pull apart, 2: center, 3,4: grouping drop zones
+	for i=1,4 do
 		local r = Region('region', 'gestO', self.r)
-		r:SetLayer("TOOLTIP")
+		r:SetLayer("HIGH")
 		if i==1 then
 			r.t = r:Texture("texture/tw_gestCenter.png")
 			r:SetWidth(330)
@@ -63,14 +64,16 @@ function guideView:Init()
 			r:SetHeight(1100)
 		else
 			r.t = r:Texture("texture/tw_dropGuideZoneSolid.png")
-			r:SetWidth(400)
-			r:SetHeight(400)
+			r:SetWidth(350)
+			r:SetHeight(350)
 		end
 		r.t:SetBlendMode("BLEND")
 		r:SetAlpha(.7)
 		r:Hide()
 		table.insert(self.gestOverlays, r)
 	end
+	-- move the inner one to top for better visibility
+	self.gestOverlays[1]:MoveToTop()
 	
 	self.arrows = {}
 	for i=1,2 do
@@ -164,26 +167,35 @@ function guideView:ShowGestureLink(r1, r2, deg)
 	local x1,y1 = r1:Center()
 	local x2,y2 = r2:Center()	
 	
-	for i =1,2 do
+	for i =1,4 do
 		local gr = self.gestOverlays[i]
 
 		-- compute alpha 1- center, 2- outter
-		if i==1 then
-			gr:SetAlpha(-deg*.6+.4) -- little overlap here
+		if i==2 then
+			gr:SetAlpha(deg*.5+.5)
 		else
-			gr:SetAlpha(deg*.6+.4)
+			gr:SetAlpha(-deg*.5+.5) -- little overlap here
 		end
-		gr:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
-		gr.t:SetRotation(math.atan2(x2-x1, y1-y2))
 		
+		if i<3 then
+			gr:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
+			gr.t:SetRotation(math.atan2(x2-x1, y1-y2))
+		else
+			if i==3 then
+				gr:SetAnchor('CENTER', x1,y1)
+			else
+				-- i==4
+				gr:SetAnchor('CENTER', x2,y2)
+			end
+		end
 		gr:Show()
 	end
 end
 
-function guideView:UpdateLinkGuide(deg)
-	r=self.gestOverlays[1]
-	r:SetAlpha(deg)	
-end
+-- function guideView:UpdateLinkGuide(deg)
+-- 	r=self.gestOverlays[1]
+-- 	r:SetAlpha(deg)	
+-- end
 
 function guideView:ShowTwoTouchGestureGuide(r1, r2)
 	-- set up animated guides, moving path
@@ -293,9 +305,13 @@ function guideView:Disable()
 	self.focusOverlay:Hide()
 	
 	for i =1,2 do
-		self.gestOverlays[i]:Hide()
 		self.touchGuides[i]:Hide()
 	end
+	
+	for i =1,4 do
+		self.gestOverlays[i]:Hide()
+	end
+	
 	self.dropGuide:Hide()
 	
 end

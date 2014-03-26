@@ -494,6 +494,7 @@ function AddRegionToGroup(region)
 			end
 		else
 			region.groupObj:AddRegion(initialGroupRegion)
+			-- TODO:fix bug here, double movements on nested regions?
 		end
 		initialGroupRegion=nil
 	end

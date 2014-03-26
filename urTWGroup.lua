@@ -144,9 +144,9 @@ function Group:AddRegion(region)
 	table.insert(self.regions, region)
 	region.group = self
 	
-	x,y = region:Center()
+	local x,y = region:Center()
 	region:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', 
-		region.x - self.r.x + self.r.w/2, region.y - self.r.y + self.r.h/2)
+		x - self.r.x + self.r.w/2, y - self.r.y + self.r.h/2)
 	region:RaiseToTop()
 	CloseMenu(region)
 	Log:print('added '..region:Name()..' to group')

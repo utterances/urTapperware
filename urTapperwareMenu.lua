@@ -72,6 +72,7 @@ function StartLinkOnDrag(self)
 	-- self is the menu button/draglet
 	-- target is the parent region
 	self.isDragging = true
+	notifyView:ShowTimedText("drop on region to link")
 	local target = self.parent.v
 	-- draw the potential link line here:
 	ShowPotentialLink(target, self)
@@ -305,7 +306,7 @@ function OpenMenu(self)
 			regionMenu.items[i]:Handle("OnDragging", regionMenu.items[i].draglet)
 			regionMenu.items[i]:Handle("OnUpdate", regionMenu.items[i].aniHandler)
 			-- need to stop animation when user interact
-			regionMenu.items[i]:Handle("OnTouchDown", nil)
+			-- regionMenu.items[i]:Handle("OnTouchDown", nil)
 			regionMenu.items[i].isDragging = false
 			
 		end
