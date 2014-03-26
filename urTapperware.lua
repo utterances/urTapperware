@@ -161,19 +161,6 @@ backdrop:Show()
 -- ==================================
 -- = load file button on background =
 -- ==================================
-loadButton = Region('region', 'load button', backdrop)
-loadButton:SetWidth(64)
-loadButton:SetHeight(64)
-loadButton:SetLayer("TOOLTIP")
-loadButton:SetAnchor('CENTER', ScreenWidth()-60, 60)
-loadButton:Handle("OnDoubleTap", loadButtonTouchUp)
-loadButton:EnableInput(true)
-loadButton:EnableMoving(false)
-loadButton.t = loadButton:Texture("texture/tw_load_button.png")
-loadButton.t:SetBlendMode("BLEND")
-loadButton:MoveToTop()
-loadButton:Show()
-
 function loadButtonTouchUp()
 	-- DPrint('pressed load')
 	cmdlist = {}
@@ -195,6 +182,20 @@ function loadProjectAction(filepath)
 	notifyView:ShowTimedText('project loaded:'..filepath)
 end
 
+loadButton = Region('region', 'load button', backdrop)
+loadButton:SetWidth(64)
+loadButton:SetHeight(64)
+loadButton:SetLayer("TOOLTIP")
+loadButton:SetAnchor('CENTER', ScreenWidth()-60, 60)
+loadButton:Handle("OnDoubleTap", loadButtonTouchUp)
+loadButton:EnableInput(true)
+loadButton:EnableMoving(false)
+loadButton.t = loadButton:Texture("texture/tw_load_button.png")
+loadButton.t:SetBlendMode("BLEND")
+loadButton:MoveToTop()
+loadButton:Show()
+
+
 -- set up shadow for when tap down and hold, show future region creation location
 shadow = Region('region', 'shadow', UIParent)
 shadow:SetLayer("BACKGROUND")
@@ -202,7 +203,7 @@ shadow.t = shadow:Texture("tw_roundrec_create.png")
 shadow.t:SetBlendMode("BLEND")
 
 -- set up layer for drawing selection boxes or lasso:
-selectionLayer = Region('region', 'selection', UIParent)
+local selectionLayer = Region('region', 'selection', UIParent)
 selectionLayer:SetLayer("BACKGROUND")
 selectionLayer:SetWidth(ScreenWidth())
 selectionLayer:SetHeight(ScreenHeight())

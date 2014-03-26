@@ -98,6 +98,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 
 	self.usable = true
 	self.t:SetTexture("tw_roundrec.png") -- reset texture
+	self.shadow:Show()
 	
 	self:Handle("OnDoubleTap", TWRegion.OnDoubleTap)
 	self:Handle("OnTouchDown", TWRegion.OnTouchDown)
@@ -848,8 +849,6 @@ function TWRegion:UpdateY(message)
 		end
 	end
 end
-
-
 
 -- FIXME: learned linked movement is not working correctly, when dragging
 -- but it works for animation

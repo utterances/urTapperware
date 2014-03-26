@@ -8,13 +8,12 @@ SMALLBUTTONSIZE = 40 -- small size
 BUTTONOFFSET = 3
 BUTTONIMAGESIZE = 80	-- size of the square icon image
 
-DRAGLET_ANI_DELAY = 1	-- delay between draglet animation
+DRAGLET_ANI_DELAY = 2	-- delay between draglet animation
 DRAGLET_ANI_DUR = 1	-- duration of draglet animation
-DRAGLET_ANI_DIST = 1
+DRAGLET_ANI_DIST = 6
 
 recycledLinkMenu = {}
 inspectedRegion = nil
-
 
 -- function Menu:new (o)
 --    o = o or {}   -- create object if user does not provide one
@@ -65,12 +64,14 @@ function MiscMenu(self)
 end
 
 function StartLinkRegionAction(r, draglet)
+	draglet.isDragging = false
 	StartLinkRegion(r, draglet)
 end
 
 function StartLinkOnDrag(self)
 	-- self is the menu button/draglet
 	-- target is the parent region
+	self.isDragging = true
 	local target = self.parent.v
 	-- draw the potential link line here:
 	ShowPotentialLink(target, self)
@@ -83,6 +84,7 @@ end
 
 function DuplicateAction(r, draglet)
 	if draglet ~= nil then
+		draglet.isDragging=false
 		x,y = draglet:Center()
 		DuplicateRegion(r, x, y)
 	else
@@ -95,8 +97,9 @@ function LockPos(r)
 	CloseMenu(r)
 end
 
-function DupOnDrag(r)
-	DPrint("drag dup")
+function DupOnDrag(self)
+	self.isDragging = true
+	notifyView:ShowTimedText("drop to duplicate")
 end
 
 function DeleteLinkAction(link)
@@ -121,19 +124,6 @@ local buttonLocation = {
 	[9]={"CENTER", 0, 0}
 }
 
-local regionMenu = {}
--- label, func, anchor relative to region, image file, draggable or not
-regionMenu.cmdList = {
-	{"", CloseRegion, 1, "tw_closebox.png"},
-	{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
-	{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
-	{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
-	{"", LockPos, 6, "tw_unlock.png"},
-	{"", LoadInspector, 7, "tw_paint.png"},
-	{"", MiscMenu, 8, "tw_more.png"}
-	-- {"", CloseMenu, 8, "tw_socket1.png"}
-}
-
 function DragGuideAnimationHandler(self, elapsed)
 	-- handles animation guide for draglets
 	
@@ -154,13 +144,11 @@ function DragGuideAnimationHandler(self, elapsed)
 				-- compute new position of draglet
 				local delta = 1 - math.abs(self.timer - DRAGLET_ANI_DUR/2)
 									/DRAGLET_ANI_DUR*2
-				DPrint(delta)
 				delta = -delta*DRAGLET_ANI_DIST + 1
 				self:SetAnchor("CENTER", target,
 															buttonLocation[pos][1],
 															buttonLocation[pos][2]*delta,
 															buttonLocation[pos][3]*delta)
-				
 			end
 		else
 			if self.timer > DRAGLET_ANI_DELAY then
@@ -171,6 +159,20 @@ function DragGuideAnimationHandler(self, elapsed)
 		self.timer = self.timer + elapsed
 	end
 end
+
+local regionMenu = {}
+-- label, func, anchor relative to region, image file, draggable or not
+regionMenu.cmdList = {
+	{"", CloseRegion, 1, "tw_closebox.png"},
+	{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
+	{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
+	{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
+	{"", LockPos, 6, "tw_unlock.png"},
+	{"", LoadInspector, 7, "tw_paint.png"},
+	{"", MiscMenu, 8, "tw_more.png"}
+	-- {"", CloseMenu, 8, "tw_socket1.png"}
+}
+
 
 local linkMenu = {}
 linkMenu.cmdList = {

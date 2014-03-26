@@ -99,7 +99,7 @@ function gestureManager:EndGestureOnRegion(region)
 						link:destroy()
 					end
 				end
-				notifyView:ShowTimedText("remove links")				
+				notifyView:ShowTimedText("remove links")
 			elseif deg < -.9 then
 				notifyView:Dismiss()
 				linkEvent = 'OnDragging'
