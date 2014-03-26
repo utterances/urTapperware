@@ -164,14 +164,14 @@ backdrop:Show()
 loadButton = Region('region', 'load button', backdrop)
 loadButton:SetWidth(64)
 loadButton:SetHeight(64)
-loadButton:SetLayer("LOW")
-loadButton:SetAnchor('CENTER',ScreenWidth()/2, 40)
+loadButton:SetLayer("TOOLTIP")
+loadButton:SetAnchor('CENTER', ScreenWidth()-60, 60)
 loadButton:Handle("OnDoubleTap", loadButtonTouchUp)
 loadButton:EnableInput(true)
-
 loadButton:EnableMoving(false)
 loadButton.t = loadButton:Texture("texture/tw_load_button.png")
 loadButton.t:SetBlendMode("BLEND")
+loadButton:MoveToTop()
 loadButton:Show()
 
 function loadButtonTouchUp()
@@ -186,7 +186,7 @@ function loadButtonTouchUp()
 	
 	table.insert(cmdlist,{'Close', nil, nil})
 	menu = loadSimpleMenu(cmdlist, 'Load Project')
-	menu:present(ScreenWidth()/2, 200)
+	menu:present(ScreenWidth(), 200)
 end
 
 function loadProjectAction(filepath)

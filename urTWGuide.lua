@@ -50,17 +50,21 @@ function guideView:Init()
 	
 	-- init gesture overlays, these fade out or in depends
 	self.gestOverlays = {}
-	for i=1,2 do
+	for i=1,3 do
 		local r = Region('region', 'gestO', self.r)
 		r:SetLayer("TOOLTIP")
 		if i==1 then
 			r.t = r:Texture("texture/tw_gestCenter.png")
 			r:SetWidth(330)
 			r:SetHeight(330)
-		else
+		elseif i == 2 then
 			r.t = r:Texture("texture/tw_gestRed.png")
 			r:SetWidth(1100)
 			r:SetHeight(1100)
+		else
+			r.t = r:Texture("texture/tw_dropGuideZoneSolid.png")
+			r:SetWidth(400)
+			r:SetHeight(400)
 		end
 		r.t:SetBlendMode("BLEND")
 		r:SetAlpha(.7)

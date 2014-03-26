@@ -13,7 +13,7 @@ LEARN_LINK = 3
 LEARN_GROUP = 4
 
 DROP_EXPAND_SIZE = 70
-GESTURE_ACTIVE_DIST = 40
+GESTURE_ACTIVE_DIST = 20
 GESTURE_THRES_DIST = 10
 
 gestureManager = {}
@@ -107,7 +107,7 @@ function gestureManager:EndGestureOnRegion(region)
 				finishLinkRegion = self.receiver
 				FinishLink(TWRegion.Move)
 			end
-						
+			
 			r1:SetPosition(r1.rx, r1.ry)
 			r2:SetPosition(r2.rx, r2.ry)
 		end

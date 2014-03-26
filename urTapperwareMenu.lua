@@ -1,15 +1,20 @@
 -- ============================
--- = Menus, contextual mostly =
+-- = Menus, contextual mostly hugs hugs hugs and kisses=
 -- ============================
--- we need region specific menu for hooking up signals(sender and receiver), and then creation menu
+-- we need region specific menu for hooking up signals(sender and receiver), and then creation menu and qi is my hero i <3 him
 
 BUTTONSIZE = 54	-- on screen size in points/pixels
 SMALLBUTTONSIZE = 40 -- small size
 BUTTONOFFSET = 3
-BUTTONIMAGESIZE = 80		-- size of the square icon image
+BUTTONIMAGESIZE = 80	-- size of the square icon image
+
+DRAGLET_ANI_DELAY = 1	-- delay between draglet animation
+DRAGLET_ANI_DUR = 1	-- duration of draglet animation
+DRAGLET_ANI_DIST = 1
 
 recycledLinkMenu = {}
 inspectedRegion = nil
+
 
 -- function Menu:new (o)
 --    o = o or {}   -- create object if user does not provide one
@@ -51,8 +56,9 @@ function CloseRegion(self)
 end
 
 function MiscMenu(self)
-	cmdlist = {{'Add link to region', StartLinkRegion, self},
+	cmdlist = {{'Add link', StartLinkRegion, self},
 		{'Add to group', addGroupPicker, self},
+		{'Toggle Movement', LockPos, self},
 		{'Cancel', nil, nil}}
 	menu = loadSimpleMenu(cmdlist, 'Command Menu')
 	menu:present(self:Center())
@@ -62,7 +68,6 @@ function StartLinkRegionAction(r, draglet)
 	StartLinkRegion(r, draglet)
 end
 
--- TODO this is not working yet since ondragstart is not implemented
 function StartLinkOnDrag(self)
 	-- self is the menu button/draglet
 	-- target is the parent region
@@ -94,10 +99,6 @@ function DupOnDrag(r)
 	DPrint("drag dup")
 end
 
-function JumpGuide(region, draglet)
-	
-end
-
 function DeleteLinkAction(link)
 	link:destroy()
 --	RemoveLinkBetween(r1, r2)
@@ -124,14 +125,52 @@ local regionMenu = {}
 -- label, func, anchor relative to region, image file, draggable or not
 regionMenu.cmdList = {
 	{"", CloseRegion, 1, "tw_closebox.png"},
-	{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, JumpGuide},
+	{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
 	{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
-	{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, JumpGuide},
+	{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
 	{"", LockPos, 6, "tw_unlock.png"},
 	{"", LoadInspector, 7, "tw_paint.png"},
 	{"", MiscMenu, 8, "tw_more.png"}
 	-- {"", CloseMenu, 8, "tw_socket1.png"}
 }
+
+function DragGuideAnimationHandler(self, elapsed)
+	-- handles animation guide for draglets
+	
+	if not self.isDragging then
+		if not self.isWaiting then
+			-- do animation
+			local target = self.parent.v
+			local pos = self.anchorpos
+			
+			if self.timer > DRAGLET_ANI_DUR then
+				self.timer = 0
+				self.isWaiting = true
+				-- reset location
+				self:SetAnchor("CENTER", target, buttonLocation[pos][1],
+															buttonLocation[pos][2],
+															buttonLocation[pos][3])
+			else
+				-- compute new position of draglet
+				local delta = 1 - math.abs(self.timer - DRAGLET_ANI_DUR/2)
+									/DRAGLET_ANI_DUR*2
+				DPrint(delta)
+				delta = -delta*DRAGLET_ANI_DIST + 1
+				self:SetAnchor("CENTER", target,
+															buttonLocation[pos][1],
+															buttonLocation[pos][2]*delta,
+															buttonLocation[pos][3]*delta)
+				
+			end
+		else
+			if self.timer > DRAGLET_ANI_DELAY then
+				self.timer = 0
+				self.isWaiting = false
+			end
+		end 
+		self.timer = self.timer + elapsed
+	end
+end
 
 local linkMenu = {}
 linkMenu.cmdList = {
@@ -165,27 +204,27 @@ function initMenus(menuObj)
 		r.tl:SetLabel("\n"..label)
 		r.tl:SetVerticalAlign("TOP")
 		r.tl:SetHorizontalAlign("CENTER")
-		-- r.tl:SetSpacing(40)
 		r.tl:SetFontHeight(13)
 		r.tl:SetFont("Avenir Next")
 		r.tl:SetColor(0,0,0,255) 	
 		r.t = r:Texture(image)
 		r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
 		r.t:SetBlendMode("BLEND")
-		-- r:SetAnchor(anchor, UIParent)
 		r:SetLayer("TOOLTIP")
 		r:SetHeight(BUTTONSIZE)
 		r:SetWidth(BUTTONSIZE)
 		r:MoveToTop()
-		-- r:Show()
 		r:Hide()
-		-- r:Handle("OnTouchDown",OptEventFunc)
 
 		r.func = func
 		r.anchorpos = anchor
 		r.parent = menuObj
 		r.draglet = item[5]
-
+		r.aniHandler = item[6]
+		r.isDragging = false
+		r.timer = 0
+		r.isWaiting = true
+		
 		table.insert(menuObj.items, r)
 	end
 	menuObj.show = 0
@@ -262,11 +301,16 @@ function OpenMenu(self)
 		if regionMenu.items[i].draglet ~= nil then
 			regionMenu.items[i]:EnableMoving(true)
 			regionMenu.items[i]:Handle("OnDragging", regionMenu.items[i].draglet)
+			regionMenu.items[i]:Handle("OnUpdate", regionMenu.items[i].aniHandler)
+			-- need to stop animation when user interact
+			regionMenu.items[i]:Handle("OnTouchDown", nil)
+			regionMenu.items[i].isDragging = false
+			
 		end
 				
 		-- regionMenu.items[i]:Handle("OnTouchDown", testMenu)
 		regionMenu.items[i]:Handle("OnTouchUp", OptEventFunc)
-		pos = regionMenu.items[i].anchorpos
+		local pos = regionMenu.items[i].anchorpos
 		regionMenu.items[i]:SetAnchor("CENTER", self,
 													buttonLocation[pos][1],
 													buttonLocation[pos][2],
@@ -299,7 +343,7 @@ function OpenMenu(self)
 	-- 			linkReceiverMenu.v = regions[i]
 	-- 		end
 	-- 		
-	-- 		break															
+	-- 		break
 	-- 	end
 	-- end
 end
@@ -329,6 +373,7 @@ function CloseMenu(self)
 		regionMenu.items[i]:EnableInput(false)
 		regionMenu.items[i]:Handle("OnTouchUp", nil)
 		regionMenu.items[i]:Handle("OnUpdate", nil)
+		regionMenu.items[i]:Handle("OnTouchDown", nil)
 	end
 	regionMenu.show = 0
 	regionMenu.v = nil
@@ -359,7 +404,10 @@ end
 
 -- this actually calls all the menu function on the right region(s)
 function OptEventFunc(self)
-	-- DPrint("optevent func")
+	if self:ReadHandle("OnUpdate") ~= nil then
+		self:Handle("OnUpdate", nil)
+	end
+	
 	local target = self.parent.v
 	self.func(target, self)
 end
