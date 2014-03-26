@@ -576,23 +576,33 @@ function TWRegion:CallEvents(signal, elapsed)
 	
 	-- TODO: remove legacy above^^
 	
+	local origin = self
+	
+	-- if signal == 'OnDragging' then
+	-- 	for _, inlink in pairs(self.inlinks) do
+	-- 		if inlink.event == signal and inlink.origin ~= nil then
+	-- 			origin = inlink.origin
+	-- 		end
+	-- 	end
+	-- end
+	
 	for k,v in pairs(self.outlinks) do
 		if(v.event == signal) then
 			local send = true
+			
 			if signal == 'OnDragging' then
 				for _, inlink in pairs(self.inlinks) do
-					if inlink.isFresh then
-						if inlink.sender == v.receiver then
-							send = false
-						end
-						inlink.isFresh = false
+					if inlink.event == signal and inlink.origin == v.receiver then
+						send = false
+						inlink.origin = nil
 					end
 				end
 			end
 			
 			if send then
 				elapsed = elapsed or signal
-				v:SendMessageToReceivers(elapsed)
+				
+				v:SendMessageToReceivers(elapsed, origin)
 			end
 		end
 	end

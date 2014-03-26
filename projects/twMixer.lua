@@ -36,7 +36,7 @@ r3:ToggleAnchor()
 r3:SetAnchor('CENTER', rgroup.r, 'CENTER', 0, 0)
 
 local r4 = TWRegion:new(nil, updateEnv)
-r4:LoadTexture('texture/tw_button.png')
+r4:LoadTexture('texture/tw_note.png')
 r4:SetPosition(ScreenWidth()/2,ScreenHeight()/2)
 r4.h = 100
 r4.w = 100
@@ -51,4 +51,7 @@ r4:ToggleAnchor()
 r4:SetAnchor('CENTER', rgroup.r, 'CENTER', 0, 0)
 
 link:new(r2,r4,'OnDragging',TWRegion.Move)
+link:new(r4,r2,'OnDragging',TWRegion.Move)
+
 link:new(r3,r4,'OnDragging',TWRegion.Move)
+link:new(r4,r3,'OnDragging',TWRegion.Move)

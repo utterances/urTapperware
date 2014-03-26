@@ -14,7 +14,7 @@ function link:new(initialLinkRegion, finishLinkRegion, event, action, data)
 	o.action = action
 	o.data = data or {}
 	o.menu = newLinkMenu(o)
-	o.isFresh = false
+	o.origin = nil
 	linkLayer:Add(o)
 	return o
 end
@@ -54,10 +54,11 @@ function link:destroy()
 	self = nil
 end
 
-function link:SendMessageToReceivers(message)
+function link:SendMessageToReceivers(message, origin)
 	if self.sender and self.receiver then
 		-- DPrint('sending message'..#self.data..' nil or not')
-		self.isFresh = true
+		self.origin = origin
+		DPrint('sending from'..self.origin:Name())
 		self.action(self.receiver, message, self.data)
 	end
 end

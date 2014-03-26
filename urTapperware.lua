@@ -70,6 +70,8 @@ function bgTouchUp(self)
 	
 	if startedSelection then
 		startedSelection = false
+		selectionLayer.t:Clear(0,0,0,0)
+		
 		local tempSelected = {}
 		for i = 1, #regions do
 			if regions[i].usable then
@@ -88,7 +90,6 @@ function bgTouchUp(self)
 			OpenGroupMenu(lassoGroupMenu, x, y, selectedRegions)
 		end
 		selectionPoly = {}
-		selectionLayer.t:Clear(0,0,0,0)
 		return
 	end
 	
@@ -203,7 +204,7 @@ shadow.t = shadow:Texture("tw_roundrec_create.png")
 shadow.t:SetBlendMode("BLEND")
 
 -- set up layer for drawing selection boxes or lasso:
-local selectionLayer = Region('region', 'selection', UIParent)
+selectionLayer = Region('region', 'selection', UIParent)
 selectionLayer:SetLayer("BACKGROUND")
 selectionLayer:SetWidth(ScreenWidth())
 selectionLayer:SetHeight(ScreenHeight())
@@ -250,10 +251,10 @@ function selectionLayer:DrawSelectionPoly()
 	
 	for i = 1, #regions do
 		if regions[i].usable then
-			x,y = regions[i]:Center()
+			local x,y = regions[i]:Center()
 			if pointInSelectionPolygon(x,y) then
-				w = regions[i]:Width()/1.5
-				h = regions[i]:Height()/1.5
+				local w = regions[i]:Width()/1.5
+				local h = regions[i]:Height()/1.5
 				self.t:SetBrushColor(255,100,100,200)
 				self.t:Ellipse(x,y,w,h)
 			end
@@ -338,15 +339,21 @@ end
 function ChangeSelectionStateRegion(self, select)
 	if select ~= self.isSelected then
 		if select then
-			self.t:SetTexture("tw_roundrec_s.png")
-			self.tl:SetColor(0,0,0,255)
-		else
-			if self.counter == 1 then
-				self.t:SetTexture("tw_roundrec_slate.png")
-				self.tl:SetColor(255,255,255,255)
-			else
-				self.t:SetTexture("tw_roundrec.png")
-			end
+			local x,y = self:Center()
+			local w = self:Width()/1.5
+			local h = self:Height()/1.5
+			selectionLayer.t:SetBrushColor(255,100,100,200)
+			selectionLayer.t:Ellipse(x,y,w,h)
+			
+			-- self.t:SetTexture("tw_roundrec_s.png")
+			-- self.tl:SetColor(0,0,0,255)
+		-- else
+			-- if self.counter == 1 then
+				-- self.t:SetTexture("tw_roundrec_slate.png")
+				-- self.tl:SetColor(255,255,255,255)
+			-- else
+				-- self.t:SetTexture("tw_roundrec.png")
+			-- end
 		end
 	end
 	
