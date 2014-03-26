@@ -564,12 +564,9 @@ end
 function TWRegion:CallEvents(signal, elapsed)
 	local list = {}
 
-	-- if current_mode == modes[1] then
 	list = self.eventlist[signal]
 	-- DPrint(#list..' '..signal)
-	-- else
-	-- 	list = vv.reventlist[signal]
-	-- end
+
 	
 	if list~=nil and #list>0 then
 		for k = 1,#list do
@@ -581,8 +578,22 @@ function TWRegion:CallEvents(signal, elapsed)
 	
 	for k,v in pairs(self.outlinks) do
 		if(v.event == signal) then
-			elapsed = elapsed or signal
-			v:SendMessageToReceivers(elapsed)
+			local send = true
+			if signal == 'OnDragging' then
+				for _, inlink in pairs(self.inlinks) do
+					if inlink.isFresh then
+						if inlink.sender == v.receiver then
+							send = false
+						end
+						inlink.isFresh = false
+					end
+				end
+			end
+			
+			if send then
+				elapsed = elapsed or signal
+				v:SendMessageToReceivers(elapsed)
+			end
 		end
 	end
 end
@@ -853,7 +864,6 @@ end
 -- FIXME: learned linked movement is not working correctly, when dragging
 -- but it works for animation
 function TWRegion:Move(message, linkdata)
-	-- DPrint(message[1]..' '..message[2])
 	local x,y = self:Center()
 	
 	local dx,dy = unpack(message)
