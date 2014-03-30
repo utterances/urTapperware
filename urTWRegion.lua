@@ -71,10 +71,10 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self.outlinks = {}
 
 -- initialize for events and signals
-	self.eventlist = {}
+	-- self.eventlist = {}
 	-- self.eventlist["OnTouchDown"] = {HoldTrigger}
 	-- self.eventlist["OnTouchUp"] = {}
-	self.eventlist["OnDoubleTap"] = {ToggleMenu}
+	-- self.eventlist["OnDoubleTap"] = {ToggleMenu}
 	-- self.eventlist["OnUpdate"] = {} 
 	-- self.eventlist["OnUpdate"].currentevent = nil
 	
@@ -562,17 +562,17 @@ function TWRegion:Update(elapsed)
 end
 
 function TWRegion:CallEvents(signal, elapsed)
-	local list = {}
-
-	list = self.eventlist[signal]
-	-- DPrint(#list..' '..signal)
-
-	
-	if list~=nil and #list>0 then
-		for k = 1,#list do
-			list[k](self)
-		end
-	end
+	-- local list = {}
+	-- 
+	-- list = self.eventlist[signal]
+	-- -- DPrint(#list..' '..signal)
+	-- 
+	-- 
+	-- if list~=nil and #list>0 then
+	-- 	for k = 1,#list do
+	-- 		list[k](self)
+	-- 	end
+	-- end
 	
 	-- TODO: remove legacy above^^
 	
@@ -635,7 +635,7 @@ function TWRegion:OnDoubleTap()
 	-- if self.regionType ~= RTYPE_GROUP then
 	self:CallEvents("OnDoubleTap")
 	bubbleView:ShowEvent('Double Tap', self)
-	
+	self:ToggleMenu()
 	-- end
 end
 
@@ -800,6 +800,16 @@ function TWRegion:SetPosition(x,y)
 	self.x = x
 	self.y = y
 end
+
+function TWRegion:ToggleMenu()
+	if self.menu == nil then
+		OpenRegionMenu(self)
+	else
+		CloseMenu(self)
+	end
+	self.updateEnv()
+end
+
 
 -- #################################################################
 -- #################################################################

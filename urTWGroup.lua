@@ -11,7 +11,6 @@ GROUPMARGIN = 40
 recycledGroupMenu = {}
 
 function ToggleLockGroup(regions)
-	-- TODO change later: now just create a group, we can't delete yet
 	newGroup = Group:new()
 	newGroup:SetRegions(regions)
 	newGroup:Draw()
@@ -173,9 +172,10 @@ function Group:NestRegionInto(r1, r2)
 	end
 end
 
+
+-- find out how big the group region needs to be, then resize and draw
+-- anchor the regions to the group to enforce spatial unity
 function Group:Draw()
-	-- find out how big the group region needs to be, then resize and draw
-	-- we need to anchor the regions to the group to enforce spatial unity
 	minX = -1
 	minY = -1
 	maxX = -1
@@ -200,8 +200,11 @@ function Group:Draw()
 	minX = minX - GROUPMARGIN
 	minY = minY - GROUPMARGIN
 	
+	-- TODO: make this proper OO style overriding the SetWidth() methods
 	self.r.w = maxX - minX
 	self.r.h = maxY - minY
+	self.r:SetWidth(maxX - minX)
+	self.r:SetHeight(maxY - minY)
 	
 	self.r:SetAnchor('CENTER', (maxX+minX)/2, (maxY+minY)/2)
 	self.r.x, self.r.y = self.r:Center()

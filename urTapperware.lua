@@ -325,17 +325,6 @@ end
 
 linkLayer:Init()
 
---To Be Moved To Region
-
-function ToggleMenu(self)
-	if self.menu == nil then
-		OpenRegionMenu(self)
-	else
-		CloseMenu(self)
-	end
-	linkLayer:Draw()
-end
-
 function ChangeSelectionStateRegion(self, select)
 	if select ~= self.isSelected then
 		if select then
