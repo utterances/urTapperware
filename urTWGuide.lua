@@ -209,14 +209,15 @@ function guideView:ShowGestureLink(r1, r2, deg)
 		self.breakLink:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
 		self.breakLink:Show()
 		
-	elseif deg < -0.8 and deg > -1.2 then
+	elseif deg < -0.8 and deg > -1.5 then
 		-- show potential
 		linkLayer:DrawPotentialLink(r1, r2)
 		self.breakLink:Hide()
-	elseif deg <-1.2 then
+	elseif deg <-1.5 then
 		linkLayer:ResetPotentialLink()
 		self.breakLink:Hide()
-		
+		notifyView:ShowTimedText('Drop on top to group')
+		-- grouping visual?
 	
 	else
 		linkLayer:ResetPotentialLink()

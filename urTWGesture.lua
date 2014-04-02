@@ -93,19 +93,22 @@ function gestureManager:EndGestureOnRegion(region)
 			local newD = (r1.x - r2.x)^2 + (r1.y - r2.y)^2
 			local deg = 2.0*(newD - oldD)/oldD
 			
-			if deg > .9 then
+			if deg > 1 then
 				for _,link in ipairs(r1.outlinks) do
 					if link.receiver == r2 then
 						link:destroy()
 					end
 				end
 				notifyView:ShowTimedText("remove links")
-			elseif deg < -.9 then
+			elseif deg < -.8 and deg > 1.5 then
 				notifyView:Dismiss()
 				linkEvent = 'OnDragging'
 				initialLinkRegion = self.sender
-				finishLinkRegion = self.receiver
-				FinishLink(TWRegion.Move)
+				ChooseEvent(self.receiver)
+				
+				-- finishLinkRegion = self.receiver
+				-- 
+				-- FinishLink(TWRegion.Move)
 			end
 			
 			r1:SetPosition(r1.rx, r1.ry)
