@@ -16,3 +16,4 @@ r3:Show()
 
 link:new(r1,r2,'OnDragging',TWRegion.Move)
 link:new(r1,r3,'OnDragging',TWRegion.Move, {1,1})
+link:new(r2,r1,'OnDragging',TWRegion.Move)

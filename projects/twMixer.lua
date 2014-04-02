@@ -50,8 +50,8 @@ rgroup.r.w = 400
 r4:ToggleMovement()
 r4:SetAnchor('CENTER', rgroup.r, 'CENTER', 0, 0)
 
--- link:new(r2,r4,'OnDragging',TWRegion.Move)
--- link:new(r4,r2,'OnDragging',TWRegion.Move)
--- 
--- link:new(r3,r4,'OnDragging',TWRegion.Move)
--- link:new(r4,r3,'OnDragging',TWRegion.Move)
+link:new(r2,r4,'OnDragging',TWRegion.Move)
+link:new(r4,r2,'OnDragging',TWRegion.Move)
+
+link:new(r3,r4,'OnDragging',TWRegion.Move)
+link:new(r4,r3,'OnDragging',TWRegion.Move)
