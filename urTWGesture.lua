@@ -108,11 +108,11 @@ function gestureManager:EndGestureOnRegion(region)
 				notifyView:Dismiss()
 				linkEvent = 'OnDragging'
 				initialLinkRegion = self.sender
-				ChooseEvent(self.receiver)
+				-- ChooseEvent(self.receiver)
 				
-				-- finishLinkRegion = self.receiver
+				finishLinkRegion = self.receiver
 				-- 
-				-- FinishLink(TWRegion.Move)
+				FinishLink(TWRegion.Move)
 			end
 			
 			r1:SetPosition(r1.rx, r1.ry)

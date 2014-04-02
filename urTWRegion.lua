@@ -179,9 +179,9 @@ function RemoveRegion(self)
 	
 	if self.regionType == RTYPE_GROUP then
 		-- remove all the children if needed
-		-- for _,r in pairs(self.groupObj.regions) do
-		-- 	RemoveRegion(r)
-		-- end
+		for _,r in pairs(self.groupObj.regions) do
+			RemoveRegion(r)
+		end
 		
 		self.groupObj:Destroy()
 	end

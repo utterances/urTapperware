@@ -60,8 +60,8 @@ function guideView:Init()
 			r:SetHeight(330)
 		elseif i == 2 then
 			r.t = r:Texture("texture/tw_gestRed.png")
-			r:SetWidth(1200)
-			r:SetHeight(1200)
+			r:SetWidth(1300)
+			r:SetHeight(1300)
 		else
 			r.t = r:Texture("texture/tw_dropGuideZoneSolid.png")
 			r:SetWidth(350)
