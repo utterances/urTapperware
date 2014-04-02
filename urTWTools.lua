@@ -31,8 +31,6 @@ function tableIndexOf( t, obj )
 	return 0
 end
 
-
-
 -- check if table is empty
 function tableIsEmpty (self)
     for _, _ in pairs(self) do

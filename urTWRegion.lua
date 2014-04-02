@@ -69,6 +69,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 -- event handling
 	self.inlinks = {}
 	self.outlinks = {}
+	self.lastMessageOrigin = {}
 
 -- initialize for events and signals
 	-- self.eventlist = {}
@@ -102,7 +103,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	
 	self:Handle("OnDoubleTap", TWRegion.OnDoubleTap)
 	self:Handle("OnTouchDown", TWRegion.OnTouchDown)
-	self:Handle("OnTouchUp", TWRegion.TouchUp)
+	self:Handle("OnTouchUp", TWRegion.OnTouchUp)
 	self:Handle("OnUpdate", TWRegion.Update)
 	self:Handle("OnLeave", TWRegion.OnLeave)
 	self:Handle("OnDragging", TWRegion.OnDrag)
@@ -343,7 +344,6 @@ function TWRegion:Copy(cx, cy, groupregion)
 end
 
 function TWRegion:OnMove(x,y,dx,dy)
-	-- DPrint('moving '..dx..' '..dy)
 	
 	-- for k,v in pairs(self.outlinks) do
 	-- 	if(v.event == "_Move") then
@@ -410,7 +410,10 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	
 	Log:print('drag '..self:Name()..' '..self.x..' '..self.y)
 	
-	self:CallEvents('OnDragging', {ndx, ndy, self.relativeX, self.relativeY})
+	local message = {ndx, ndy, self.relativeX, self.relativeY}
+	self.lastMessageOrigin = message
+	-- use same table twice, 2nd time as the origin marker to avoid loops
+	self:CallEvents('OnDragging', message, message)
 end
 
 function TWRegion:Update(elapsed)
@@ -576,7 +579,7 @@ function TWRegion:OnDoubleTap()
 	self:ToggleMenu()
 end
 
-function TWRegion:TouchUp()
+function TWRegion:OnTouchUp()
 	gestureManager:EndGestureOnRegion(self)
 	
 	if self.isHeld and self.holdTimer < TIME_TO_HOLD then
@@ -663,7 +666,7 @@ function TWRegion:OnSizeChanged()
 	Log:print(self:Name()..' resized to '..self.w..' '..self.h)
 end
 
-function TWRegion:CallEvents(signal, elapsed)
+function TWRegion:CallEvents(signal, messageData, setOrigin)
 	-- local list = {}
 	-- 
 	-- list = self.eventlist[signal]
@@ -678,8 +681,7 @@ function TWRegion:CallEvents(signal, elapsed)
 	
 	-- TODO: remove legacy above^^
 	
-	local origin = self
-	
+	local origin = setOrigin
 	-- if signal == 'OnDragging' then
 	-- 	for _, inlink in pairs(self.inlinks) do
 	-- 		if inlink.event == signal and inlink.origin ~= nil then
@@ -692,19 +694,19 @@ function TWRegion:CallEvents(signal, elapsed)
 		if(v.event == signal) then
 			local send = true
 			
-			if signal == 'OnDragging' then
-				for _, inlink in pairs(self.inlinks) do
-					if inlink.event == signal and inlink.origin == v.receiver then
-						send = false
-						inlink.origin = nil
-					end
-				end
-			end
+			-- if signal == 'OnDragging' then
+			-- 	for _, inlink in pairs(self.inlinks) do
+			-- 		if inlink.event == signal and inlink.origin == v.receiver then
+			-- 			send = false
+			-- 			inlink.origin = nil
+			-- 		end
+			-- 	end
+			-- end
 			
 			if send then
-				elapsed = elapsed or signal
+				messageData = messageData or signal
 				
-				v:SendMessageToReceivers(elapsed, origin)
+				v:SendMessageToReceivers(messageData, origin)
 			end
 		end
 	end
@@ -854,7 +856,6 @@ function TWRegion:ClampedMovement(oldx,oldy,dx,dy)
 end
 
 function TWRegion:PlayAnimation(_, linkdata)
-	-- DPrint('starting playback '..#self.movepath)
 	self.movepath = linkdata
 	if #self.movepath > 0 then
 		if self.loopmove then
@@ -939,7 +940,7 @@ function TWRegion:Move(message, linkdata)
 	local ndx, ndy = self:ClampedMovement(x, y, moveX, moveY)
 	
 	self:SetPosition(x + ndx, y + ndy)
-	self:CallEvents('OnDragging', {ndx, ndy, self.relativeX, self.relativeY})
+	self:CallEvents('OnDragging', {ndx, ndy, self.relativeX, self.relativeY}, self.lastMessageOrigin)
 end
 
 function MoveLeft(self, message)

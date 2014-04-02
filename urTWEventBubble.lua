@@ -129,12 +129,11 @@ function bubbleView:OnTouchUp()
 		else
 			cmdname = 'Free Movement'
 		end
-		DPrint(self.region:Name())
 		cmdlist = {{cmdname, toggleMoveRetriction, self.region},
 			{'Remove from group', self.region.RemoveFromGroup, self.region},
 			{'Cancel', nil, nil}}
-					
-		menu = loadSimpleMenu(cmdlist, 'Restrict Movement within Container?')
+		
+		menu = loadSimpleMenu(cmdlist, 'Restrict '..self.region:Name()..' within Container?')
 		menu:present(self:Center())
 	end
 end

@@ -100,7 +100,6 @@ function guideView:Init()
 		r:Hide()
 		table.insert(self.touchGuides, r)
 	end
-
 	
 	-- init focus/spotlight
 	-- self.linkGuide = Region('region', 'focus', self.r)
@@ -202,7 +201,6 @@ function guideView:ShowGestureLink(r1, r2, deg)
 		gr:Show()
 	end
 	
-	DPrint(deg)
 	if deg > 1 then
 		-- show remove icon
 		linkLayer:ResetPotentialLink()
