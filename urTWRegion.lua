@@ -356,13 +356,28 @@ function TWRegion:OnMove(x,y,dx,dy)
 end
 
 function TWRegion:OnDrag(x,y,dx,dy,e)
+	-- x,y current pos after the drag
+	-- dx dy change in the last e seconds
 	Log:print('drag '..self:Name()..' '..x..' '..y)
 	if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
 		self.isHeld = false	-- cancel hold gesture if over tolerance
 	end
-
+	
 	self.dx = dx
 	self.dy = dy
+	
+	local ndx, ndy = self:ClampedMovement(x-dx, y-dy, dx, dy)
+	
+	if self.group ~= nil then
+		if ndx~=dx or ndy~=dy then
+		-- need to undo the move here, should only be ones in a group
+			self:SetAnchor('CENTER', self.group.r, 'CENTER', x-dx+ndx - self.group.r.x, y-dy+ndy - self.group.r.y)
+		else
+			self:SetAnchor('CENTER', self.group.r, 'CENTER', x - self.group.r.x, y - self.group.r.y)
+		end
+	end
+	
+	self:UpdateRelativePos()
 	
 	if self.group ~= nil then
 		-- also anchor movement here within group
@@ -374,18 +389,26 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 		if self.relativeY > 1 or self.relativeY < -1 then
 			bubbleView:ShowEvent('crossing boundary', self, true)
 		end
-	end
-
-	if not self.canBeMoved then
-		self.x = self.oldx
-		self.y = self.oldy
+		
+	else
+		-- not in a group
+		if not self.canBeMoved then
+			-- ok this should actually not print at all, just to be sure
+			DPrint('tries to move but fail')
+		end
 	end
 	
 	gestureManager:Dragged(self, dx, dy, x, y)
 	self.holdTimer = 0
 	self.updateEnv()
+	self.oldx = self.x
+	self.oldy = self.y
+	self.x = x
+	self.y = y
 	
-	-- self:CallEvents('OnDragging', {dx, dy, self.relativeX, self.relativeY})
+	Log:print('drag '..self:Name()..' '..self.x..' '..self.y)
+	
+	self:CallEvents('OnDragging', {ndx, ndy, self.relativeX, self.relativeY})
 end
 
 function TWRegion:Update(elapsed)
@@ -514,98 +537,12 @@ function TWRegion:Update(elapsed)
 	-- 	end
 	-- end
 	
-	if self.oldx ~= x or self.oldy ~= y then
-		local oldoldx = self.oldx
-		local oldoldy = self.oldy
-		self.x = x
-		self.y = y
-		
-		if self.group ~= nil then
-			-- also anchor movement here within group
-		
-			self.relativeX = (self.x - self.group.r.x)/(self.group.r.w - self.w)*2
-			self.relativeY = (self.y - self.group.r.y)/(self.group.r.h - self.h)*2
-
-			if not self.canBeMoved then
-				if self.relativeY >= 1 or self.relativeY <= -1 then
-					self.y = self.oldy
-				else
-					self.oldy = y
-				end
-				
-				if self.relativeX >= 1 or self.relativeX <= -1 then
-					self.x = self.oldx
-				else
-					self.oldx = x
-				end
-				self:SetAnchor('CENTER', self.group.r, 'CENTER', self.oldx - self.group.r.x, self.oldy - self.group.r.y)
-				-- self.x = self.oldx
-				-- self.y = self.oldy
-			else
-				self:SetAnchor('CENTER', self.group.r, 'CENTER', self.x - self.group.r.x, self.y - self.group.r.y)
-				
-				self.oldx = self.x
-				self.oldy = self.y
-			end
-			
-		else
-			self.relativeX = (x - ScreenWidth()/2)/(ScreenWidth()-self.w)*2
-			self.relativeY = (y - ScreenHeight()/2)/(ScreenHeight()-self.h)*2
-						
-			self.oldx = self.x
-			self.oldy = self.y
-		end
-		
-		self:CallEvents('OnDragging', {self.x - oldoldx, self.y - oldoldy, self.relativeX, self.relativeY})
-	else -- didn't move by user
-	end
-end
-
-function TWRegion:CallEvents(signal, elapsed)
-	-- local list = {}
-	-- 
-	-- list = self.eventlist[signal]
-	-- -- DPrint(#list..' '..signal)
-	-- 
-	-- 
-	-- if list~=nil and #list>0 then
-	-- 	for k = 1,#list do
-	-- 		list[k](self)
-	-- 	end
+	-- if self.oldx ~= x or self.oldy ~= y then
+	-- 	local oldoldx = self.oldx
+	-- 	local oldoldy = self.oldy
+	-- 	self.x = x
+	-- 	self.y = y
 	-- end
-	
-	-- TODO: remove legacy above^^
-	
-	local origin = self
-	
-	-- if signal == 'OnDragging' then
-	-- 	for _, inlink in pairs(self.inlinks) do
-	-- 		if inlink.event == signal and inlink.origin ~= nil then
-	-- 			origin = inlink.origin
-	-- 		end
-	-- 	end
-	-- end
-	
-	for k,v in pairs(self.outlinks) do
-		if(v.event == signal) then
-			local send = true
-			
-			if signal == 'OnDragging' then
-				for _, inlink in pairs(self.inlinks) do
-					if inlink.event == signal and inlink.origin == v.receiver then
-						send = false
-						inlink.origin = nil
-					end
-				end
-			end
-			
-			if send then
-				elapsed = elapsed or signal
-				
-				v:SendMessageToReceivers(elapsed, origin)
-			end
-		end
-	end
 end
 
 function TWRegion:OnTouchDown()
@@ -632,11 +569,9 @@ function TWRegion:OnTouchDown()
 end
 
 function TWRegion:OnDoubleTap()
-	-- if self.regionType ~= RTYPE_GROUP then
 	self:CallEvents("OnDoubleTap")
 	bubbleView:ShowEvent('Double Tap', self)
 	self:ToggleMenu()
-	-- end
 end
 
 function TWRegion:TouchUp()
@@ -726,6 +661,56 @@ function TWRegion:OnSizeChanged()
 	Log:print(self:Name()..' resized to '..self.w..' '..self.h)
 end
 
+function TWRegion:CallEvents(signal, elapsed)
+	-- local list = {}
+	-- 
+	-- list = self.eventlist[signal]
+	-- -- DPrint(#list..' '..signal)
+	-- 
+	-- 
+	-- if list~=nil and #list>0 then
+	-- 	for k = 1,#list do
+	-- 		list[k](self)
+	-- 	end
+	-- end
+	
+	-- TODO: remove legacy above^^
+	
+	local origin = self
+	
+	-- if signal == 'OnDragging' then
+	-- 	for _, inlink in pairs(self.inlinks) do
+	-- 		if inlink.event == signal and inlink.origin ~= nil then
+	-- 			origin = inlink.origin
+	-- 		end
+	-- 	end
+	-- end
+	
+	for k,v in pairs(self.outlinks) do
+		if(v.event == signal) then
+			local send = true
+			
+			if signal == 'OnDragging' then
+				for _, inlink in pairs(self.inlinks) do
+					if inlink.event == signal and inlink.origin == v.receiver then
+						send = false
+						inlink.origin = nil
+					end
+				end
+			end
+			
+			if send then
+				elapsed = elapsed or signal
+				
+				v:SendMessageToReceivers(elapsed, origin)
+			end
+		end
+	end
+end
+
+-- #################################################################
+-- #################################################################
+
 function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
 	if self.regionType == RTYPE_GROUP then
 		return
@@ -769,7 +754,7 @@ function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
 	CloseMenu(self)
 end
 
-function TWRegion:ToggleAnchor()
+function TWRegion:ToggleMovement()
 	notifyView:ShowTimedText("toggled movement")
 	self.canBeMoved = not self.canBeMoved
 	if self.group==nil then
@@ -788,7 +773,10 @@ function TWRegion:LoadTexture(filename)
 	end
 end
 
-function TWRegion:SetPosition(x,y)
+-- right now just sets new position directly
+-- does not trigger move event
+-- TODO: make this animate movement
+function TWRegion:SetPosition(x, y, noevent)
 	if self.group == nil then
 		self:SetAnchor('CENTER', x, y)
 		self.oldx = x
@@ -797,8 +785,12 @@ function TWRegion:SetPosition(x,y)
 		self:SetAnchor('CENTER', self.group.r, 'CENTER', 
 			x - self.group.r.x, y - self.group.r.y)
 	end
-	self.x = x
-	self.y = y
+	
+	if not noevent then
+		self.x = x
+		self.y = y
+		self:UpdateRelativePos()
+	end
 end
 
 function TWRegion:ToggleMenu()
@@ -810,9 +802,46 @@ function TWRegion:ToggleMenu()
 	self.updateEnv()
 end
 
+-- #################################################################
+-- #################################################################
 
--- #################################################################
--- #################################################################
+-- updates relative position
+function TWRegion:UpdateRelativePos()
+	if self.group ~= nil then
+		-- also anchor movement here within group
+		self.relativeX = (self.x - self.group.r.x)/(self.group.r.w - self.w)*2
+		self.relativeY = (self.y - self.group.r.y)/(self.group.r.h - self.h)*2
+	else
+		self.relativeX = (self.x - ScreenWidth()/2)/(ScreenWidth()-self.w)*2
+		self.relativeY = (self.y - ScreenHeight()/2)/(ScreenHeight()-self.h)*2
+	end
+end
+
+-- private helper to clamp movement
+-- check if dx dy is possible
+-- return the clampped deltas, (ndx, ndy)
+-- does _NOT_ actually do the anchoring.moving
+function TWRegion:ClampedMovement(oldx,oldy,dx,dy)
+	local ndx = dx
+	local ndy = dy
+	if self.group ~= nil then
+		-- also anchor movement here within group
+		if not self.canBeMoved then
+			if oldx+dx + self.w/2 > self.group.r.x + self.group.r.w/2 then
+				ndx = self.group.r.x + self.group.r.w/2 - oldx - self.w/2
+			elseif oldx+dx - self.w/2 < self.group.r.x - self.group.r.w/2 then
+				ndx = self.group.r.x - self.group.r.w/2 - oldx + self.w/2
+			end
+			
+			if oldy+dy + self.h/2 > self.group.r.y + self.group.r.h/2 then
+				ndy = self.group.r.y + self.group.r.h/2 - oldy - self.h/2
+			elseif oldy+dy - self.h/2 < self.group.r.y - self.group.r.h/2 then
+				ndy = self.group.r.y - self.group.r.h/2 - oldy + self.h/2
+			end
+		end
+	end
+	return ndx,ndy
+end
 
 function TWRegion:PlayAnimation(_, linkdata)
 	-- DPrint('starting playback '..#self.movepath)
@@ -896,7 +925,10 @@ function TWRegion:Move(message, linkdata)
 	
 	local moveX = cosT*dx - sinT*dy
 	local moveY = sinT*dx + cosT*dy
-	self:SetPosition(x + moveX, y + moveY)
+	
+	self:SetPosition(x + moveX, y + moveY, true)
+	-- self:OnDragging()
+
 	-- self:SetAnchor('CENTER', self.oldx, self.oldy)
 	self:CallEvents('OnDragging', {moveX, moveY})
 	-- TODO: fix this, send relative values too

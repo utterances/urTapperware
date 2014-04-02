@@ -190,6 +190,14 @@ function guideView:ShowGestureLink(r1, r2, deg)
 		end
 		gr:Show()
 	end
+	
+	if deg > 1 then
+		-- show potential
+		linkLayer:DrawPotentialLink(r1, r2)
+	elseif deg < -1 then
+		-- show remove icon
+	end
+	
 end
 
 -- function guideView:UpdateLinkGuide(deg)
@@ -283,12 +291,6 @@ function guideUpdateAniGuide(self, e)
 	if self.aniGuideTimer > ANIMATED_GUIDE_TIMER then
 		self.aniGuideTimer = 0
 	end
-end
-
-function guideView:ShowMenuDragletGuide(r)
-	
-	
-	
 end
 
 function guideView:Disable()

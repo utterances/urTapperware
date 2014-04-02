@@ -94,7 +94,7 @@ function DuplicateAction(r, draglet)
 end
 
 function LockPos(r)
-	r:ToggleAnchor()
+	r:ToggleMovement()
 	CloseMenu(r)
 end
 

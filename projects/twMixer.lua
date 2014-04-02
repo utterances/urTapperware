@@ -15,7 +15,7 @@ rgroup.r.h = 400
 rgroup.r.w = 100
 rgroup.r:LoadTexture('texture/tw_barback_v.png')
 
-r2:ToggleAnchor()
+r2:ToggleMovement()
 r2:SetAnchor('CENTER', rgroup.r, 'CENTER', 0, 0)
 
 local r3 = TWRegion:new(nil, updateEnv)
@@ -32,11 +32,11 @@ rgroup.r.h = 100
 rgroup.r.w = 400
 rgroup.r:LoadTexture('texture/tw_barback_h.png')
 
-r3:ToggleAnchor()
+r3:ToggleMovement()
 r3:SetAnchor('CENTER', rgroup.r, 'CENTER', 0, 0)
 
 local r4 = TWRegion:new(nil, updateEnv)
-r4:LoadTexture('texture/tw_note.png')
+r4:LoadTexture('texture/sp_redball.png')
 r4:SetPosition(ScreenWidth()/2,ScreenHeight()/2)
 r4.h = 100
 r4.w = 100
@@ -47,11 +47,11 @@ rgroup.r:SetPosition(ScreenWidth()/2,ScreenHeight()/2)
 rgroup.r.h = 400
 rgroup.r.w = 400
 
-r4:ToggleAnchor()
+r4:ToggleMovement()
 r4:SetAnchor('CENTER', rgroup.r, 'CENTER', 0, 0)
 
-link:new(r2,r4,'OnDragging',TWRegion.Move)
-link:new(r4,r2,'OnDragging',TWRegion.Move)
-
-link:new(r3,r4,'OnDragging',TWRegion.Move)
-link:new(r4,r3,'OnDragging',TWRegion.Move)
+-- link:new(r2,r4,'OnDragging',TWRegion.Move)
+-- link:new(r4,r2,'OnDragging',TWRegion.Move)
+-- 
+-- link:new(r3,r4,'OnDragging',TWRegion.Move)
+-- link:new(r4,r3,'OnDragging',TWRegion.Move)
