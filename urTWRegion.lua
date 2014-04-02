@@ -367,8 +367,13 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	
 	self.dx = dx
 	self.dy = dy
+	local ndx, ndy
 	
-	local ndx, ndy = self:ClampedMovement(x-dx, y-dy, dx, dy)
+	if not gestureManager:IsMultiTouch(self) then
+		ndx, ndy = self:ClampedMovement(x-dx, y-dy, dx, dy)
+	else
+		ndx, ndy = dx, dy
+	end
 	
 	if self.group ~= nil then
 		if ndx~=dx or ndy~=dy then
@@ -814,6 +819,20 @@ function TWRegion:RemoveFromGroup()
 	end
 end
 
+function TWRegion:ExistLinkBetween(other)
+	for _,link in ipairs(self.outlinks) do
+		if link.receiver == other then
+			return true
+		end
+	end
+
+	for _,link in ipairs(self.inlinks) do
+		if link.sender == other then
+			return true
+		end
+	end
+end
+
 -- #################################################################
 -- #################################################################
 
@@ -939,8 +958,11 @@ function TWRegion:Move(message, linkdata)
 	
 	local ndx, ndy = self:ClampedMovement(x, y, moveX, moveY)
 	
-	self:SetPosition(x + ndx, y + ndy)
-	self:CallEvents('OnDragging', {ndx, ndy, self.relativeX, self.relativeY}, self.lastMessageOrigin)
+	-- only move if we are not also holding this event in gesture manager:
+	if not gestureManager:IsMultiTouch(self) then
+		self:SetPosition(x + ndx, y + ndy)
+		self:CallEvents('OnDragging', {ndx, ndy, self.relativeX, self.relativeY}, self.lastMessageOrigin)
+	end
 end
 
 function MoveLeft(self, message)

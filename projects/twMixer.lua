@@ -53,5 +53,14 @@ r4:SetAnchor('CENTER', rgroup.r, 'CENTER', 0, 0)
 link:new(r2,r4,'OnDragging',TWRegion.Move)
 link:new(r4,r2,'OnDragging',TWRegion.Move)
 
-link:new(r3,r4,'OnDragging',TWRegion.Move)
-link:new(r4,r3,'OnDragging',TWRegion.Move)
+local r5 = TWRegion:new(nil, updateEnv)
+r5:SwitchRegionType()
+r5:SetPosition(10,10)
+r5.h = 100
+r5.w = 100
+r5:Show()
+
+link:new(r4,r5, 'OnDragging', TWRegion.UpdateVal)
+
+-- link:new(r3,r4,'OnDragging',TWRegion.Move)
+-- link:new(r4,r3,'OnDragging',TWRegion.Move)

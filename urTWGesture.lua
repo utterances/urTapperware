@@ -33,12 +33,15 @@ function gestureManager:Reset()
 	self.gestureMode = LEARN_OFF
 	self.recording = {}
 	self.sender = nil
+
+	self.pinchGestDeg = nil
 	guideView:Disable()
 end
 
 function gestureManager:BeginGestureOnRegion(region)
 	if not tableHasObj(self.allRegions, region) then
 		table.insert(self.allRegions, region)
+		-- DPrint(#self.allRegions..'+')
 	end
 	
 	if #self.allRegions ~= 2 then
@@ -48,7 +51,7 @@ end
 
 function gestureManager:EndGestureOnRegion(region)
 	tableRemoveObj(self.allRegions, region)
-	-- DPrint('rem '..#self.allRegions)	
+	-- DPrint(#self.allRegions..'-')
 	if self.mode == LEARN_GROUP then
 		self.mode = LEARN_OFF
 		self.gestureMode = LEARN_OFF
@@ -81,6 +84,7 @@ function gestureManager:EndGestureOnRegion(region)
 			groupRegion.groupObj:AddRegion(region)
 			-- put group back for consecutive add
 			table.insert(self.allRegions, groupRegion)
+			-- DPrint(#self.allRegions..'+g')
 		end
 	elseif #self.allRegions ~= 2 then
 		if self.gestureMode == LEARN_LINK then
@@ -89,18 +93,18 @@ function gestureManager:EndGestureOnRegion(region)
 			local r1 = self.sender
 			local r2 = self.receiver
 			-- check if we are breaking or making links:
-			local oldD = (r1.rx - r2.rx)^2 + (r1.ry - r2.ry)^2
-			local newD = (r1.x - r2.x)^2 + (r1.y - r2.y)^2
-			local deg = 2.0*(newD - oldD)/oldD
+			-- local oldD = (r1.rx - r2.rx)^2 + (r1.ry - r2.ry)^2
+			-- local newD = (r1.x - r2.x)^2 + (r1.y - r2.y)^2
+			-- local deg = 2.0*(newD - oldD)/oldD
 			
-			if deg > 1 then
+			if self.pinchGestDeg > 1 then
 				for _,link in ipairs(r1.outlinks) do
 					if link.receiver == r2 then
 						link:destroy()
 					end
 				end
 				notifyView:ShowTimedText("remove links")
-			elseif deg < -.8 and deg > 1.5 then
+			elseif self.pinchGestDeg < -.6 and self.pinchGestDeg > -0.9 then
 				notifyView:Dismiss()
 				linkEvent = 'OnDragging'
 				initialLinkRegion = self.sender
@@ -227,10 +231,11 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 					-- show link guide, lock into link mode
 					self.gestureMode = LEARN_LINK
 					-- draw the guide overlay
-					local oldD = (r1.rx - r2.rx)^2 + (r1.ry - r2.ry)^2
-					local newD = (r1.x - r2.x)^2 + (r1.y - r2.y)^2
+					local oldD = math.sqrt((r1.rx - r2.rx)^2 + (r1.ry - r2.ry)^2)
+					local newD = math.sqrt((r1.x - r2.x)^2 + (r1.y - r2.y)^2)
 					
-					guideView:ShowGestureLink(r1, r2, 2.0*(newD - oldD)/oldD)
+					self.pinchGestDeg = 1.75*(newD - oldD)/oldD
+					guideView:ShowGestureLink(r1, r2, self.pinchGestDeg)
 					if self.sender == nil then
 						self.sender = r1
 						self.receiver = r2
@@ -363,6 +368,8 @@ function gestureManager:TouchDown(region)
 end
 
 function gestureManager:EndHold(region)
+	tableRemoveObj(self.allRegions, region)
+	-- DPrint(#self.allregions..'-h')
 	if self.mode == LEARN_OFF then
 		return
 	elseif self.mode == LEARN_DRAG and tableHasObj(self.receivers, region) then
@@ -427,6 +434,10 @@ function gestureManager:SetSelector(selectorFunc)
 	self.selector=selectorFunc
 end
 
+function gestureManager:IsMultiTouch(region)
+	-- DPrint('check multi '..region:Name())
+	return #self.allRegions>1 and tableHasObj(self.allRegions, region)
+end
 -- function gestureManager:EndHold(region)
 -- 	-- Do NOT call this with region == initial holding region
 -- 	self.mode = LEARN_OFF

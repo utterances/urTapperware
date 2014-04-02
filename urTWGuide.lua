@@ -60,8 +60,8 @@ function guideView:Init()
 			r:SetHeight(330)
 		elseif i == 2 then
 			r.t = r:Texture("texture/tw_gestRed.png")
-			r:SetWidth(1100)
-			r:SetHeight(1100)
+			r:SetWidth(1200)
+			r:SetHeight(1200)
 		else
 			r.t = r:Texture("texture/tw_dropGuideZoneSolid.png")
 			r:SetWidth(350)
@@ -174,6 +174,7 @@ function guideView:ShowSpotlight(region)
 end
 
 function guideView:ShowGestureLink(r1, r2, deg)
+	DPrint(deg)
 	local x1,y1 = r1:Center()
 	local x2,y2 = r2:Center()	
 	
@@ -183,6 +184,12 @@ function guideView:ShowGestureLink(r1, r2, deg)
 		-- compute alpha 1- center, 2- outter
 		if i==2 then
 			gr:SetAlpha(deg*.5+.5)
+		elseif i==1 then
+			if deg < -0.9 then
+				gr:SetAlpha(0.2)
+			else
+				gr:SetAlpha(-deg*.5+.5) -- little overlap here
+			end
 		else
 			gr:SetAlpha(-deg*.5+.5) -- little overlap here
 		end
@@ -204,24 +211,34 @@ function guideView:ShowGestureLink(r1, r2, deg)
 	if deg > 1 then
 		-- show remove icon
 		linkLayer:ResetPotentialLink()
-		self.breakLink:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
-		self.breakLink:Show()
-		
-	elseif deg < -0.8 and deg > -1.5 then
+		self:ZoomRegionOverlays(300)
+		if r1:ExistLinkBetween(r2) then
+			self.breakLink:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
+			self.breakLink:Show()
+		end
+	elseif deg < -0.65 and deg > -0.9 then
 		-- show potential
 		linkLayer:DrawPotentialLink(r1, r2)
 		self.breakLink:Hide()
-	elseif deg <-1.5 then
+		self:ZoomRegionOverlays(300)
+	elseif deg <-0.9 then
 		linkLayer:ResetPotentialLink()
 		self.breakLink:Hide()
 		notifyView:ShowTimedText('Drop on top to group')
 		-- grouping visual?
-	
+		self:ZoomRegionOverlays(400)
 	else
 		linkLayer:ResetPotentialLink()
 		self.breakLink:Hide()
+		self:ZoomRegionOverlays(300)
 	end
-	
+end
+
+function guideView:ZoomRegionOverlays(size)
+	for i=3,4 do
+		self.gestOverlays[i]:SetWidth(size)
+		self.gestOverlays[i]:SetHeight(size)
+	end
 end
 
 -- function guideView:UpdateLinkGuide(deg)

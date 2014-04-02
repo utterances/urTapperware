@@ -383,7 +383,7 @@ end
 menu = nil
 
 function ChooseEvent(self)
-	if initialLinkRegion ~= nil then		
+	if initialLinkRegion ~= nil then
 		finishLinkRegion = self
 		cmdlist = {{'Tap', ChooseAction, 'OnTouchUp'},
 			{'Tap & Hold', ChooseAction, 'OnTapAndHold'},

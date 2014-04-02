@@ -286,7 +286,7 @@ end
 
 function Group:Destroy()
 	--// not sure if this is needed or actually works yet //--
-	self:Hide()
+	self.r:Hide()
 	for i = 1, #self.regions do
 		self.regions[i].group = nil
 	end

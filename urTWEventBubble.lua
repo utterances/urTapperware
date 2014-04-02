@@ -133,7 +133,7 @@ function bubbleView:OnTouchUp()
 			{'Remove from group', self.region.RemoveFromGroup, self.region},
 			{'Cancel', nil, nil}}
 		
-		menu = loadSimpleMenu(cmdlist, 'Restrict '..self.region:Name()..' within Container?')
+		menu = loadSimpleMenu(cmdlist, 'Restrict '..self.region:Name()..' within group?')
 		menu:present(self:Center())
 	end
 end
