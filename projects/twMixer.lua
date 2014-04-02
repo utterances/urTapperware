@@ -58,9 +58,19 @@ r5:SwitchRegionType()
 r5:SetPosition(10,10)
 r5.h = 100
 r5.w = 100
+r5:ToggleMovement()
 r5:Show()
 
-link:new(r4,r5, 'OnDragging', TWRegion.UpdateVal)
+local r6 = TWRegion:new(nil, updateEnv)
+r6:SwitchRegionType()
+r6:SetPosition(120,10)
+r6.h = 100
+r6.w = 100
+r5:ToggleMovement()
+r6:Show()
+
+link:new(r4,r5, 'OnDragging', TWRegion.UpdateX)
+link:new(r4,r6, 'OnDragging', TWRegion.UpdateY)
 
 -- link:new(r3,r4,'OnDragging',TWRegion.Move)
 -- link:new(r4,r3,'OnDragging',TWRegion.Move)

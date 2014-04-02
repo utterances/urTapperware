@@ -286,11 +286,12 @@ end
 
 function Group:Destroy()
 	--// not sure if this is needed or actually works yet //--
-	self.r:Hide()
-	for i = 1, #self.regions do
-		self.regions[i].group = nil
-	end
 	
+	for i = 1, #self.regions do
+		Group:RemoveRegion(self.regions[i])
+	end
+	self.r:Hide()
+	-- self region is removed somewhere else in region:RemoveRegion
 	self.regions = nil
 	self = nil
 end

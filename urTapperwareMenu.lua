@@ -58,6 +58,7 @@ function MiscMenu(self)
 	cmdlist = {{'Add link', StartLinkRegion, self},
 		{'Add to group', addGroupPicker, self},
 		{'Lock Movement', LockPos, self},
+		{'Duplicate', testMenu, self},
 		{'Cancel', nil, nil}}
 		
 	if self.group~= nil then
