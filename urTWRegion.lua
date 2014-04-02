@@ -178,9 +178,11 @@ function RemoveRegion(self)
 	
 	if self.regionType == RTYPE_GROUP then
 		-- remove all the children if needed
-		for _,r in pairs(self.groupObj.regions) do
-			RemoveRegion(r)
-		end
+		-- for _,r in pairs(self.groupObj.regions) do
+		-- 	RemoveRegion(r)
+		-- end
+		
+		self.groupObj:Destroy()
 	end
 		
 	-- check if in and out links need to be removed
@@ -926,12 +928,10 @@ function TWRegion:Move(message, linkdata)
 	local moveX = cosT*dx - sinT*dy
 	local moveY = sinT*dx + cosT*dy
 	
-	self:SetPosition(x + moveX, y + moveY, true)
-	-- self:OnDragging()
-
-	-- self:SetAnchor('CENTER', self.oldx, self.oldy)
-	self:CallEvents('OnDragging', {moveX, moveY})
-	-- TODO: fix this, send relative values too
+	local ndx, ndy = self:ClampedMovement(x, y, moveX, moveY)
+	
+	self:SetPosition(x + ndx, y + ndy)
+	self:CallEvents('OnDragging', {ndx, ndy, self.relativeX, self.relativeY})
 end
 
 function MoveLeft(self, message)

@@ -30,9 +30,9 @@ end
 function LoadInspector(self)
 	cmdlist = {}
 	
-	for file in lfs.dir(DocumentPath("texture")) do
+	for file in lfs.dir(DocumentPath("sprites")) do
 		if string.sub(file,1,1) ~= "." then
-			table.insert(cmdlist, {file, LoadTexture, "texture/"..file})				
+			table.insert(cmdlist, {file, LoadTexture, "sprites/"..file})
 		end
 	end
 	

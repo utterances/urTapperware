@@ -192,9 +192,10 @@ function guideView:ShowGestureLink(r1, r2, deg)
 	end
 	
 	if deg > 1 then
+		linkLayer:ResetPotentialLink()
 		-- show potential
-		linkLayer:DrawPotentialLink(r1, r2)
 	elseif deg < -1 then
+		linkLayer:DrawPotentialLink(r1, r2)
 		-- show remove icon
 	end
 	

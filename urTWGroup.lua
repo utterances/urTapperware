@@ -47,6 +47,7 @@ function CallGroupFunc(self)
 	-- use this to call function on the link menu button
 	-- because we have reference to the link, not just one region
 	CloseGroupMenu(self.parent)
+	selectionLayer.t:Clear(0,0,0,0) --FIXME: clunky way to disable selection vis
 	self.func(self.parent.selectedRegions)
 end
 

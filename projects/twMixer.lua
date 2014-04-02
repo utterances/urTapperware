@@ -3,7 +3,7 @@
 -- ===============================================
 
 local r2 = TWRegion:new(nil, updateEnv)
-r2:LoadTexture('texture/tw_button.png')
+r2:LoadTexture('sprites/tw_button.png')
 r2:SetPosition(100,ScreenHeight()/2)
 r2.h = 100
 r2.w = 100
@@ -13,13 +13,13 @@ local rgroup = ToggleLockGroup({r2})
 rgroup.r:SetPosition(100,ScreenHeight()/2)
 rgroup.r.h = 400
 rgroup.r.w = 100
-rgroup.r:LoadTexture('texture/tw_barback_v.png')
+rgroup.r:LoadTexture('sprites/tw_barback_v.png')
 
 r2:ToggleMovement()
 r2:SetAnchor('CENTER', rgroup.r, 'CENTER', 0, 0)
 
 local r3 = TWRegion:new(nil, updateEnv)
-r3:LoadTexture('texture/tw_button.png')
+r3:LoadTexture('sprites/tw_button.png')
 r3:SetPosition(ScreenWidth()/2,800)
 r3.h = 100
 r3.w = 100
@@ -30,13 +30,13 @@ rgroup = ToggleLockGroup({r3})
 rgroup.r:SetPosition(ScreenWidth()/2,800)
 rgroup.r.h = 100
 rgroup.r.w = 400
-rgroup.r:LoadTexture('texture/tw_barback_h.png')
+rgroup.r:LoadTexture('sprites/tw_barback_h.png')
 
 r3:ToggleMovement()
 r3:SetAnchor('CENTER', rgroup.r, 'CENTER', 0, 0)
 
 local r4 = TWRegion:new(nil, updateEnv)
-r4:LoadTexture('texture/sp_redball.png')
+r4:LoadTexture('sprites/sp_redball.png')
 r4:SetPosition(ScreenWidth()/2,ScreenHeight()/2)
 r4.h = 100
 r4.w = 100

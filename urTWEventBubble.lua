@@ -48,15 +48,14 @@ function bubbleView:ShowEvent(text, region, menu)
 	self.r:SetHeight(10)	
 	self.r.sizeChangeSpeed = 15
 
-	self.r:Show()
 	self.r:SetAlpha(1)
 	self.r.tl:SetLabel(text)
-	self.r:MoveToTop()
 	
 	self.r.timer = STAY_TIME
 	self.r:Handle("OnUpdate", bubbleUpdate)
 	self.r:EnableInput(true)
-	
+	self.r:MoveToTop()
+	self.r:Show()
 end
 
 function bubbleView:Dismiss()
@@ -69,16 +68,14 @@ end
 
 function bubbleUpdate(self, e)
 	-- FIXME this animation code isn't working yet, add spring physics
-	-- 
 	
 	if self:Height() < self.h then
 		local curH = self:Height()
 		local curW = self:Width()
-		-- DPrint('trying to animate'..self.h..' '..self:Height())
 		
 		curH = curH + e*(self.h-curH)*self.sizeChangeSpeed
 		curW = curW + e*(self.w-curW)*self.sizeChangeSpeed
-
+		
 		self:SetHeight(curH)
 		self:SetWidth(curW)
 		self.tl:SetHorizontalAlign("JUSTIFY")
@@ -100,11 +97,11 @@ function bubbleUpdate(self, e)
 			self:Handle("OnUpdate", nil)
 		else
 			self:SetAlpha(self:Alpha() - self:Alpha() * e/FADEINTIME)
-			if self:Alpha()< 0.6 then
+			if self:Alpha()< 0.9 then
 				self:EnableInput(false)
-			end			
+			end
 		end
-	end	
+	end
 end
 
 function bubbleView:OnTouchDown()
@@ -143,7 +140,8 @@ end
 
 function toggleMoveRetriction(r)
 	menu:dismiss()
-	r:ToggleMovement()
-	r:SetAnchor('CENTER', r.group.r, 'CENTER', 0, 0)	
-	
+	if r~= nil then
+		r:ToggleMovement()
+		r:SetAnchor('CENTER', r.group.r, 'CENTER', 0, 0)
+	end
 end
