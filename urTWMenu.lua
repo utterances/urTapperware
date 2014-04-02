@@ -91,9 +91,13 @@ function SimpleMenu:setCommandList(cmdlist)
 		label.t:SetBlendMode("BLEND")
 		
 		label.tl = label:TextLabel()
+		if #text > 13 then
+			label.tl:SetFontHeight(MENUFONTSIZE-6)
+		else
+			label.tl:SetFontHeight(MENUFONTSIZE)
+		end
+		label.tl:SetFont(MENUFONT)
 		label.tl:SetLabel(text)
-  	  	label.tl:SetFontHeight(MENUFONTSIZE)
-  		label.tl:SetFont(MENUFONT)
 		label.tl:SetColor(0,128,255,255)
 		label.tl:SetShadowColor(0,0,0,0)
 		

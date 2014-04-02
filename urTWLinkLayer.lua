@@ -111,7 +111,7 @@ function linkLayer:DrawPotentialLink(region, draglet)
 	-- self.linkGuides.t:SetBrushColor(195,240,240,150)
 	self.linkGuides.t:SetBrushColor(255,146,2,200)
 	
-	self.linkGuides.t:SetBrushSize(10)
+	self.linkGuides.t:SetBrushSize(14)
 	
 	rx, ry = region:Center()
 	posx, posy = draglet:Center()

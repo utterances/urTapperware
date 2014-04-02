@@ -804,6 +804,14 @@ function TWRegion:ToggleMenu()
 	self.updateEnv()
 end
 
+function TWRegion:RemoveFromGroup()
+	if self.group~=nil then
+		self.group:RemoveRegion(self)
+		menu:dismiss()
+		notifyView:ShowTimedText('removed '..self:Name()..' from group')
+	end
+end
+
 -- #################################################################
 -- #################################################################
 

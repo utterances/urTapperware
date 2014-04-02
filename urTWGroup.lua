@@ -145,11 +145,23 @@ function Group:AddRegion(region)
 	region.group = self
 	
 	local x,y = region:Center()
-	region:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', 
-		x - self.r.x + self.r.w/2, y - self.r.y + self.r.h/2)
+	region:SetPosition(x,y)
+	-- region:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', 
+	-- 	x - self.r.x + self.r.w/2, y - self.r.y + self.r.h/2)
 	region:RaiseToTop()
 	CloseMenu(region)
 	Log:print('added '..region:Name()..' to group')
+end
+
+function Group:RemoveRegion(region)
+	if region.group == self then
+		region.group = nil
+		tableRemoveObj(self.regions, region)
+		local x,y = region:Center()
+		region:SetPosition(x,y)
+	else
+		DPrint('removing region: not my region!')
+	end
 end
 
 function Group:NestRegionInto(r1, r2)

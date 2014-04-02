@@ -97,7 +97,7 @@ function bubbleUpdate(self, e)
 			self:Handle("OnUpdate", nil)
 		else
 			self:SetAlpha(self:Alpha() - self:Alpha() * e/FADEINTIME)
-			if self:Alpha()< 0.9 then
+			if self:Alpha()< 0.4 then
 				self:EnableInput(false)
 			end
 		end
@@ -131,6 +131,7 @@ function bubbleView:OnTouchUp()
 		end
 		DPrint(self.region:Name())
 		cmdlist = {{cmdname, toggleMoveRetriction, self.region},
+			{'Remove from group', self.region.RemoveFromGroup, self.region},
 			{'Cancel', nil, nil}}
 					
 		menu = loadSimpleMenu(cmdlist, 'Restrict Movement within Container?')

@@ -124,6 +124,17 @@ function guideView:Init()
 	self.dropGuide:EnableInput(false)
 	self.dropGuide:Hide()
 	
+	-- init focus/spotlight
+	self.breakLink = Region('region', 'focus', self.r)
+	self.breakLink:SetLayer("TOOLTIP")
+	self.breakLink:SetWidth(200)
+	self.breakLink:SetHeight(200)
+	self.breakLink.t = self.breakLink:Texture("texture/tw_brokenlink.png")
+	self.breakLink.t:SetBlendMode("BLEND")
+	self.breakLink:SetAlpha(.95)
+	self.breakLink:EnableInput(false)
+	self.breakLink:Hide()
+	
 	self.showDrop = true
 	self.showLink = true
 end
@@ -191,12 +202,25 @@ function guideView:ShowGestureLink(r1, r2, deg)
 		gr:Show()
 	end
 	
+	DPrint(deg)
 	if deg > 1 then
-		linkLayer:ResetPotentialLink()
-		-- show potential
-	elseif deg < -1 then
-		linkLayer:DrawPotentialLink(r1, r2)
 		-- show remove icon
+		linkLayer:ResetPotentialLink()
+		self.breakLink:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
+		self.breakLink:Show()
+		
+	elseif deg < -0.8 and deg > -1.2 then
+		-- show potential
+		linkLayer:DrawPotentialLink(r1, r2)
+		self.breakLink:Hide()
+	elseif deg <-1.2 then
+		linkLayer:ResetPotentialLink()
+		self.breakLink:Hide()
+		
+	
+	else
+		linkLayer:ResetPotentialLink()
+		self.breakLink:Hide()
 	end
 	
 end
@@ -316,7 +340,7 @@ function guideView:Disable()
 	end
 	
 	self.dropGuide:Hide()
-	
+	self.breakLink:Hide()
 end
 
 function guideUpdate(self, e)

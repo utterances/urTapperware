@@ -57,8 +57,12 @@ end
 function MiscMenu(self)
 	cmdlist = {{'Add link', StartLinkRegion, self},
 		{'Add to group', addGroupPicker, self},
-		{'Toggle Movement', LockPos, self},
+		{'Lock Movement', LockPos, self},
 		{'Cancel', nil, nil}}
+		
+	if self.group~= nil then
+		cmdlist[2] = {'Remove from group', self.RemoveFromGroup, self}
+	end
 	menu = loadSimpleMenu(cmdlist, 'Command Menu')
 	menu:present(self:Center())
 end
