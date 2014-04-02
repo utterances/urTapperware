@@ -169,8 +169,10 @@ function Group:NestRegionInto(r1, r2)
 	if r2.regionType ~= RTYPE_GROUP then
 		-- create new group, set sizes
 		newGroup = ToggleLockGroup({r1})
-		newGroup.h = r2.h
-		newGroup.w = r2.w
+		if r2.h > newGroup.h or r2.w > newGroup.w then
+			newGroup.h = r2.h
+			newGroup.w = r2.w
+		end
 		-- newGroup.r:SetAnchor("CENTER", groupRegion.rx, groupRegion.ry)
 		-- newGroup.r.x = r2.rx
 		-- newGroup.r.y = r2.ry
@@ -280,10 +282,6 @@ function Group:OnSizeChanged()
 	
 	self.w = self:Width()
 	self.h = self:Height()
-end
-
-function Group:Hide()
-	self:Hide()
 end
 
 function Group:Destroy()
