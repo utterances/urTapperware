@@ -127,20 +127,20 @@ end
 function gestureManager:StartHold(region)
 	if self.mode == LEARN_OFF and #self.allRegions<2 then
 		-- animation learning and movement learning mode
-		self.mode = LEARN_ON
-		self.holding = region
-		self.rx, self.ry = region:Center()
-		self.holding.movepath = {}
-		self.receiver = nil
-		notifyView:ShowText("Holding "..region:Name()..', drag other regions to learn')
-		guideView:ShowSpotlight(region)
-		-- starts learning mode gesture, shake everything that's not held
-		for i = 1,#regions do
-			regions[i]:AnimateShaking(true)
-		end
-		self.holding:AnimateShaking(false)
-	-- elseif self.mode == LEARN_ON then
-	-- 	gestureManager:EndHold(region)
+	-- 	self.mode = LEARN_ON
+	-- 	self.holding = region
+	-- 	self.rx, self.ry = region:Center()
+	-- 	self.holding.movepath = {}
+	-- 	self.receiver = nil
+	-- 	notifyView:ShowText("Holding "..region:Name()..', drag other regions to learn')
+	-- 	guideView:ShowSpotlight(region)
+	-- 	-- starts learning mode gesture, shake everything that's not held
+	-- 	for i = 1,#regions do
+	-- 		regions[i]:AnimateShaking(true)
+	-- 	end
+	-- 	self.holding:AnimateShaking(false)
+	-- -- elseif self.mode == LEARN_ON then
+	-- -- 	gestureManager:EndHold(region)
 	elseif self.mode == LEARN_OFF and #self.allRegions == 2 then
 		-- TODO disabled for now, do this later
 		-- exactly two holds, let's do linking gesture instead

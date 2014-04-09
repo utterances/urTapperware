@@ -6,6 +6,8 @@
 -- assumes urTapperwareMenu.lua is already processed
 
 linkLayer = {}
+ARROW_OFFSET = 35
+ARROW_SIZE = 20
 
 function linkLayer:Init()
 	self.list = {}
@@ -89,6 +91,7 @@ function linkLayer:Update()
 				self.t:SetBrushColor(100,120,120,200)
 				self.t:SetBrushSize(5)
 				self.t:Line(X1,Y1,X2,Y2)
+				self.parent:DrawArrow(X1,Y1,X2,Y2)
 				-- draw the link menu (close button), it will compute centroid using
 				-- region locations	
 				OpenLinkMenu(link.menu)
@@ -106,16 +109,45 @@ function linkLayer:Draw()
 	self.links.needsDraw = true	
 end
 
+
 function linkLayer:DrawPotentialLink(region, draglet)
 	self.linkGuides.t:Clear(0,0,0,0)
-	-- self.linkGuides.t:SetBrushColor(195,240,240,150)
-	self.linkGuides.t:SetBrushColor(255,146,2,200)
+	self.linkGuides.t:SetBrushColor(195,240,200,150)
+	-- self.linkGuides.t:SetBrushColor(255,146,2,200)
 	
 	self.linkGuides.t:SetBrushSize(14)
 	
 	rx, ry = region:Center()
 	posx, posy = draglet:Center()
 	self.linkGuides.t:Line(rx,ry,posx,posy)
+end
+
+-- private helper to draw arrow
+function linkLayer:DrawArrow(x1, y1, x2, y2)
+	-- get center of the line
+	local cx = (x1+x2)/2
+	local cy = (y1+y2)/2
+	local dx = x2-x1
+	local dy = y2-y1
+	
+	local dh = math.sqrt(dx^2 + dy^2)
+	
+	-- head of the arrow
+	local headx = ARROW_OFFSET / dh * dx + cx
+	local heady = ARROW_OFFSET / dh * dy + cy
+	
+	-- normalized wing coordinates
+	local wx = ARROW_SIZE / dh * -dx
+	local wy = ARROW_SIZE / dh * -dy
+	-- rotate the wings by 30deg
+	-- sin(30) = .5, cos(30) = .866
+	local w1x = wx*.866 - wy*.5 + headx
+	local w1y = wx*.5 + wy*.866 + heady
+	local w2x = wx*.866 + wy*.5 + headx
+	local w2y = -wx*.5 + wy*.866 + heady
+	
+	self.links.t:Line(headx,heady,w1x,w1y)
+	self.links.t:Line(headx,heady,w2x,w2y)
 end
 
 function linkLayer:ResetPotentialLink()

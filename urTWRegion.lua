@@ -389,12 +389,14 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	if self.group ~= nil then
 		-- also anchor movement here within group
 		
-		if self.relativeX > 1 or self.relativeX < -1 then
-			bubbleView:ShowEvent('crossing boundary', self, true)
-		end
+		if GestureMode then
+			if self.relativeX > 1.05 or self.relativeX < -1.05 then
+				bubbleView:ShowEvent('crossing boundary', self, true)
+			end
 
-		if self.relativeY > 1 or self.relativeY < -1 then
-			bubbleView:ShowEvent('crossing boundary', self, true)
+			if self.relativeY > 1.05 or self.relativeY < -1.05 then
+				bubbleView:ShowEvent('crossing boundary', self, true)
+			end
 		end
 		
 	else
@@ -405,7 +407,9 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 		end
 	end
 	
-	gestureManager:Dragged(self, dx, dy, x, y)
+	if GestureMode then
+		gestureManager:Dragged(self, dx, dy, x, y)
+	end
 	self.holdTimer = 0
 	self.updateEnv()
 	self.oldx = self.x
@@ -529,8 +533,9 @@ function TWRegion:Update(elapsed)
 		if self.holdTimer > TIME_TO_HOLD then
 			-- do hold action here
 			self:CallEvents("OnTapAndHold", elapsed)
-			
-			gestureManager:StartHold(self)
+			if GestureMode then
+				gestureManager:StartHold(self)
+			end
 		else
 			self.holdTimer = self.holdTimer + elapsed
 		end
@@ -557,7 +562,9 @@ end
 
 function TWRegion:OnTouchDown()
 	self.rx, self.ry = self:Center()
-	gestureManager:BeginGestureOnRegion(self)
+	if GestureMode then
+		gestureManager:BeginGestureOnRegion(self)
+	end
 	if self.regionType == RTYPE_GROUP then
 		self.isHeld = true
 		self.holdTimer = -1
@@ -585,13 +592,14 @@ function TWRegion:OnDoubleTap()
 end
 
 function TWRegion:OnTouchUp()
-	gestureManager:EndGestureOnRegion(self)
-	
-	if self.isHeld and self.holdTimer < TIME_TO_HOLD then
-		-- a true tap without moving/dragging
-		gestureManager:Tapped(self)
-	else
-		gestureManager:EndHold(self)
+	if GestureMode then
+		gestureManager:EndGestureOnRegion(self)
+		if self.isHeld and self.holdTimer < TIME_TO_HOLD then
+			-- a true tap without moving/dragging
+			gestureManager:Tapped(self)
+		else
+			gestureManager:EndHold(self)
+		end
 	end
 	
 	
@@ -649,7 +657,9 @@ function TWRegion:OnTouchUp()
 end
 
 function TWRegion:OnLeave()
- 	gestureManager:EndHold(self)
+	if GestureMode then
+	 	gestureManager:EndHold(self)
+	end
 	self.isHeld = false
 	self.holdTimer = 0
 end
