@@ -58,14 +58,15 @@ dofile(DocumentPath("urTWSound.lua"))
 -- = Backdrop =
 -- ============
 
-function bgTouchDown(self)
-	local x,y = InputPosition()
+function bgTouchDown(self, x, y)
 	touchStateDown = true
 	shadow:Show()
 	shadow:SetAnchor('CENTER',x,y)
+	Log:print('bg touch down '..x..' '..y)
 end
 
-function bgTouchUp(self)
+function bgTouchUp(self, x, y)
+	Log:print('bg touch up '..x..' '..y)
 	shadow:Hide()
 	notifyView:Dismiss()
 	gestureManager:SetSelector(nil)
@@ -77,8 +78,8 @@ function bgTouchUp(self)
 		local tempSelected = {}
 		for i = 1, #regions do
 			if regions[i].usable then
-				x,y = regions[i]:Center()
-				if pointInSelectionPolygon(x,y) then
+				local rx,ry = regions[i]:Center()
+				if pointInSelectionPolygon(rx,ry) then
 					table.insert(tempSelected, regions[i])
 					ChangeSelectionStateRegion(regions[i], true)
 				else
@@ -88,7 +89,6 @@ function bgTouchUp(self)
 		end
 		if #tempSelected > 0 then
 			selectedRegions = tempSelected
-			x,y = InputPosition()
 			OpenGroupMenu(lassoGroupMenu, x, y, selectedRegions)
 		end
 		selectionPoly = {}
@@ -100,7 +100,6 @@ function bgTouchUp(self)
 		-- DPrint('not down yet')
 		return
 	end
-	local x,y = InputPosition()
 	
 	if x>CREATION_MARGIN and x<ScreenWidth()-CREATION_MARGIN and 
 		y>CREATION_MARGIN and y<ScreenHeight()-CREATION_MARGIN then
@@ -113,13 +112,13 @@ function bgTouchUp(self)
 	-- startedSelection = false
 end
 
-function bgMove(self)
+function bgMove(self, x, y)
+	Log:print('bg move '..x..' '..y)
 	startedSelection = true
 	shadow:Hide()
 	CloseGroupMenu(lassoGroupMenu)
 	
 	-- change creation behavior to selection box/lasso
-	local x,y = InputPosition()
 	if #selectionPoly > 0 then
 		last = selectionPoly[#selectionPoly]
 		if math.sqrt((x - last[1])^2 + (y - last[2])^2) > LASSOSEPDISTANCE then

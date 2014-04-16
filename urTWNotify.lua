@@ -6,7 +6,8 @@
 
 -- link action icon, shows briefly when a link is made
 
-FADE_RATE = .8
+FADE_RATE = 2
+DEFAULT_TIME = 3.0
 notifyView = {}
 
 function notifyView:Init()
@@ -46,7 +47,7 @@ end
 function notifyView:ShowTimedText(text, time)
 	self:ShowText(text)
 
-	self.r.timer = time or 2.0
+	self.r.timer = time or DEFAULT_TIME
 	self.r:Handle("OnUpdate", notifyUpdate)
 end
 

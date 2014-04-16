@@ -4,7 +4,7 @@
 -- event notification bubble, should later be turn into a draggable menu
 -- singleton class, or not really a class, just a table, always on top region
 
-STAY_TIME = 1.5
+STAY_TIME = 2
 bubbleView = {}
 menu = {}
 function bubbleView:Init()
@@ -67,7 +67,7 @@ function bubbleView:Dismiss()
 end
 
 function bubbleUpdate(self, e)
-	-- FIXME this animation code isn't working yet, add spring physics
+	-- FIXME add spring physics
 	
 	if self:Height() < self.h then
 		local curH = self:Height()

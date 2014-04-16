@@ -235,11 +235,17 @@ function TWRegion:RemoveOutgoingLink(l)
 	tableRemoveObj(self.outlinks,l)
 end
 
-function TWRegion:HasLinkTo(r)
+function TWRegion:HasLinkTo(r, linkEvent)
 	-- see if there exist a link to region r
 	for _,link in ipairs(self.outlinks) do
 		if (link.receiver == r) then
-			return true
+			if linkEvent ~= nil then
+				if link.event == linkEvent then
+					return true
+				end
+			else
+				return true
+			end
 		end
 	end
 	return false
@@ -360,7 +366,7 @@ end
 function TWRegion:OnDrag(x,y,dx,dy,e)
 	-- x,y current pos after the drag
 	-- dx dy change in the last e seconds
-	Log:print('drag '..self:Name()..' '..x..' '..y)
+	-- Log:print('drag '..self:Name()..' '..x..' '..y)
 	if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
 		self.isHeld = false	-- cancel hold gesture if over tolerance
 	end
@@ -560,8 +566,9 @@ function TWRegion:Update(elapsed)
 	-- end
 end
 
-function TWRegion:OnTouchDown()
+function TWRegion:OnTouchDown()	
 	self.rx, self.ry = self:Center()
+	Log:print(self:Name()..' touchdown '..self.rx..' '..self.ry)
 	if GestureMode then
 		gestureManager:BeginGestureOnRegion(self)
 	end
@@ -586,12 +593,14 @@ function TWRegion:OnTouchDown()
 end
 
 function TWRegion:OnDoubleTap()
+	Log:print(self:Name()..' doubletap '..self.x..' '..self.y)
 	self:CallEvents("OnDoubleTap")
 	bubbleView:ShowEvent('Double Tap', self)
 	self:ToggleMenu()
 end
 
 function TWRegion:OnTouchUp()
+	Log:print(self:Name()..' touchup '..self.x..' '..self.y)
 	if GestureMode then
 		gestureManager:EndGestureOnRegion(self)
 		if self.isHeld and self.holdTimer < TIME_TO_HOLD then

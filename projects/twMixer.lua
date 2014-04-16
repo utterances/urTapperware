@@ -72,5 +72,5 @@ r6:Show()
 link:new(r4,r5, 'OnDragging', TWRegion.UpdateX)
 link:new(r4,r6, 'OnDragging', TWRegion.UpdateY)
 
--- link:new(r3,r4,'OnDragging',TWRegion.Move)
--- link:new(r4,r3,'OnDragging',TWRegion.Move)
+link:new(r3,r4,'OnDragging',TWRegion.Move)
+link:new(r4,r3,'OnDragging',TWRegion.Move)

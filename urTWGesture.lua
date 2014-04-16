@@ -107,12 +107,17 @@ function gestureManager:EndGestureOnRegion(region)
 			elseif self.pinchGestDeg < -.6 and self.pinchGestDeg > -0.9 then
 				notifyView:Dismiss()
 				linkEvent = 'OnDragging'
-				initialLinkRegion = self.sender
-				-- ChooseEvent(self.receiver)
-				
-				finishLinkRegion = self.receiver
-				-- 
+				if r1:HasLinkTo(r2, linkEvent) then
+					initialLinkRegion = r2
+					finishLinkRegion = r1
+				else
+					initialLinkRegion = self.sender
+					finishLinkRegion = self.receiver
+				end
+				-- TODO clean this up later!
 				FinishLink(TWRegion.Move)
+				-- ChooseEvent(self.receiver)				
+				
 			end
 			
 			r1:SetPosition(r1.rx, r1.ry)
@@ -142,22 +147,9 @@ function gestureManager:StartHold(region)
 	-- -- elseif self.mode == LEARN_ON then
 	-- -- 	gestureManager:EndHold(region)
 	elseif self.mode == LEARN_OFF and #self.allRegions == 2 then
-		-- TODO disabled for now, do this later
 		-- exactly two holds, let's do linking gesture instead
-		-- self.mode = LEARN_LINK
-		-- -- first store their locations
-		-- for i = 1,2 do
-		-- 	self.allRegions[i].rx, self.allRegions[i].ry = self.allRegions[i]:Center()
-		-- end
-		-- r1 = self.allRegions[1]
-		-- r2 = self.allRegions[2]
-		-- 
-		-- -- draw the guide overlay
-		-- guideView:ShowGesturePull(r1, r2)
-		-- guideView:ShowGestureCenter(r1, r2)
-
 		r1 = self.allRegions[1]
-		r2 = self.allRegions[2]		
+		r2 = self.allRegions[2]
 		guideView:ShowTwoTouchGestureGuide(r1, r2)
 	end
 end

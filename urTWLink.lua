@@ -16,6 +16,8 @@ function link:new(initialLinkRegion, finishLinkRegion, event, action, data)
 	o.menu = newLinkMenu(o)
 	o.origin = false
 	linkLayer:Add(o)
+	
+	Log:print('link created '..initialLinkRegion:Name()..'->'..finishLinkRegion:Name()..' '..event)
 	return o
 end
 
@@ -46,6 +48,9 @@ end
 
 function link:destroy()
 	DeleteLinkMenu(self.menu)
+	Log:print('link deleted '..self.sender:Name()..'->'..self.receiver:Name()..' '..self.event)
+	
+	
 	self.menu = nil
 	self:RemoveSender()
 	self:RemoveReceiver()

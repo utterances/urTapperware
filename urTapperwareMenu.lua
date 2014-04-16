@@ -60,6 +60,7 @@ function MiscMenu(self)
 		{'Lock Movement', LockPos, self},
 		{'Duplicate', testMenu, self},
 		{'Cancel', nil, nil}}
+		-- FIXME: better text label
 		
 	if self.group~= nil then
 		cmdlist[2] = {'Remove from group', self.RemoveFromGroup, self}
