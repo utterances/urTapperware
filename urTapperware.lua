@@ -62,11 +62,11 @@ function bgTouchDown(self, x, y)
 	touchStateDown = true
 	shadow:Show()
 	shadow:SetAnchor('CENTER',x,y)
-	Log:print('bg touch down '..x..' '..y)
+	Log:print('bg touchdown '..x..' '..y)
 end
 
 function bgTouchUp(self, x, y)
-	Log:print('bg touch up '..x..' '..y)
+	Log:print('bg touchup '..x..' '..y)
 	shadow:Hide()
 	notifyView:Dismiss()
 	gestureManager:SetSelector(nil)

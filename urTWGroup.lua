@@ -150,11 +150,12 @@ function Group:AddRegion(region)
 	-- 	x - self.r.x + self.r.w/2, y - self.r.y + self.r.h/2)
 	region:RaiseToTop()
 	CloseMenu(region)
-	Log:print('added '..region:Name()..' to group')
+	Log:print(region:Name()..' added to group '..self.r:Name())
 end
 
 function Group:RemoveRegion(region)
 	if region.group == self then
+		Log:print(region:Name()..' removed from '..self.r.Name())
 		region.group = nil
 		tableRemoveObj(self.regions, region)
 		local x,y = region:Center()
@@ -286,7 +287,7 @@ end
 
 function Group:Destroy()
 	--// not sure if this is needed or actually works yet //--
-	
+	Log:print(self.r:Name()..' deleted group')
 	for i = 1, #self.regions do
 		Group:RemoveRegion(self.regions[i])
 	end

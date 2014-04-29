@@ -175,7 +175,7 @@ end
 
 function RemoveRegion(self)
 	CloseMenu(self)
-	Log:print('removed '..self:Name())
+	Log:print(self:Name()..' removed')
 	
 	if self.regionType == RTYPE_GROUP then
 		-- remove all the children if needed
@@ -215,7 +215,7 @@ function TWRegion:new(o, updateEnv)
 	setmetatable(o, self)
 	self.__index = self
 	o.updateEnv = updateEnv
-	Log:print('created '..o:Name())
+	Log:print(o:Name()..' created')
 	return o
 end
 
@@ -299,7 +299,7 @@ function TWRegion:Copy(cx, cy, groupregion)
 		group_copy.r.w = self:Width()
 		group_copy.r:LoadTexture(self.textureFile)
 
-		Log:print('copied group with '..self.groupObj.regions[1]:Name())
+		Log:print(self.groupObj.regions[1]:Name()..' copied group to '..group_copy.r:Name())
 
 		return group_copy
 	end
@@ -344,7 +344,7 @@ function TWRegion:Copy(cx, cy, groupregion)
 	end
 	
 	notifyView:ShowTimedText("Copied")
-	Log:print('copied '..self:Name()..' to '..newRegion:Name())
+	Log:print(self:Name()..' copied to '..newRegion:Name())
 	
 	return newRegion
 end
@@ -395,15 +395,15 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	if self.group ~= nil then
 		-- also anchor movement here within group
 		
-		if GestureMode then
-			if self.relativeX > 1.05 or self.relativeX < -1.05 then
-				bubbleView:ShowEvent('crossing boundary', self, true)
-			end
-
-			if self.relativeY > 1.05 or self.relativeY < -1.05 then
-				bubbleView:ShowEvent('crossing boundary', self, true)
-			end
-		end
+		-- if GestureMode then
+		-- 	if self.relativeX > 1.05 or self.relativeX < -1.05 then
+		-- 		bubbleView:ShowEvent('crossing boundary', self, true)
+		-- 	end
+		-- 
+		-- 	if self.relativeY > 1.05 or self.relativeY < -1.05 then
+		-- 		bubbleView:ShowEvent('crossing boundary', self, true)
+		-- 	end
+		-- end
 		
 	else
 		-- not in a group
@@ -423,7 +423,7 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	self.x = x
 	self.y = y
 	
-	Log:print('drag '..self:Name()..' '..self.x..' '..self.y)
+	Log:print(self:Name()..' drag '..self.x..' '..self.y)
 	
 	local message = {ndx, ndy, self.relativeX, self.relativeY}
 	self.lastMessageOrigin = message
@@ -595,7 +595,7 @@ end
 function TWRegion:OnDoubleTap()
 	Log:print(self:Name()..' doubletap '..self.x..' '..self.y)
 	self:CallEvents("OnDoubleTap")
-	bubbleView:ShowEvent('Double Tap', self)
+	-- bubbleView:ShowEvent('Double Tap', self)
 	self:ToggleMenu()
 end
 
@@ -687,7 +687,7 @@ function TWRegion:OnSizeChanged()
 	self.h = self:Height()
 	self.shadow:SetWidth(self.w + SHADOW_MARGIN)
 	self.shadow:SetHeight(self.h + SHADOW_MARGIN)
-	Log:print(self:Name()..' resized to '..self.w..' '..self.h)
+	Log:print(self:Name()..' resized '..self.w..' '..self.h)
 end
 
 function TWRegion:CallEvents(signal, messageData, setOrigin)
@@ -797,7 +797,7 @@ function TWRegion:LoadTexture(filename)
 		self.tl:SetLabel('')
 		self.shadow:Hide()
 		notifyView:ShowTimedText("texture changed to "..filename)
-		Log:print(self:Name()..' texture changed to '..filename)
+		Log:print(self:Name()..' texture changed '..filename)
 	end
 end
 

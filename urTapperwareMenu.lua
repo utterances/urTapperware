@@ -186,8 +186,6 @@ linkMenu.cmdList = {
 	{"",testMenu, 3, "tw_socket1.png"}
 }
 
-
-
 local linkReceiverMenu = {}
 -- label, func, anchor relative to region, image file
 linkReceiverMenu.cmdList = {
@@ -416,6 +414,8 @@ function OptEventFunc(self)
 	if self:ReadHandle("OnUpdate") ~= nil then
 		self:Handle("OnUpdate", nil)
 	end
+	
+	Log:print('menu cmd on '..self)
 	
 	local target = self.parent.v
 	self.func(target, self)

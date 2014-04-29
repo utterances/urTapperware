@@ -143,6 +143,7 @@ function SimpleMenu:present(x, y)
 	for i = 1, #self.cmdLabels do
 		self.cmdLabels[i]:MoveToTop()
 	end
+	Log:print('menu shown '..self.r.tl:Label())
 end
 
 function SimpleMenu:dismiss()
@@ -165,8 +166,10 @@ function CallFunc(self)
 	self.t:Clear(235,235,235,0)
 	
 	if self.func ~= nil then	-- if func is nil always dimiss parent menu
+		Log:print('menu cmd '..self.tl:Label())
 		self.func(self.arg)
 	else
+		Log:print('menu dismissed')
 		self.parent:dismiss()
 	end
 end

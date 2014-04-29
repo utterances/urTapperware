@@ -17,7 +17,7 @@ end
 
 function Log:print(text)
 	if Log.on then
-		local t = os.time()
+		local t = string.format("%.3f", os.clock())
 		self.file:write(t..' '..text..'\n')
 		self.file:flush()
 	end
