@@ -140,6 +140,7 @@ end
 
 function toggleMoveRetriction(r)
 	menu:dismiss()
+	menu=nil
 	if r~= nil then
 		r:ToggleMovement()
 		r:SetAnchor('CENTER', r.group.r, 'CENTER', 0, 0)

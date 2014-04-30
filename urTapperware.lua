@@ -30,7 +30,8 @@ linkAction = nil
 startedSelection = false
 touchStateDown = false
 
-GestureMode = true
+-- 1 - menu only, 2 - drag cable, 3 - gesture
+InputMode = 1
 
 -- selection data structs
 selectionPoly = {}
@@ -234,6 +235,7 @@ bubbleView:Init()
 Log:start()
 -- Log:stop()
 
+menu = nil
 
 
 function selectionLayer:DrawSelectionPoly()
@@ -377,15 +379,14 @@ function StartLinkRegion(self, draglet)
 		OpenRegionMenu(self)
 	else
 		-- otherwise ask for a target
-		if menu~=nil then
+		if menu then
 			menu:dismiss()
+			menu=nil
 		end
 		notifyView:ShowTimedText("Tap another region to link")
 		gestureManager:SetSelector(ChooseEvent)
 	end
 end
-
-menu = nil
 
 function ChooseEvent(self)
 	if initialLinkRegion ~= nil then
@@ -402,7 +403,7 @@ end
 function ChooseAction(message)
 	linkEvent = message
 	menu:dismiss()
-	
+	menu=nil
 	cmdlist = {{'Show Value',FinishLink, TWRegion.UpdateVal},
 		{'Show X', FinishLink, TWRegion.UpdateX},
 		{'Show Y', FinishLink, TWRegion.UpdateY},
@@ -421,6 +422,7 @@ function FinishLink(linkAction, data)
 	-- end
 	if menu then
 		menu:dismiss()
+		menu = nil
 	end
 	
 	local link = link:new(initialLinkRegion,finishLinkRegion,linkEvent,linkAction,data)
@@ -468,9 +470,10 @@ end
 
 function addGroupPicker(region)
 	initialGroupRegion = region
-	-- if menu~=nil then
-	menu:dismiss()
-	-- end
+	if menu then
+		menu:dismiss()
+		menu = nil
+	end
 	notifyView:ShowText("Tap a region or group to add")
 	gestureManager:SetSelector(AddRegionToGroup)
 end

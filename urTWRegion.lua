@@ -81,7 +81,7 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	
 	self.t:SetBlendMode("BLEND")
 	self.tl:SetLabel(self:Name())
-	self.tl:SetFontHeight(16)
+	self.tl:SetFontHeight(26)
 	self.tl:SetFont("Avenir Next")
 	self.tl:SetColor(0,0,0,255)
 	self.tl:SetHorizontalAlign("JUSTIFY")
@@ -124,7 +124,7 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	r_s:SetLayer("LOW")
 	r_s:Show() 
 
-	local r = Region(ttype,"r"..id,parent)
+	local r = Region(ttype,"R"..id,parent)
 	r.tl = r:TextLabel()
 	r.t = r:Texture("tw_roundrec.png")
 	r:SetLayer("LOW")
@@ -393,8 +393,6 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	self:UpdateRelativePos()
 	
 	if self.group ~= nil then
-		-- also anchor movement here within group
-		
 		-- if GestureMode then
 		-- 	if self.relativeX > 1.05 or self.relativeX < -1.05 then
 		-- 		bubbleView:ShowEvent('crossing boundary', self, true)
@@ -404,7 +402,6 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 		-- 		bubbleView:ShowEvent('crossing boundary', self, true)
 		-- 	end
 		-- end
-		
 	else
 		-- not in a group
 		if not self.canBeMoved then
@@ -413,7 +410,7 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 		end
 	end
 	
-	if GestureMode then
+	if InputMode == 2 then
 		gestureManager:Dragged(self, dx, dy, x, y)
 	end
 	self.holdTimer = 0
@@ -539,7 +536,7 @@ function TWRegion:Update(elapsed)
 		if self.holdTimer > TIME_TO_HOLD then
 			-- do hold action here
 			self:CallEvents("OnTapAndHold", elapsed)
-			if GestureMode then
+			if InputMode == 2 then
 				gestureManager:StartHold(self)
 			end
 		else
@@ -569,9 +566,7 @@ end
 function TWRegion:OnTouchDown()	
 	self.rx, self.ry = self:Center()
 	Log:print(self:Name()..' touchdown '..self.rx..' '..self.ry)
-	if GestureMode then
-		gestureManager:BeginGestureOnRegion(self)
-	end
+	gestureManager:BeginGestureOnRegion(self)
 	if self.regionType == RTYPE_GROUP then
 		self.isHeld = true
 		self.holdTimer = -1
@@ -601,14 +596,12 @@ end
 
 function TWRegion:OnTouchUp()
 	Log:print(self:Name()..' touchup '..self.x..' '..self.y)
-	if GestureMode then
-		gestureManager:EndGestureOnRegion(self)
-		if self.isHeld and self.holdTimer < TIME_TO_HOLD then
-			-- a true tap without moving/dragging
-			gestureManager:Tapped(self)
-		else
-			gestureManager:EndHold(self)
-		end
+	gestureManager:EndGestureOnRegion(self)
+	if self.isHeld and self.holdTimer < TIME_TO_HOLD then
+		-- a true tap without moving/dragging
+		gestureManager:Tapped(self)
+	else
+		gestureManager:EndHold(self)
 	end
 	
 	
@@ -666,7 +659,7 @@ function TWRegion:OnTouchUp()
 end
 
 function TWRegion:OnLeave()
-	if GestureMode then
+	if InputMode==2 then
 	 	gestureManager:EndHold(self)
 	end
 	self.isHeld = false
@@ -834,6 +827,7 @@ function TWRegion:RemoveFromGroup()
 	if self.group~=nil then
 		self.group:RemoveRegion(self)
 		menu:dismiss()
+		menu=nil
 		notifyView:ShowTimedText('removed '..self:Name()..' from group')
 	end
 end
@@ -876,7 +870,7 @@ function TWRegion:ClampedMovement(oldx,oldy,dx,dy)
 	local ndy = dy
 	if self.group ~= nil then
 		-- also anchor movement here within group
-		if not self.canBeMoved then
+		-- if not self.canBeMoved then
 			if oldx+dx + self.w/2 > self.group.r.x + self.group.r.w/2 then
 				ndx = self.group.r.x + self.group.r.w/2 - oldx - self.w/2
 			elseif oldx+dx - self.w/2 < self.group.r.x - self.group.r.w/2 then
@@ -888,7 +882,7 @@ function TWRegion:ClampedMovement(oldx,oldy,dx,dy)
 			elseif oldy+dy - self.h/2 < self.group.r.y - self.group.r.h/2 then
 				ndy = self.group.r.y - self.group.r.h/2 - oldy + self.h/2
 			end
-		end
+		-- end
 	end
 	return ndx,ndy
 end

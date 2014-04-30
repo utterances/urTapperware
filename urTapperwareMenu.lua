@@ -44,6 +44,7 @@ end
 
 function LoadTexture(filename)
 	menu:dismiss()
+	menu=nil
 	inspectedRegion:LoadTexture(filename)
 	inspectedRegion = nil
 end
@@ -55,16 +56,28 @@ function CloseRegion(self)
 end
 
 function MiscMenu(self)
-	cmdlist = {{'Add link', StartLinkRegion, self},
-		{'Add to group', addGroupPicker, self},
-		{'Lock Movement', LockPos, self},
-		{'Duplicate', testMenu, self},
-		{'Cancel', nil, nil}}
-		-- FIXME: better text label
-		
+	local groupCmd
 	if self.group~= nil then
-		cmdlist[2] = {'Remove from group', self.RemoveFromGroup, self}
+		 groupCmd = {'Remove from group', self.RemoveFromGroup, self}
+	else
+		 groupCmd = {'Add to group', addGroupPicker, self}
 	end
+	
+	if InputMode == 1 then
+		cmdlist = {{'Add link', StartLinkRegion, self},
+			groupCmd,
+			-- {'Lock Movement', LockPos, self},
+			{'Duplicate', testMenu, self},
+			{'Cancel', nil, nil}}
+	elseif InputMode == 2 then
+		cmdlist = {
+			-- {'Add link', StartLinkRegion, self},
+			groupCmd,
+			-- {'Lock Movement', LockPos, self},
+			-- {'Duplicate', testMenu, self},
+			{'Cancel', nil, nil}}
+	end
+		
 	menu = loadSimpleMenu(cmdlist, 'Command Menu')
 	menu:present(self:Center())
 end
@@ -169,17 +182,40 @@ end
 
 local regionMenu = {}
 -- label, func, anchor relative to region, image file, draggable or not
-regionMenu.cmdList = {
-	{"", CloseRegion, 1, "tw_closebox.png"},
-	{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
-	{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
-	{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
-	{"", LockPos, 6, "tw_unlock.png"},
-	{"", LoadInspector, 7, "tw_paint.png"},
-	{"", MiscMenu, 8, "tw_more.png"}
-	-- {"", CloseMenu, 8, "tw_socket1.png"}
-}
 
+if InputMode == 1 then
+	
+	regionMenu.cmdList = {
+		{"", CloseRegion, 1, "tw_closebox.png"},
+		-- {"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
+		{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
+		-- {"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
+		{"", LockPos, 6, "tw_unlock.png"},
+		{"", LoadInspector, 7, "tw_paint.png"},
+		{"", MiscMenu, 5, "tw_more.png"}
+		-- {"", CloseMenu, 8, "tw_socket1.png"}
+	}
+elseif InputMode == 2 then
+	regionMenu.cmdList = {
+		{"", CloseRegion, 1, "tw_closebox.png"},
+		{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
+		{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
+		{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
+		{"", LockPos, 6, "tw_unlock.png"},
+		{"", LoadInspector, 7, "tw_paint.png"},
+		{"", MiscMenu, 8, "tw_more.png"}
+	}
+elseif InputMode == 3 then
+	regionMenu.cmdList = {
+		{"", CloseRegion, 1, "tw_closebox.png"},
+		-- {"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
+		{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
+		{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
+		{"", LockPos, 6, "tw_unlock.png"},
+		{"", LoadInspector, 7, "tw_paint.png"},
+		-- {"", MiscMenu, 8, "tw_more.png"}
+	}
+end
 
 local linkMenu = {}
 linkMenu.cmdList = {
