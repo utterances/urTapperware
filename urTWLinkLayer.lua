@@ -112,7 +112,7 @@ end
 
 function linkLayer:DrawPotentialLink(region, draglet)
 	self.linkGuides.t:Clear(0,0,0,0)
-	self.linkGuides.t:SetBrushColor(195,240,200,150)
+	self.linkGuides.t:SetBrushColor(195,240,200,250)
 	-- self.linkGuides.t:SetBrushColor(255,146,2,200)
 	
 	self.linkGuides.t:SetBrushSize(14)

@@ -60,6 +60,9 @@ function gestureManager:EndGestureOnRegion(region)
 		groupRegion = self.allRegions[1]
 		self:Reset()
 		
+		region.h = region.oldh
+		region.w = region.oldw
+		
 		if groupRegion==nil or region.regionType==RTYPE_GROUP then
 			return
 		end
@@ -76,7 +79,7 @@ function gestureManager:EndGestureOnRegion(region)
 			if region.textureFile~=nil then
 				newGroup.r:LoadTexture(region.textureFile)
 			end
-			
+			Log:print('done grouping, based on '..groupRegion:Name())
 			RemoveRegion(groupRegion)
 		else
 			groupRegion.h = groupRegion.oldh
@@ -215,7 +218,8 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 						groupR.w = groupR.w + DROP_EXPAND_SIZE
 					elseif groupR.groupObj and otherR.group==groupR.groupObj then
 						DPrint('nested')
-						
+						self.mod = NESTED_GROUP
+						guideView:Show
 						-- two region already nested, showing removal guide
 						
 					end

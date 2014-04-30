@@ -234,6 +234,10 @@ function guideView:ShowGestureLink(r1, r2, deg)
 	end
 end
 
+function guideView:ShowRemoveFromGroup(groupR)
+	
+end
+
 function guideView:ZoomRegionOverlays(size)
 	for i=3,4 do
 		self.gestOverlays[i]:SetWidth(size)
