@@ -160,7 +160,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		-- only show event notification here if we are not doing learning
 		
 		if math.abs(dx) > HOLD_SHIFT_TOR*20 or math.abs(dy) > HOLD_SHIFT_TOR*20 then
-			bubbleView:ShowEvent(round(region.relativeX,3)..' '..round(region.relativeY,3), region)
+			-- bubbleView:ShowEvent(round(region.relativeX,3)..' '..round(region.relativeY,3), region)
 		end
 		
 		if #self.allRegions == 2 then

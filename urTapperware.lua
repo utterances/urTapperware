@@ -43,7 +43,7 @@ dofile(DocumentPath("urTWEventBubble.lua"))	-- event notification view
 
 dofile(DocumentPath("urTapperwareMenu.lua"))	-- old menu system, need rewrite
 dofile(DocumentPath("urTWMenu.lua"))	-- new cleaner simple menu
-dofile(DocumentPath("urTWGestureMenu.lua"))	-- new cleaner simple menu
+-- dofile(DocumentPath("urTWGestureMenu.lua"))	-- new cleaner simple menu
 dofile(DocumentPath("urTWLink.lua"))	-- needs menu, links
 dofile(DocumentPath("urTWRegion.lua"))
 
@@ -165,6 +165,9 @@ backdrop:Show()
 -- ==================================
 function loadButtonTouchUp()
 	-- DPrint('pressed load')
+	if menu ~= nil then
+		return
+	end
 	cmdlist = {}
 	
 	for file in lfs.dir(DocumentPath("projects")) do
@@ -180,6 +183,7 @@ end
 
 function loadProjectAction(filepath)
 	menu:dismiss()
+	menu = nil
 	dofile(DocumentPath(filepath))
 	notifyView:ShowTimedText('project loaded:'..filepath)
 end

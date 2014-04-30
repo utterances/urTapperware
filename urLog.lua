@@ -6,7 +6,9 @@
 Log={}
 
 function Log:start()
+	local stamp = os.time()
 	self.file = io.open(DocumentPath("out.log"), "w")
+	-- self.file = io.open(DocumentPath(stamp..".log"), "w")
 	self.on = true
 end
 

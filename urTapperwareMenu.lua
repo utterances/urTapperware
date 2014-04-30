@@ -357,6 +357,7 @@ end
 
 function OpenRegionMenu(self)
 	-- OpenMenu(self, regionMenu)
+	Log:print(self:Name()..' opened rmenu')
 	OpenMenu(self)
 end
 
@@ -397,7 +398,8 @@ function CloseMenu(self)
 	linkLayer:ResetPotentialLink()
 	for i = 1,#regions do
 		regions[i].menu = nil
-	end	
+	end
+	Log:print(self:Name()..' closed rmenu')
 end
 
 -- function SwitchToLinkMenu()
@@ -415,7 +417,7 @@ function OptEventFunc(self)
 		self:Handle("OnUpdate", nil)
 	end
 	
-	Log:print('menu cmd on '..self)
+	Log:print(self.parent.v:Name()..' rmenu cmd activated')
 	
 	local target = self.parent.v
 	self.func(target, self)

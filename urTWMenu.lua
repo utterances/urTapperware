@@ -31,7 +31,7 @@ end
 -- ======================
 
 SimpleMenu = {}	-- class
-menus = {}		-- ? maybe not need this one TODO
+menus = {}	-- ? maybe not need this one TODO
 recycledMenus = {}
 
 function SimpleMenu:new(o, cmdlist, message)
@@ -102,7 +102,7 @@ function SimpleMenu:setCommandList(cmdlist)
 		label.tl:SetShadowColor(0,0,0,0)
 		
 		-- hook up function call
-		label:Handle("OnTouchUp", CallFunc)
+		label:Handle("OnTouchUp", SimpleMenu.CallFunc)
 		label:Handle("OnTouchDown", MenuDown)
 		label:Handle("OnLeave", MenuLeave)
 		label.func = cmdlist[i][2]
@@ -143,7 +143,7 @@ function SimpleMenu:present(x, y)
 	for i = 1, #self.cmdLabels do
 		self.cmdLabels[i]:MoveToTop()
 	end
-	Log:print('menu shown '..self.r.tl:Label())
+	Log:print('present '..self.r.tl:Label())
 end
 
 function SimpleMenu:dismiss()
@@ -162,11 +162,12 @@ end
 -- ===================
 
 -- this actually calls all the menu function on the right region(s)
-function CallFunc(self)
+function SimpleMenu.CallFunc(self)
 	self.t:Clear(235,235,235,0)
+	Log:print('menu cmd '..self.tl:Label())
+	
 	
 	if self.func ~= nil then	-- if func is nil always dimiss parent menu
-		Log:print('menu cmd '..self.tl:Label())
 		self.func(self.arg)
 	else
 		Log:print('menu dismissed')
