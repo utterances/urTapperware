@@ -262,8 +262,8 @@ function TWRegion:RaiseToTop()
 	self:SetLayer("LOW")
 end
 
+-- creates a copy and return it, groupregion optional
 function TWRegion:Copy(cx, cy, groupregion)
-	-- return a copy
 	
 	if self.regionType == RTYPE_GROUP then
 		notifyView:ShowTimedText('Copying Group')
@@ -410,9 +410,8 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 		end
 	end
 	
-	if InputMode == 2 then
-		gestureManager:Dragged(self, dx, dy, x, y)
-	end
+	gestureManager:Dragged(self, dx, dy, x, y)
+	
 	self.holdTimer = 0
 	self.updateEnv()
 	self.oldx = self.x
@@ -536,9 +535,7 @@ function TWRegion:Update(elapsed)
 		if self.holdTimer > TIME_TO_HOLD then
 			-- do hold action here
 			self:CallEvents("OnTapAndHold", elapsed)
-			if InputMode == 2 then
-				gestureManager:StartHold(self)
-			end
+			gestureManager:StartHold(self)
 		else
 			self.holdTimer = self.holdTimer + elapsed
 		end
@@ -659,9 +656,7 @@ function TWRegion:OnTouchUp()
 end
 
 function TWRegion:OnLeave()
-	if InputMode==2 then
-	 	gestureManager:EndHold(self)
-	end
+	gestureManager:EndHold(self)
 	self.isHeld = false
 	self.holdTimer = 0
 end
@@ -759,7 +754,7 @@ function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
 		
 		self.tl:SetLabel(self:Name())		
 		self.t:SetTexture("tw_roundrec.png")
-		self.tl:SetFontHeight(16)
+		self.tl:SetFontHeight(26)
 		self.tl:SetColor(0,0,0,255)
 		self.tl:SetHorizontalAlign("JUSTIFY")
 		self.tl:SetVerticalAlign("MIDDLE")
@@ -824,10 +819,10 @@ function TWRegion:ToggleMenu()
 end
 
 function TWRegion:RemoveFromGroup()
-	if self.group~=nil then
+	menu:dismiss()
+	menu=nil
+	if self.group then
 		self.group:RemoveRegion(self)
-		menu:dismiss()
-		menu=nil
 		notifyView:ShowTimedText('removed '..self:Name()..' from group')
 	end
 end
@@ -970,12 +965,12 @@ function TWRegion:Move(message, linkdata)
 	local moveY = sinT*dx + cosT*dy
 	
 	local ndx, ndy = self:ClampedMovement(x, y, moveX, moveY)
-	
 	-- only move if we are not also holding this event in gesture manager:
 	if not gestureManager:IsMultiTouch(self) then
 		self:SetPosition(x + ndx, y + ndy)
 		self:CallEvents('OnDragging', {ndx, ndy, self.relativeX, self.relativeY}, self.lastMessageOrigin)
 	end
+	Log:print(self:Name()..' move '..self.x..' '..self.y)
 end
 
 function MoveLeft(self, message)

@@ -31,7 +31,7 @@ startedSelection = false
 touchStateDown = false
 
 -- 1 - menu only, 2 - drag cable, 3 - gesture
-InputMode = 1
+InputMode = 3
 
 -- selection data structs
 selectionPoly = {}
@@ -104,10 +104,17 @@ function bgTouchUp(self, x, y)
 	
 	if x>CREATION_MARGIN and x<ScreenWidth()-CREATION_MARGIN and 
 		y>CREATION_MARGIN and y<ScreenHeight()-CREATION_MARGIN then
-		local region = TWRegion:new(nil,updateEnv)
-		region:Show()
-		region:SetAnchor("CENTER",x,y) --only time to anchor directly		
-		region:SetPosition(x,y)
+		
+		local newRegion
+		if #gestureManager.allRegions==1 then
+			newRegion = #gestureManager.allRegions[1]:Copy(x,y)
+		else
+			newRegion = TWRegion:new(nil,updateEnv)
+		end
+		
+		newRegion:Show()
+		newRegion:SetAnchor("CENTER",x,y) --only time to anchor directly		
+		newRegion:SetPosition(x,y)
 	end
 	touchStateDown = false
 	-- startedSelection = false
@@ -391,8 +398,9 @@ end
 function ChooseEvent(self)
 	if initialLinkRegion ~= nil then
 		finishLinkRegion = self
-		cmdlist = {{'Tap', ChooseAction, 'OnTouchUp'},
-			{'Tap & Hold', ChooseAction, 'OnTapAndHold'},
+		cmdlist = {
+			-- {'Tap', ChooseAction, 'OnTouchUp'},
+			-- {'Tap & Hold', ChooseAction, 'OnTapAndHold'},
 			{'Move', ChooseAction, 'OnDragging'},
 			{'Cancel', nil, nil}}
 		menu = loadSimpleMenu(cmdlist, 'Choose Event:')
@@ -404,12 +412,13 @@ function ChooseAction(message)
 	linkEvent = message
 	menu:dismiss()
 	menu=nil
-	cmdlist = {{'Show Value',FinishLink, TWRegion.UpdateVal},
-		{'Show X', FinishLink, TWRegion.UpdateX},
-		{'Show Y', FinishLink, TWRegion.UpdateY},
+	cmdlist = {
+		{'Move', FinishLink, TWRegion.Move},
+		{'Send X', FinishLink, TWRegion.UpdateX},
+		{'Send Y', FinishLink, TWRegion.UpdateY},
 		-- {'Move Left', FinishLink, MoveLeft},
 		-- {'Move Right', FinishLink, MoveRight},
-		{'Move', FinishLink, TWRegion.Move},
+		{'Send X,Y',FinishLink, TWRegion.UpdateVal},
 		{'Cancel', nil, nil}}
 	menu = loadSimpleMenu(cmdlist, 'Choose Action to respond')
 	menu:present(finishLinkRegion:Center())
@@ -426,6 +435,11 @@ function FinishLink(linkAction, data)
 	end
 	
 	local link = link:new(initialLinkRegion,finishLinkRegion,linkEvent,linkAction,data)
+	
+	if linkEvent=='OnDragging' and linkAction==TWRegion.Move then
+		-- let's automate double linking movements
+		local link2 = link:new(finishLinkRegion,initialLinkRegion,linkEvent,linkAction,data)
+	end
 	-- if data ~= nil then
 	-- 	link.data = data
 	-- end
@@ -479,7 +493,7 @@ function addGroupPicker(region)
 end
 
 function AddRegionToGroup(region)
-	if initialGroupRegion~=nil then
+	if initialGroupRegion~=nil and region ~= initialGroupRegion then
 		if region.regionType ~= RTYPE_GROUP then
 			if region.group==nil then
 				-- create new group, set sizes

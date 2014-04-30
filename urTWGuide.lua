@@ -174,7 +174,7 @@ function guideView:ShowSpotlight(region)
 end
 
 function guideView:ShowGestureLink(r1, r2, deg)
-	DPrint(deg)
+	-- DPrint(deg)
 	local x1,y1 = r1:Center()
 	local x2,y2 = r2:Center()	
 	

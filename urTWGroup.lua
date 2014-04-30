@@ -26,9 +26,16 @@ function initGroupMenu()
 	-- }
 
 	local r = Region('region','menu',UIParent)
-	r.t = r:Texture("tw_unlock.png")	--TODO change this later
+	r.t = r:Texture("tw_socket2.png")	--TODO change this later
 	r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
 	r.t:SetBlendMode("BLEND")
+	r.tl = r:TextLabel()
+	r.tl:SetLabel('\n'..'Group')
+	r.tl:SetVerticalAlign("TOP")
+	r.tl:SetHorizontalAlign("CENTER")
+	r.tl:SetFontHeight(12)
+	r.tl:SetFont("Avenir Next")
+	r.tl:SetColor(0,0,0,255)
 	r:SetLayer("TOOLTIP")
 	r:SetHeight(BUTTONSIZE)
 	r:SetWidth(BUTTONSIZE)
@@ -155,7 +162,7 @@ end
 
 function Group:RemoveRegion(region)
 	if region.group == self then
-		Log:print(region:Name()..' removed from '..self.r.Name())
+		Log:print(region:Name()..' removed from '..self.r:Name())
 		region.group = nil
 		tableRemoveObj(self.regions, region)
 		local x,y = region:Center()

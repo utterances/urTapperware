@@ -41,7 +41,7 @@ function SimpleMenu:new(o, cmdlist, message)
 	 
 	o.r = Region('region', 'backdrop', UIParent)
 	o.r.t = o.r:Texture()
-	o.r.t:Clear(255,255,255,200)
+	o.r.t:Clear(255,255,255,220)
 	o.r.t:SetBlendMode("BLEND")
 	o.r:SetWidth(MENUWIDTH)
 	
@@ -154,6 +154,7 @@ function SimpleMenu:dismiss()
 		self.cmdLabels[i]:EnableInput(false)
 	end
 	table.insert(recycledMenus, self)
+	self=nil
 end
 
 
@@ -165,7 +166,6 @@ end
 function SimpleMenu.CallFunc(self)
 	self.t:Clear(235,235,235,0)
 	Log:print('menu cmd '..self.tl:Label())
-	
 	
 	if self.func ~= nil then	-- if func is nil always dimiss parent menu
 		self.func(self.arg)

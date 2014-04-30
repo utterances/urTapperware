@@ -96,14 +96,21 @@ function gestureManager:EndGestureOnRegion(region)
 			-- local oldD = (r1.rx - r2.rx)^2 + (r1.ry - r2.ry)^2
 			-- local newD = (r1.x - r2.x)^2 + (r1.y - r2.y)^2
 			-- local deg = 2.0*(newD - oldD)/oldD
-			
+			local didSomething = false
 			if self.pinchGestDeg > 1 then
 				for _,link in ipairs(r1.outlinks) do
 					if link.receiver == r2 then
 						link:destroy()
 					end
 				end
+				for _,link in ipairs(r2.outlinks) do
+					if link.receiver == r1 then
+						link:destroy()
+					end
+				end
+				
 				notifyView:ShowTimedText("remove links")
+				didSomething = true
 			elseif self.pinchGestDeg < -.6 and self.pinchGestDeg > -0.9 then
 				notifyView:Dismiss()
 				linkEvent = 'OnDragging'
@@ -117,11 +124,13 @@ function gestureManager:EndGestureOnRegion(region)
 				-- TODO clean this up later!
 				FinishLink(TWRegion.Move)
 				-- ChooseEvent(self.receiver)				
-				
+				didSomething = true
 			end
 			
-			r1:SetPosition(r1.rx, r1.ry)
-			r2:SetPosition(r2.rx, r2.ry)
+			if didSomething then
+				r1:SetPosition(r1.rx, r1.ry)
+				r2:SetPosition(r2.rx, r2.ry)
+			end
 		end
 		
 		-- don't cancel if it's group mode, we want the drop behaviour to persist
@@ -156,7 +165,7 @@ end
 
 function gestureManager:Dragged(region, dx, dy, x, y)
 	-- recording gesture here if we are enabled:
-	if self.mode == LEARN_OFF then
+	if self.mode == LEARN_OFF and InputMode == 3 then
 		-- only show event notification here if we are not doing learning
 		
 		if math.abs(dx) > HOLD_SHIFT_TOR*20 or math.abs(dy) > HOLD_SHIFT_TOR*20 then
@@ -167,7 +176,6 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 			-- check for overlap, if exist check movement speed
 			local r1 = self.allRegions[1]
 			local r2 = self.allRegions[2]
-			
 -- http://stackoverflow.com/questions/306316/determine-if-two-rectangles-overlap-each-other
 			if r1.x-r1.w/2 < r2.x+r2.w/2 and r1.x+r1.w/2 > r2.x-r2.w/2 and
 				r1.y-r1.h/2 < r2.y+r2.h/2 and r1.y+r1.h/2 > r2.y-r2.h/2 then
@@ -199,10 +207,18 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 					end
 					
 					otherR:RaiseToTop()
-					groupR.oldh = groupR.h
-					groupR.h = groupR.h + DROP_EXPAND_SIZE
-					groupR.oldw = groupR.w
-					groupR.w = groupR.w + DROP_EXPAND_SIZE
+					if not groupR.groupObj or otherR.group~=groupR.groupObj then
+						-- not already nested
+						groupR.oldh = groupR.h
+						groupR.h = groupR.h + DROP_EXPAND_SIZE
+						groupR.oldw = groupR.w
+						groupR.w = groupR.w + DROP_EXPAND_SIZE
+					elseif groupR.groupObj and otherR.group==groupR.groupObj then
+						DPrint('nested')
+						
+						-- two region already nested, showing removal guide
+						
+					end
 				end
 			else
 				-- if regions are not overlapping
@@ -210,6 +226,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 				-- also detect which gesture user is performing based on offsets
 				-- compute offsets first
 				if self.gestureMode == LEARN_GROUP then
+					DPrint('dont show guide, already in group')
 					return -- don't do nothing if we already know the mode
 				end
 

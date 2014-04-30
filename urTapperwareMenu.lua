@@ -94,6 +94,7 @@ function StartLinkOnDrag(self)
 	notifyView:ShowTimedText("drop on region to link")
 	local target = self.parent.v
 	-- draw the potential link line here:
+	Log:print(target:Name()..' rmenu dragging')
 	ShowPotentialLink(target, self)
 end
 
