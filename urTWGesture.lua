@@ -57,11 +57,11 @@ function gestureManager:EndGestureOnRegion(region)
 		self.gestureMode = LEARN_OFF
 		-- two things here, turn last region into a group, then add the current region into this group
 		
-		groupRegion = self.allRegions[1]
+		local groupRegion = self.allRegions[1]
 		self:Reset()
 		
-		region.h = region.oldh
-		region.w = region.oldw
+		-- region.h = region.oldh
+		-- region.w = region.oldw
 		
 		if groupRegion==nil or region.regionType==RTYPE_GROUP then
 			return
@@ -89,6 +89,31 @@ function gestureManager:EndGestureOnRegion(region)
 			table.insert(self.allRegions, groupRegion)
 			-- DPrint(#self.allRegions..'+g')
 		end
+	elseif self.mode == NESTED_GROUP then
+		self.mode = LEARN_OFF
+		self.gestureMode = LEARN_OFF
+		self:Reset()
+		guideView:Disable()
+		
+		local r1 = region
+		local r2 = self.allRegions[1]
+		
+		if r2==nil or region.regionType==RTYPE_GROUP or r2.groupRegion ~= RTYPE_GROUP then
+			return
+		end
+		-- sanity check
+		assert(region.group == r2.groupObj, 'nest group is wrong')
+		
+		-- check if not overlaping, if yes remove from group:
+		
+		if r1.x-r1.w/2 >= r2.x+r2.w/2 or r1.x+r1.w/2 >= r2.x-r2.w/2 or
+				r1.y-r1.h/2 >= r2.y+r2.h/2 or r1.y+r1.h/2 >= r2.y-r2.h/2 then
+			-- remove r1 from r2:
+			r1:RemoveFromGroup()
+			r2:SetPosition(r2.rx, r2.ry)
+		end
+		r1:SetPosition(r1.rx, r1.ry)
+			
 	elseif #self.allRegions ~= 2 then
 		if self.gestureMode == LEARN_LINK then
 			self.gestureMode = LEARN_OFF
@@ -171,9 +196,9 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 	if self.mode == LEARN_OFF and InputMode == 3 then
 		-- only show event notification here if we are not doing learning
 		
-		if math.abs(dx) > HOLD_SHIFT_TOR*20 or math.abs(dy) > HOLD_SHIFT_TOR*20 then
+		-- if math.abs(dx) > HOLD_SHIFT_TOR*20 or math.abs(dy) > HOLD_SHIFT_TOR*20 then
 			-- bubbleView:ShowEvent(round(region.relativeX,3)..' '..round(region.relativeY,3), region)
-		end
+		-- end
 		
 		if #self.allRegions == 2 then
 			-- check for overlap, if exist check movement speed
@@ -218,8 +243,8 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 						groupR.w = groupR.w + DROP_EXPAND_SIZE
 					elseif groupR.groupObj and otherR.group==groupR.groupObj then
 						DPrint('nested')
-						self.mod = NESTED_GROUP
-						guideView:Show
+						self.mode = NESTED_GROUP
+						guideView:ShowRemoveFromGroup(groupR)
 						-- two region already nested, showing removal guide
 						
 					end
@@ -330,12 +355,6 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		-- local olddist = math.abs(r1.rx - r2.rx) + math.abs(r1.ry - r2.ry)
 		-- local newdist = math.abs(x1 - x2) + math.abs(y1 - y2)
 		-- local gestDeg = newdist - olddist -- positive if pulling, negative if pinching
-		
-		-- update gesture guide here:
-		
-		-- guideView:UpdatePull(-(olddist/3 - gestDeg)/(olddist/3))
-		-- guideView:UpdateCenter(-(gestDeg - olddist/3)/(olddist/3))
-		
 		return
 	end	
 	
@@ -348,15 +367,15 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 	end
 	
 	-- record the actual path here:
-	if dx ~= 0 or dy ~= 0 then
-		p = Point(dx,dy)
-		table.insert(region.movepath, p)
-		-- update the guide to show this path
-		guideView:ShowPath(self.receivers)
-		if region ~= self.holding then
-			linkLayer:DrawPotentialLink(self.holding, region)
-		end
-	end
+	-- if dx ~= 0 or dy ~= 0 then
+	-- 	p = Point(dx,dy)
+	-- 	table.insert(region.movepath, p)
+	-- 	-- update the guide to show this path
+	-- 	guideView:ShowPath(self.receivers)
+	-- 	if region ~= self.holding then
+	-- 		linkLayer:DrawPotentialLink(self.holding, region)
+	-- 	end
+	-- end
 end
 
 function gestureManager:Tapped(region)

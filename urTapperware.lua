@@ -31,7 +31,7 @@ startedSelection = false
 touchStateDown = false
 
 -- 1 - menu only, 2 - drag cable, 3 - gesture
-InputMode = 3
+InputMode = 1
 
 -- selection data structs
 selectionPoly = {}
@@ -107,7 +107,7 @@ function bgTouchUp(self, x, y)
 		
 		local newRegion
 		if #gestureManager.allRegions==1 then
-			newRegion = #gestureManager.allRegions[1]:Copy(x,y)
+			newRegion = gestureManager.allRegions[1]:Copy(x,y)
 		else
 			newRegion = TWRegion:new(nil,updateEnv)
 		end

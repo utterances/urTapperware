@@ -19,7 +19,7 @@ inspectedRegion = nil
 --    o = o or {}   -- create object if user does not provide one
 --    setmetatable(o, self)
 --    self.__index = self
---    return o	 
+--    return o
 -- end
 
 function testMenu(self)
@@ -67,7 +67,7 @@ function MiscMenu(self)
 		cmdlist = {{'Add link', StartLinkRegion, self},
 			groupCmd,
 			-- {'Lock Movement', LockPos, self},
-			{'Duplicate', testMenu, self},
+			{'Duplicate', DuplicateAction, self},
 			{'Cancel', nil, nil}}
 	elseif InputMode == 2 then
 		cmdlist = {
