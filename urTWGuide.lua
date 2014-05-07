@@ -134,6 +134,17 @@ function guideView:Init()
 	self.breakLink:EnableInput(false)
 	self.breakLink:Hide()
 	
+	-- init focus/spotlight
+	self.ungroup = Region('region', 'focus', self.r)
+	self.ungroup:SetLayer("TOOLTIP")
+	self.ungroup:SetWidth(1000) --scale this later according to region size
+	self.ungroup:SetHeight(1000)
+	self.ungroup.t = self.ungroup:Texture("texture/tw_ungroup.png")
+	self.ungroup.t:SetBlendMode("BLEND")
+	self.ungroup:SetAlpha(.9)
+	self.ungroup:EnableInput(false)
+	self.ungroup:Hide()
+	
 	self.showDrop = true
 	self.showLink = true
 end
@@ -235,7 +246,11 @@ function guideView:ShowGestureLink(r1, r2, deg)
 end
 
 function guideView:ShowRemoveFromGroup(groupR)
+	self.ungroup:SetAnchor('CENTER', groupR, 'CENTER', 0,0)
+	self.SetWidth(groupR:Width()*10)
+	self.SetHeight(groupR:Height()*10)
 	
+	self.ungroup:Show()
 end
 
 function guideView:ZoomRegionOverlays(size)
@@ -359,6 +374,7 @@ function guideView:Disable()
 		self.gestOverlays[i]:Hide()
 	end
 	
+	self.ungroup:Hide()
 	self.dropGuide:Hide()
 	self.breakLink:Hide()
 end

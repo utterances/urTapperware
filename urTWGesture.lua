@@ -249,7 +249,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 					elseif groupR.groupObj and otherR.group==groupR.groupObj then
 						-- DPrint('nested')
 						self.mode = NESTED_GROUP
-						-- guideView:ShowRemoveFromGroup(groupR)
+						guideView:ShowRemoveFromGroup(groupR)
 						-- two region already nested, showing removal guide
 					end
 				end

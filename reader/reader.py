@@ -14,8 +14,10 @@ def main(argv=None):
 		print 'error reading', inputFile
 		return 1
 	
-	print 'parsing', inputFile
+	# now read the file, save each line and filter drag etc.
 	for l in open(inputFile, 'r').readlines():
+		
+		
 		l = l.split()
 		print l
 		return
