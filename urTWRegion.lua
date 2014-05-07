@@ -379,14 +379,17 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 		ndx, ndy = self:ClampedMovement(x-dx, y-dy, dx, dy)
 	else
 		ndx, ndy = dx, dy
+		-- DPrint(self:Name()..' multi')
 	end
 	
 	if self.group ~= nil then
 		if ndx~=dx or ndy~=dy then
 		-- need to undo the move here, should only be ones in a group
 			self:SetAnchor('CENTER', self.group.r, 'CENTER', x-dx+ndx - self.group.r.x, y-dy+ndy - self.group.r.y)
-		else
-			self:SetAnchor('CENTER', self.group.r, 'CENTER', x - self.group.r.x, y - self.group.r.y)
+		-- else
+			-- self:SetAnchor('CENTER', self.group.r, 'CENTER', x - self.group.r.x, y - self.group.r.y)
+		elseif gestureManager:IsMultiTouch(self) then
+			self:SetAnchor('CENTER', x,y)
 		end
 	end
 	
@@ -653,6 +656,11 @@ function TWRegion:OnTouchUp()
 	-- end
 	
 	self:CallEvents("OnTouchUp")
+	
+	if self.group ~=nil then
+		self:ReanchorToGroup()
+		-- see if we need to reanchor to group region
+	end
 end
 
 function TWRegion:OnLeave()
@@ -861,9 +869,9 @@ end
 -- return the clampped deltas, (ndx, ndy)
 -- does _NOT_ actually do the anchoring.moving
 function TWRegion:ClampedMovement(oldx,oldy,dx,dy)
-	local ndx = dx
-	local ndy = dy
 	if self.group ~= nil then
+		local ndx = dx
+		local ndy = dy
 		-- also anchor movement here within group
 		-- if not self.canBeMoved then
 			if oldx+dx + self.w/2 > self.group.r.x + self.group.r.w/2 then
@@ -878,8 +886,20 @@ function TWRegion:ClampedMovement(oldx,oldy,dx,dy)
 				ndy = self.group.r.y - self.group.r.h/2 - oldy + self.h/2
 			end
 		-- end
+		return ndx,ndy
+	else
+		return dx, dy
 	end
-	return ndx,ndy
+end
+
+function TWRegion:ReanchorToGroup()
+	assert(self.group~=nil)
+	_, relativeToRegion = self:Anchor()
+	if relativeToRegion ~= self.group.r then
+		-- DPrint('reanchoring')
+		-- re anchor:
+		self:SetAnchor('CENTER', self.group.r, 'CENTER', self.x - self.group.r.x, self.y - self.group.r.y)
+	end
 end
 
 function TWRegion:PlayAnimation(_, linkdata)

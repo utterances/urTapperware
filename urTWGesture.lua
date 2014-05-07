@@ -244,7 +244,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 					elseif groupR.groupObj and otherR.group==groupR.groupObj then
 						DPrint('nested')
 						self.mode = NESTED_GROUP
-						guideView:ShowRemoveFromGroup(groupR)
+						-- guideView:ShowRemoveFromGroup(groupR)
 						-- two region already nested, showing removal guide
 						
 					end
@@ -329,13 +329,13 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		return
 	elseif self.mode == LEARN_ON and region ~= self.holding then
 		self.mode = LEARN_DRAG
-		notifyView:ShowText("Learning movement of "..region:Name())		
+		notifyView:ShowText("Learning movement of "..region:Name())
 	elseif self.mode == LEARN_DRAG and region == self.holding then
 		-- special case when parent region starts to move too, learn
 		-- pinch/reverse pinch, convert to movement event->action pair
 		
 		if #self.receivers > 0 then
-			notifyView:ShowText("Learning move interaction between "..region:Name()..' and '..self.receivers[1]:Name())			
+			notifyView:ShowText("Learning move interaction between "..region:Name()..' and '..self.receivers[1]:Name())
 		end
 		
 		-- not use for now:

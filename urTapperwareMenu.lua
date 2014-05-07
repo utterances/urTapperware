@@ -454,7 +454,7 @@ function OptEventFunc(self)
 		self:Handle("OnUpdate", nil)
 	end
 	
-	Log:print(self.parent.v:Name()..' rmenu cmd activated')
+	Log:print(self.parent.v:Name()..' rmenu cmd_activated')
 	
 	local target = self.parent.v
 	self.func(target, self)
