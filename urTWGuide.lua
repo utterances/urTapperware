@@ -141,7 +141,7 @@ function guideView:Init()
 	self.ungroup:SetHeight(1000)
 	self.ungroup.t = self.ungroup:Texture("texture/tw_ungroup.png")
 	self.ungroup.t:SetBlendMode("BLEND")
-	self.ungroup:SetAlpha(.9)
+	self.ungroup:SetAlpha(.5)
 	self.ungroup:EnableInput(false)
 	self.ungroup:Hide()
 	
@@ -247,8 +247,8 @@ end
 
 function guideView:ShowRemoveFromGroup(groupR)
 	self.ungroup:SetAnchor('CENTER', groupR, 'CENTER', 0,0)
-	self.SetWidth(groupR:Width()*10)
-	self.SetHeight(groupR:Height()*10)
+	self.ungroup:SetWidth(groupR:Width()*10)
+	self.ungroup:SetHeight(groupR:Height()*10)
 	
 	self.ungroup:Show()
 end
