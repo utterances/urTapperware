@@ -31,7 +31,7 @@ startedSelection = false
 touchStateDown = false
 
 -- 1 - menu only, 2 - drag cable, 3 - gesture
-InputMode = 1
+InputMode = 3
 
 -- selection data structs
 selectionPoly = {}

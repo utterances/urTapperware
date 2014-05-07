@@ -60,13 +60,10 @@ function gestureManager:EndGestureOnRegion(region)
 		local groupRegion = self.allRegions[1]
 		self:Reset()
 		
-		-- region.h = region.oldh
-		-- region.w = region.oldw
-		
 		if groupRegion==nil or region.regionType==RTYPE_GROUP then
 			return
 		end
-				
+		
 		if groupRegion.regionType ~= RTYPE_GROUP then
 			-- create new group, set sizes
 			newGroup = ToggleLockGroup({region})
@@ -92,28 +89,36 @@ function gestureManager:EndGestureOnRegion(region)
 	elseif self.mode == NESTED_GROUP then
 		self.mode = LEARN_OFF
 		self.gestureMode = LEARN_OFF
-		self:Reset()
 		guideView:Disable()
 		
 		local r1 = region
 		local r2 = self.allRegions[1]
+		self:Reset()
 		
-		if r2==nil or region.regionType==RTYPE_GROUP or r2.groupRegion ~= RTYPE_GROUP then
+		if r2==nil or 
+		(region.regionType~=RTYPE_GROUP and r2.regionType~= RTYPE_GROUP) then
+			DPrint(r2:Name())
 			return
 		end
+		if region.group==nil then
+			-- if region is actually the group, switch r1 and r2
+			assert(region.groupObj == r2.group)
+			r1 = r2
+			r2 = region
+		end
 		-- sanity check
-		assert(region.group == r2.groupObj, 'nest group is wrong')
-		
+		-- assert(region.group == r2.groupObj, 'nest group is wrong')
 		-- check if not overlaping, if yes remove from group:
-		
 		if r1.x-r1.w/2 >= r2.x+r2.w/2 or r1.x+r1.w/2 >= r2.x-r2.w/2 or
 				r1.y-r1.h/2 >= r2.y+r2.h/2 or r1.y+r1.h/2 >= r2.y-r2.h/2 then
 			-- remove r1 from r2:
 			r1:RemoveFromGroup()
-			r2:SetPosition(r2.rx, r2.ry)
+			-- r2:SetPosition(r2.rx, r2.ry)
+		else
+			r1:SetPosition(r1.rx, r1.ry)
 		end
-		r1:SetPosition(r1.rx, r1.ry)
-			
+		r2:SetPosition(r2.rx, r2.ry)
+		
 	elseif #self.allRegions ~= 2 then
 		if self.gestureMode == LEARN_LINK then
 			self.gestureMode = LEARN_OFF
@@ -242,11 +247,10 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 						groupR.oldw = groupR.w
 						groupR.w = groupR.w + DROP_EXPAND_SIZE
 					elseif groupR.groupObj and otherR.group==groupR.groupObj then
-						DPrint('nested')
+						-- DPrint('nested')
 						self.mode = NESTED_GROUP
 						-- guideView:ShowRemoveFromGroup(groupR)
 						-- two region already nested, showing removal guide
-						
 					end
 				end
 			else
@@ -344,19 +348,8 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		-- 	table.insert(region.movepath, p)
 		-- end
 	elseif self.mode == LEARN_LINK and #self.allRegions == 2 then
-		-- compute how much are we off into each gesture and update vis guide
-		-- DPrint('in link mode!')
-		-- local r1 = self.allRegions[1]
-		-- local r2 = self.allRegions[2]
-		-- local x1,y1 = r1:Center()
-		-- local x2,y2 = r2:Center()
-		-- -- cx = (r1.rx + r2.rx)/2
-		-- -- cy = (r1.ry + r2.ry)/2
-		-- local olddist = math.abs(r1.rx - r2.rx) + math.abs(r1.ry - r2.ry)
-		-- local newdist = math.abs(x1 - x2) + math.abs(y1 - y2)
-		-- local gestDeg = newdist - olddist -- positive if pulling, negative if pinching
 		return
-	end	
+	end
 	
 	
 	if not tableHasObj(self.receivers, region) and region ~= self.holding then
