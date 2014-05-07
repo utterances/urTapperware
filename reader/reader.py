@@ -92,17 +92,20 @@ def main(argv=None):
 	pprint.pprint(saveLog)
 	print 'touchdown:', numTouchDowns, 'drag:', numDrag, 'wait:', waitTime
 	# compute average drag speed:
-	print 'avg drag speed', avgDragSpeed(saveLog)
+	avgSpeed, avgDur = dragStats(saveLog)
+	print 'avg drag speed', round(avgSpeed,2),'avg duration:',round(avgDur,3)
 		
 	
-def avgDragSpeed(saveLog):
+def dragStats(saveLog):
 	totalTime = 0
 	totalDist = 0
+	count = 0
 	for l in saveLog:
 		if len(l) == 9:
 			totalTime += l[7]
 			totalDist += l[7]*l[8]
-	return totalDist/totalTime
+			count += 1
+	return totalDist/totalTime, totalTime/count
 	
 def saveDrag(dict, out):
 	for k in dict.keys():
