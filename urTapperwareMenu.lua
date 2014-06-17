@@ -87,6 +87,48 @@ function StartLinkRegionAction(r, draglet)
 	StartLinkRegion(r, draglet)
 end
 
+function StartGroupSel(self)
+	-- selection lasso for grouping, refactor this from bg selection gesture
+
+	-- self is the menu button/draglet
+	-- target is the parent region
+	self.isDragging = true
+	notifyView:ShowTimedText("select regions to group")
+	local target = self.parent.v
+	-- draw the potential link line here:
+	Log:print(target:Name()..' rmenu drag_select')
+	local x,y = self:Center()
+
+	-- bgMove(self, x, y) old code moved here:
+	Log:print('bg move '..x..' '..y)
+	startedSelection = true
+	shadow:Hide()
+	CloseGroupMenu(lassoGroupMenu)
+	
+	-- change creation behavior to selection box/lasso
+	if #selectionPoly > 0 then
+		last = selectionPoly[#selectionPoly]
+		if math.sqrt((x - last[1])^2 + (y - last[2])^2) > LASSOSEPDISTANCE then
+			--more than the lasso point distance, add a new point to selection poly
+			table.insert(selectionPoly, {x,y})
+			selectionLayer:DrawSelectionPoly()
+		end
+	else
+		table.insert(selectionPoly, {x,y})
+		selectionLayer:DrawSelectionPoly()
+	end
+
+end
+
+function GroupSelection(r, draglet)
+	-- up on selection draglet, group selections
+	CloseMenu(r)
+	draglet.isDragging = false
+	-- TODO group check selection
+	local x,y = draglet:Center()
+	bgDragletUp(r, x, y)
+end
+
 function StartLinkOnDrag(self)
 	-- self is the menu button/draglet
 	-- target is the parent region
@@ -200,7 +242,8 @@ elseif InputMode == 2 then
 	regionMenu.cmdList = {
 		{"", CloseRegion, 1, "tw_closebox.png"},
 		{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
-		{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
+		-- {"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
+		{"", GroupSelection, 4, "texture/tw_group_sel.png", StartGroupSel, DragGuideAnimationHandler},
 		{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
 		{"", LockPos, 6, "tw_unlock.png"},
 		{"", LoadInspector, 7, "tw_paint.png"},
@@ -244,13 +287,13 @@ function initMenus(menuObj)
 		image = item[4]
 		
 		local r = Region('region','menu',UIParent)
-		r.tl = r:TextLabel()
-		r.tl:SetLabel("\n"..label)
-		r.tl:SetVerticalAlign("TOP")
-		r.tl:SetHorizontalAlign("CENTER")
-		r.tl:SetFontHeight(13)
-		r.tl:SetFont("Avenir Next")
-		r.tl:SetColor(0,0,0,255) 	
+		-- r.tl = r:TextLabel()
+		-- r.tl:SetLabel("\n"..label)
+		-- r.tl:SetVerticalAlign("TOP")
+		-- r.tl:SetHorizontalAlign("CENTER")
+		-- r.tl:SetFontHeight(13)
+		-- r.tl:SetFont("Avenir Next")
+		-- r.tl:SetColor(0,0,0,255) 	
 		r.t = r:Texture(image)
 		r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
 		r.t:SetBlendMode("BLEND")
@@ -268,6 +311,7 @@ function initMenus(menuObj)
 		r.isDragging = false
 		r.timer = 0
 		r.isWaiting = true
+		r.downState = false
 		
 		table.insert(menuObj.items, r)
 	end
@@ -337,10 +381,10 @@ linkReceiverMenu.show = 0
 function OpenMenu(self)
 	for i = 1,#regions do
 		regions[i].menu = nil
-	end	
+	end
 	
 	regionMenu.v = self
-		
+	
 	for i = 1,#regionMenu.items do
 		if regionMenu.items[i].draglet ~= nil then
 			regionMenu.items[i]:EnableMoving(true)
@@ -349,10 +393,9 @@ function OpenMenu(self)
 			-- need to stop animation when user interact
 			-- regionMenu.items[i]:Handle("OnTouchDown", nil)
 			regionMenu.items[i].isDragging = false
-			
 		end
 				
-		-- regionMenu.items[i]:Handle("OnTouchDown", testMenu)
+		regionMenu.items[i]:Handle("OnTouchDown", MenuDown)
 		regionMenu.items[i]:Handle("OnTouchUp", OptEventFunc)
 		local pos = regionMenu.items[i].anchorpos
 		regionMenu.items[i]:SetAnchor("CENTER", self,
@@ -394,7 +437,7 @@ end
 
 function OpenRegionMenu(self)
 	-- OpenMenu(self, regionMenu)
-	Log:print(self:Name()..' opened rmenu')
+	Log:print(self:Name()..' rmenu opened')
 	OpenMenu(self)
 end
 
@@ -436,7 +479,7 @@ function CloseMenu(self)
 	for i = 1,#regions do
 		regions[i].menu = nil
 	end
-	Log:print(self:Name()..' closed rmenu')
+	Log:print(self:Name()..' rmenu closed')
 end
 
 -- function SwitchToLinkMenu()
@@ -447,6 +490,10 @@ end
 -- 		regionMenu.items[i]:Handle("OnUpdate", nil)
 --     end
 -- end
+
+function MenuDown(self)
+	self.downState = true
+end
 
 -- this actually calls all the menu function on the right region(s)
 function OptEventFunc(self)

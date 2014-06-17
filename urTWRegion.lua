@@ -84,11 +84,11 @@ function ResetRegion(self) -- customized parameter initialization of region, eve
 	self.tl:SetFontHeight(26)
 	self.tl:SetFont("Avenir Next")
 	self.tl:SetColor(0,0,0,255)
-	self.tl:SetHorizontalAlign("JUSTIFY")
+	-- self.tl:SetHorizontalAlign("CENTER")
 	self.tl:SetVerticalAlign("MIDDLE")
 	-- self.tl:SetShadowColor(100,100,100,255)
 	-- self.tl:SetShadowOffset(1,1)
-	-- self.tl:SetShadowBlur(10)
+	-- self.tl:SetShadowBlur(5)
 	self:SetWidth(INITSIZE/3)
 	self:SetHeight(INITSIZE/3)
 	
@@ -657,10 +657,10 @@ function TWRegion:OnTouchUp()
 	
 	self:CallEvents("OnTouchUp")
 	
-	if self.group ~=nil then
-		self:ReanchorToGroup()
-		-- see if we need to reanchor to group region
-	end
+	-- if self.group ~=nil then
+	-- 	self:ReanchorToGroup()
+	-- 	-- see if we need to reanchor to group region
+	-- end
 end
 
 function TWRegion:OnLeave()

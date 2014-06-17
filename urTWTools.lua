@@ -68,3 +68,14 @@ function round(val, decimal)
   end
 end
 
+-- =================
+-- = slicing array =
+-- =================
+
+function pick (t,...)
+	local out = {}
+	for i =1,select ('#',...) do
+		out[#out+1] = t[select (i,...)]
+	end
+	return out
+end 

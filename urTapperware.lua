@@ -31,7 +31,7 @@ startedSelection = false
 touchStateDown = false
 
 -- 1 - menu only, 2 - drag cable, 3 - gesture
-InputMode = 3
+InputMode = 2
 
 -- selection data structs
 selectionPoly = {}
@@ -72,29 +72,29 @@ function bgTouchUp(self, x, y)
 	notifyView:Dismiss()
 	gestureManager:SetSelector(nil)
 	
-	if startedSelection then
-		startedSelection = false
-		selectionLayer.t:Clear(0,0,0,0)
-		
-		local tempSelected = {}
-		for i = 1, #regions do
-			if regions[i].usable then
-				local rx,ry = regions[i]:Center()
-				if pointInSelectionPolygon(rx,ry) then
-					table.insert(tempSelected, regions[i])
-					ChangeSelectionStateRegion(regions[i], true)
-				else
-					ChangeSelectionStateRegion(regions[i], false)
-				end
-			end
-		end
-		if #tempSelected > 0 then
-			selectedRegions = tempSelected
-			OpenGroupMenu(lassoGroupMenu, x, y, selectedRegions)
-		end
-		selectionPoly = {}
-		return
-	end
+	-- if startedSelection then
+	-- 	startedSelection = false
+	-- 	selectionLayer.t:Clear(0,0,0,0)
+	-- 	
+	-- 	local tempSelected = {}
+	-- 	for i = 1, #regions do
+	-- 		if regions[i].usable then
+	-- 			local rx,ry = regions[i]:Center()
+	-- 			if pointInSelectionPolygon(rx,ry) then
+	-- 				table.insert(tempSelected, regions[i])
+	-- 				ChangeSelectionStateRegion(regions[i], true)
+	-- 			else
+	-- 				ChangeSelectionStateRegion(regions[i], false)
+	-- 			end
+	-- 		end
+	-- 	end
+	-- 	if #tempSelected > 0 then
+	-- 		selectedRegions = tempSelected
+	-- 		OpenGroupMenu(lassoGroupMenu, x, y, selectedRegions)
+	-- 	end
+	-- 	selectionPoly = {}
+	-- 	return
+	-- end
 	
 	-- only create if we are not too close to the edge
 	if not touchStateDown then
@@ -120,25 +120,55 @@ function bgTouchUp(self, x, y)
 	-- startedSelection = false
 end
 
-function bgMove(self, x, y)
-	Log:print('bg move '..x..' '..y)
-	startedSelection = true
-	shadow:Hide()
-	CloseGroupMenu(lassoGroupMenu)
-	
-	-- change creation behavior to selection box/lasso
-	if #selectionPoly > 0 then
-		last = selectionPoly[#selectionPoly]
-		if math.sqrt((x - last[1])^2 + (y - last[2])^2) > LASSOSEPDISTANCE then
-			--more than the lasso point distance, add a new point to selection poly
-			table.insert(selectionPoly, {x,y})
-			selectionLayer:DrawSelectionPoly()
+-- function bgMove(self, x, y)
+-- 	Log:print('bg move '..x..' '..y)
+-- 	startedSelection = true
+-- 	shadow:Hide()
+-- 	CloseGroupMenu(lassoGroupMenu)
+-- 	
+-- 	-- change creation behavior to selection box/lasso
+-- 	if #selectionPoly > 0 then
+-- 		last = selectionPoly[#selectionPoly]
+-- 		if math.sqrt((x - last[1])^2 + (y - last[2])^2) > LASSOSEPDISTANCE then
+-- 			--more than the lasso point distance, add a new point to selection poly
+-- 			table.insert(selectionPoly, {x,y})
+-- 			selectionLayer:DrawSelectionPoly()
+-- 		end
+-- 	else
+-- 		table.insert(selectionPoly, {x,y})
+-- 		selectionLayer:DrawSelectionPoly()
+-- 	end
+-- end
+
+function bgDragletUp(self, x, y)
+	if startedSelection then
+		startedSelection = false
+		selectionLayer.t:Clear(0,0,0,0)
+		
+		local tempSelected = {}
+		for i = 1, #regions do
+			if regions[i].usable then
+				local rx,ry = regions[i]:Center()
+				if pointInSelectionPolygon(rx,ry) then
+					table.insert(tempSelected, regions[i])
+					ChangeSelectionStateRegion(regions[i], true)
+				else
+					ChangeSelectionStateRegion(regions[i], false)
+				end
+			end
 		end
-	else
-		table.insert(selectionPoly, {x,y})
-		selectionLayer:DrawSelectionPoly()
+		if #tempSelected > 0 then
+			selectedRegions = tempSelected
+			OpenGroupMenu(self, x, y, selectedRegions)
+		end
+		selectionPoly = {}
+		return
 	end
 end
+
+-- function bgDragletDragging(self, x, y)
+-- 	
+-- end
 
 function bgLeave(self)
 	shadow:Hide()
@@ -156,7 +186,7 @@ backdrop:Handle("OnTouchUp", bgTouchUp)
 backdrop:Handle("OnDoubleTap", bgDoubleTap)
 backdrop:Handle("OnEnter", bgEnter)
 backdrop:Handle("OnLeave", bgLeave)
-backdrop:Handle("OnMove", bgMove)
+-- backdrop:Handle("OnMove", bgMove)
 backdrop:Handle("OnPageEntered", visdown)
 
 backdrop:EnableInput(true)

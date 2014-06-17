@@ -11,6 +11,9 @@ GROUPMARGIN = 40
 recycledGroupMenu = {}
 
 function ToggleLockGroup(regions)
+	-- local parent = regionsList[2]
+	-- local rest = 
+	-- local regions = regionsList[1]
 	newGroup = Group:new()
 	newGroup:SetRegions(regions)
 	newGroup:Draw()
@@ -18,24 +21,43 @@ function ToggleLockGroup(regions)
 	return newGroup
 end
 
+-- Action handler for add region to group command
+function AddRegionsToGroupAction({regions, parentR})
+	if parentR.regionType ~= RTYPE_GROUP then
+		-- create new group, set sizes
+		newGroup = ToggleLockGroup(regions)
+		newGroup.r.h = parentR.h
+		newGroup.r.w = parentR.w
+		-- newGroup.r:SetAnchor("CENTER", parent.rx, parent.ry)
+		newGroup.r.x = parentR.rx
+		newGroup.r.y = parentR.ry
+		
+		if region.textureFile~=nil then
+			newGroup.r:LoadTexture(region.textureFile)
+		end
+		Log:print('done grouping, based on '..parentR:Name())
+		RemoveRegion(parentR)
+	else
+		parentR.groupObj:AddRegion(regions)
+		-- put group back for consecutive add
+		table.insert(self.allRegions, parentR)
+		-- DPrint(#self.allRegions..'+g')
+	end
+end
+
+
+
 function initGroupMenu()
 	local groupMenu = {}
 	-- label, func, anchor relative to region, image file, draggable or not
 	-- groupMenu.cmdList = {
-	-- 	{"", ToggleLockGroup, "tw_unlock.png"}
+	-- 	{"", ToggleLockGroup, "texture/tw_group_cmd.png"}
 	-- }
 
 	local r = Region('region','menu',UIParent)
-	r.t = r:Texture("tw_socket2.png")	--TODO change this later
+	r.t = r:Texture("texture/tw_group_cmd.png")	--TODO change this later
 	r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
 	r.t:SetBlendMode("BLEND")
-	r.tl = r:TextLabel()
-	r.tl:SetLabel('\n'..'Group')
-	r.tl:SetVerticalAlign("TOP")
-	r.tl:SetHorizontalAlign("CENTER")
-	r.tl:SetFontHeight(12)
-	r.tl:SetFont("Avenir Next")
-	r.tl:SetColor(0,0,0,255)
 	r:SetLayer("TOOLTIP")
 	r:SetHeight(BUTTONSIZE)
 	r:SetWidth(BUTTONSIZE)
@@ -74,14 +96,20 @@ function newGroupMenu()
 	return groupMenu
 end
 	
-function OpenGroupMenu(menu, x, y, selectedRegions)
+function OpenGroupMenu(parentRegion, x, y, selectedRegions)
 	-- shows the actual menu
-	menu.item:Show()
-	menu.item:EnableInput(true)
-	menu.item:Handle("OnTouchUp", CallGroupFunc)
-	menu.item:MoveToTop()
-	menu.selectedRegions = selectedRegions
-	menu.item:SetAnchor("CENTER", x, y)	   
+	-- groupingMenuContextual.item:Show()
+	-- groupingMenuContextual.item:EnableInput(true)
+	-- groupingMenuContextual.item:Handle("OnTouchUp", CallGroupFunc)
+	-- groupingMenuContextual.item:MoveToTop()
+	-- groupingMenuContextual.selectedRegions = selectedRegions
+	-- groupingMenuContextual.item:SetAnchor("CENTER", x, y)
+	
+	local cmdlist = {{'Add', AddRegionsToGroupAction, {parentRegion, selectedRegions}},
+		{'Cancel', nil, nil}}
+	
+	menu = loadSimpleMenu(cmdlist, 'Add selected regions to group?')
+	menu:present(x, y)
 end
 	
 function deleteGroupMenu(menu)
@@ -95,8 +123,11 @@ end
 -- ==============================
 
 function CloseGroupMenu(self)
-	self.item:Hide()
-	self.item:EnableInput(false)
+	-- self.item:Hide()
+	-- self.item:EnableInput(false)
+	if menu ~= nil then
+		menu:dismiss()
+	end
 end
 
 
@@ -106,13 +137,14 @@ end
 
 Group = {}	-- the class
 groups = {}	-- the list of groups
+-- groupingMenuContextual = initGroupMenu()
 
 function Group:new(o)
 	o = o or {}   -- create object if user does not provide one
 	setmetatable(o, self)
 	self.__index = self
 	
-	o.menu = newGroupMenu()
+	-- o.menu = newGroupMenu()
 	o.r = TWRegion:new(nil,updateEnv)
 	o.r.regionType = RTYPE_GROUP
 	o.r.t = o.r:Texture()
@@ -243,8 +275,8 @@ function Group:Draw()
 	-- now show everything
 	self.r:Show()
 	-- OpenGroupMenu(self.menu, minX, minY, nil) -- TODO: self.regions functionality
-	self.menu.item:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', 0, 0)
-	self.menu.item:EnableInput(false)
+	-- self.menu.item:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', 0, 0)
+	-- self.menu.item:EnableInput(false)
 end
 
 function Group:OnSizeChanged()

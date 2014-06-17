@@ -20,8 +20,22 @@ def main(argv=None):
 	timeZero = 0
 	saveLog = []
 	tempDragHist = {}
+	# counters
 	numTouchDowns = 0
 	numDrag = 0
+	
+	# UI
+	numMenuCmd = 0
+	numMenuActivate = 0
+	
+	# program
+	numRegionCmds = {}
+	numRegion = 0
+	
+	numLinkCmds = {}
+	
+	numGroupCreation = 0
+	
 	lastR = None
 	lastTime = 0
 	waitTime = 0
@@ -54,6 +68,11 @@ def main(argv=None):
 		elif l[1][0] == 'R': 
 			# we are dealing with region here
 			lastR = l[1]
+			
+			# count all:
+			numRegionCmds[l[2]] = numRegionCmds.get(l[2], 0) + 1
+			
+			
 			if l[2] == 'drag' or l[2] == 'move' or l[2] == 'resized':
 				# start saving drag history
 				key = l[1]+l[2]
@@ -71,6 +90,19 @@ def main(argv=None):
 					saveLog += [l]
 				elif l[2] == 'touchdown':
 					numTouchDowns += 1
+				
+				if l[2] == 'created':
+					numRegion += 1
+				elif l[2] == 'deleted':
+					numRegion -= 1
+		elif l[1] == 'link':
+			# count all:
+			numLinkCmds[l[2]] = numLinkCmds.get(l[2], 0) + 1
+		
+		elif l[1] == 'menu': #menu simple version
+			if l[2] == 'show':
+				numMenuActivate += 1
+			numMenuCmd += 1
 		else:
 			saveLog += [l]
 			
@@ -90,6 +122,9 @@ def main(argv=None):
 	saveLog.sort(key=lambda x: x[0])
 	
 	pprint.pprint(saveLog)
+	pprint.pprint(numRegionCmds)
+	pprint.pprint(numLinkCmds)
+	print 'menu cmd count:', numMenuCmd
 	print 'touchdown:', numTouchDowns, 'drag:', numDrag, 'wait:', waitTime
 	# compute average drag speed:
 	avgSpeed, avgDur = dragStats(saveLog)

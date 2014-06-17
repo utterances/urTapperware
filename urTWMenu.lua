@@ -2,6 +2,14 @@
 
 -- simple list menu used as a last resort to pick from a few options
 
+-- 	cmdlist = {{'Add link', StartLinkRegion, self},
+-- 		{'Duplicate', DuplicateAction, self},
+-- 		{'Cancel', nil, nil}}
+-- 	
+-- menu = loadSimpleMenu(cmdlist, 'Command Menu')
+-- menu:present(self:Center())
+
+
 ------------- Simple menu --------------
 
 -- geometry constants:
@@ -103,8 +111,8 @@ function SimpleMenu:setCommandList(cmdlist)
 		
 		-- hook up function call
 		label:Handle("OnTouchUp", SimpleMenu.CallFunc)
-		label:Handle("OnTouchDown", MenuDown)
-		label:Handle("OnLeave", MenuLeave)
+		label:Handle("OnTouchDown", SimpleMenu.MenuDown)
+		label:Handle("OnLeave", SimpleMenu.MenuLeave)
 		label.func = cmdlist[i][2]
 		label.arg = cmdlist[i][3]
 		label.parent = self
@@ -143,12 +151,14 @@ function SimpleMenu:present(x, y)
 	for i = 1, #self.cmdLabels do
 		self.cmdLabels[i]:MoveToTop()
 	end
-	Log:print('present '..self.r.tl:Label())
+	Log:print('menu show '..self.r.tl:Label())
 end
 
 function SimpleMenu:dismiss()
 	self.r:Hide()
 	self.r:EnableInput(false)
+	Log:print('menu close'..self.r.tl:Label())
+	
 	for i = 1, #self.cmdLabels do
 		self.cmdLabels[i]:Hide()
 		self.cmdLabels[i]:EnableInput(false)
@@ -169,18 +179,16 @@ function SimpleMenu.CallFunc(self)
 	
 	if self.func ~= nil then	-- if func is nil always dimiss parent menu
 		self.func(self.arg)
-	else
-		Log:print('menu dismissed')
-		self.parent:dismiss()
 	end
+	self.parent:dismiss()
 end
 
-function MenuDown(self)
+function SimpleMenu.MenuDown(self)
 	self.t:Clear(235,235,235,255)
 	self.tl:SetColor(20,140,255,255)
 end
 
-function MenuLeave(self)
+function SimpleMenu.MenuLeave(self)
 	self.t:Clear(235,235,235,0)
 	self.tl:SetColor(0,128,255,255)	
 end
