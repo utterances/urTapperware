@@ -11,10 +11,7 @@ GROUPMARGIN = 40
 recycledGroupMenu = {}
 
 function ToggleLockGroup(regions)
-	-- local parent = regionsList[2]
-	-- local rest = 
-	-- local regions = regionsList[1]
-	newGroup = Group:new()
+	local newGroup = Group:new()
 	newGroup:SetRegions(regions)
 	newGroup:Draw()
 	Log:print('created group with '..regions[1]:Name())
@@ -22,26 +19,27 @@ function ToggleLockGroup(regions)
 end
 
 -- Action handler for add region to group command
-function AddRegionsToGroupAction({regions, parentR})
+function AddRegionsToGroupAction(RegionsParentPair)
+	local parentR = RegionsParentPair[1]
+	local regions = RegionsParentPair[2]
 	if parentR.regionType ~= RTYPE_GROUP then
 		-- create new group, set sizes
 		newGroup = ToggleLockGroup(regions)
-		newGroup.r.h = parentR.h
-		newGroup.r.w = parentR.w
-		-- newGroup.r:SetAnchor("CENTER", parent.rx, parent.ry)
+		-- newGroup.r.h = parentR.h
+		-- newGroup.r.w = parentR.w
+		newGroup.r:SetAnchor("CENTER", parentR.rx, parentR.ry)
 		newGroup.r.x = parentR.rx
 		newGroup.r.y = parentR.ry
 		
-		if region.textureFile~=nil then
-			newGroup.r:LoadTexture(region.textureFile)
+		if parentR.textureFile~=nil then
+			newGroup.r:LoadTexture(parentR.textureFile)
 		end
 		Log:print('done grouping, based on '..parentR:Name())
 		RemoveRegion(parentR)
 	else
-		parentR.groupObj:AddRegion(regions)
-		-- put group back for consecutive add
-		table.insert(self.allRegions, parentR)
-		-- DPrint(#self.allRegions..'+g')
+		for i = 1, #regions do
+			parentR.groupObj:AddRegion(regions[i])
+		end
 	end
 end
 
@@ -184,6 +182,10 @@ function Group:AddRegion(region)
 	region.group = self
 	
 	local x,y = region:Center()
+	
+	-- if region is outside the group, move it in lazily
+	if x < self.r.x
+	
 	region:SetPosition(x,y)
 	-- region:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', 
 	-- 	x - self.r.x + self.r.w/2, y - self.r.y + self.r.h/2)

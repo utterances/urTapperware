@@ -19,7 +19,7 @@ FADEINTIME = .2 -- seconds for things to fade in, TESTING for now
 EPSILON = 0.001	--small number for rounding
 
 -- selection param
-LASSOSEPDISTANCE = 20 -- pixels between each point when drawing selection lasso
+LASSOSEPDISTANCE = 10 -- pixels between each point when drawing selection lasso
 
 FreeAllRegions()
 DPrint('')
@@ -143,11 +143,10 @@ end
 function bgDragletUp(self, x, y)
 	if startedSelection then
 		startedSelection = false
-		selectionLayer.t:Clear(0,0,0,0)
 		
 		local tempSelected = {}
 		for i = 1, #regions do
-			if regions[i].usable then
+			if regions[i].usable and regions[i]~=self then
 				local rx,ry = regions[i]:Center()
 				if pointInSelectionPolygon(rx,ry) then
 					table.insert(tempSelected, regions[i])
@@ -161,6 +160,8 @@ function bgDragletUp(self, x, y)
 			selectedRegions = tempSelected
 			OpenGroupMenu(self, x, y, selectedRegions)
 		end
+		-- DPrint('clear sel layer')
+		selectionLayer.t:Clear(0,0,0,0)
 		selectionPoly = {}
 		return
 	end
