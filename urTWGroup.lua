@@ -184,9 +184,13 @@ function Group:AddRegion(region)
 	local x,y = region:Center()
 	
 	-- if region is outside the group, move it in lazily
-	if x < self.r.x
+	if x < self.r.x - self.r.w/2 or x > self.r.x + self.r.w/2 or
+			 y < self.r.y - self.r.h/2 or y > self.r.y + self.r.h/2 then
+		region:SetPosition(self.r.x, self.r.y)
+	else
+		region:SetPosition(x,y)
+	end
 	
-	region:SetPosition(x,y)
 	-- region:SetAnchor('CENTER', self.r, 'BOTTOMLEFT', 
 	-- 	x - self.r.x + self.r.w/2, y - self.r.y + self.r.h/2)
 	region:RaiseToTop()
