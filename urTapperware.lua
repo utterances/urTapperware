@@ -194,7 +194,7 @@ backdrop:EnableInput(true)
 backdrop:SetClipRegion(0,0,ScreenWidth(),ScreenHeight())
 backdrop:EnableClipping(true)
 backdrop.player = {}
-backdrop.t = backdrop:Texture("texture/tw_paperback.jpg")
+backdrop.t = backdrop:Texture("texture/tw_legoback.jpg")
 backdrop.t:SetTexCoord(0,ScreenWidth()/1024.0,1.0,0.0)
 backdrop.t:SetBlendMode("BLEND")
 backdrop:Show()
@@ -203,10 +203,10 @@ backdrop:Show()
 -- = load file button on background =
 -- ==================================
 function loadButtonTouchUp()
-	-- DPrint('pressed load')
-	if menu ~= nil then
-		return
-	end
+	DPrint('pressed load')
+	-- if menu ~= nil then -- low priority TODO: fix dup menu
+	-- 	return
+	-- end
 	cmdlist = {}
 	
 	for file in lfs.dir(DocumentPath("projects")) do

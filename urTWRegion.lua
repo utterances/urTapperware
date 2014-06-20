@@ -670,10 +670,12 @@ function TWRegion:OnLeave()
 end
 
 function TWRegion:RaiseToTop()
-	self.shadow:MoveToTop()
-	self.shadow:SetLayer("LOW")
-	self:MoveToTop()
-	self:SetLayer("LOW")
+	if self.canBeMoved then
+		self.shadow:MoveToTop()
+		self.shadow:SetLayer("LOW")
+		self:MoveToTop()
+		self:SetLayer("LOW")
+	end
 end
 
 function TWRegion:OnSizeChanged()
