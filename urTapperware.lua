@@ -214,6 +214,8 @@ function loadButtonTouchUp()
 		end
 	end
 	
+	
+	table.insert(cmdlist,{'Load Menu', FlipPage, nil})
 	table.insert(cmdlist,{'Close', nil, nil})
 	menu = loadSimpleMenu(cmdlist, 'Load Project')
 	menu:present(ScreenWidth(), 200)
@@ -238,6 +240,24 @@ loadButton.t = loadButton:Texture("texture/tw_load_button.png")
 loadButton.t:SetBlendMode("BLEND")
 loadButton:MoveToTop()
 loadButton:Show()
+
+function markDone()
+	notifyView:ShowTimedText("Thanks!")
+	Log:print('mk done')
+end
+
+doneButton = Region('region', 'load button', backdrop)
+doneButton:SetWidth(54)
+doneButton:SetHeight(54)
+doneButton:SetLayer("TOOLTIP")
+doneButton:SetAnchor('CENTER', ScreenWidth()-54, ScreenHeight()-54)
+doneButton:Handle("OnTouchUp", markDone)
+doneButton:EnableInput(true)
+doneButton:EnableMoving(false)
+doneButton.t = doneButton:Texture("texture/tw_done_button.png")
+doneButton.t:SetBlendMode("BLEND")
+doneButton:MoveToTop()
+doneButton:Show()
 
 
 -- set up shadow for when tap down and hold, show future region creation location
@@ -552,17 +572,17 @@ end
 
 
 ----------------- v11.pagebutton -------------------
-local pagebutton=Region('region', 'pagebutton', UIParent)
-pagebutton:SetWidth(50)
-pagebutton:SetHeight(50)
-pagebutton:SetLayer("TOOLTIP")
-pagebutton:SetAnchor('BOTTOMLEFT',ScreenWidth()-50-4,ScreenHeight()-50-4)
-pagebutton:EnableClamping(true)
-pagebutton:Handle("OnTouchDown", FlipPage)
-pagebutton.texture = pagebutton:Texture("texture/tw_menu_button.png")
--- pagebutton.texture:SetGradientColor("TOP",255,255,255,255,255,255,255,255)
--- pagebutton.texture:SetGradientColor("BOTTOM",255,255,255,255,255,255,255,255)
-pagebutton.texture:SetBlendMode("BLEND")
-pagebutton.texture:SetTexCoord(0,1.0,0,1.0)
-pagebutton:EnableInput(true)
-pagebutton:Show()
+-- local pagebutton=Region('region', 'pagebutton', UIParent)
+-- pagebutton:SetWidth(50)
+-- pagebutton:SetHeight(50)
+-- pagebutton:SetLayer("TOOLTIP")
+-- pagebutton:SetAnchor('BOTTOMLEFT',ScreenWidth()-50-4,ScreenHeight()-50-4)
+-- pagebutton:EnableClamping(true)
+-- pagebutton:Handle("OnTouchDown", FlipPage)
+-- pagebutton.texture = pagebutton:Texture("texture/tw_menu_button.png")
+-- -- pagebutton.texture:SetGradientColor("TOP",255,255,255,255,255,255,255,255)
+-- -- pagebutton.texture:SetGradientColor("BOTTOM",255,255,255,255,255,255,255,255)
+-- pagebutton.texture:SetBlendMode("BLEND")
+-- pagebutton.texture:SetTexCoord(0,1.0,0,1.0)
+-- pagebutton:EnableInput(true)
+-- pagebutton:Show()
