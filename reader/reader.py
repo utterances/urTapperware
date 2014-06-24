@@ -28,6 +28,9 @@ def main(argv=None):
 	numMenuCmd = 0
 	numMenuActivate = 0
 	
+	numSimCmd = 0
+	numSimActivate = 0
+	
 	# program
 	numRegionCmds = {}
 	numRegion = 0
@@ -52,6 +55,10 @@ def main(argv=None):
 		if l[0]-lastTime > WAIT_THRES:
 			waitTime += l[0]-lastTime
 		lastTime = l[0]
+		
+		if l[1] == 'mk' and l[2] == 'done':
+			#we are done
+			break
 		
 		if l[1] == 'bg':
 			if l[2] == 'move':
@@ -102,6 +109,8 @@ def main(argv=None):
 		elif l[1] == 'menu': #menu simple version
 			if l[2] == 'show':
 				numMenuActivate += 1
+				
+			
 			numMenuCmd += 1
 		else:
 			saveLog += [l]

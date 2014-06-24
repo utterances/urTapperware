@@ -151,7 +151,7 @@ function DuplicateAction(r, draglet)
 		x,y = draglet:Center()
 		DuplicateRegion(r, x, y)
 	else
-		DuplicateRegion(r)
+		DuplicateRegion(r, ScreenWidth()/2, ScreenHeight()/2)
 	end
 end
 

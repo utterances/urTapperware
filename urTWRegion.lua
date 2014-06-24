@@ -124,7 +124,7 @@ function CreateRegion(ttype,name,parent,id) -- customized initialization of regi
 	r_s:SetLayer("LOW")
 	r_s:Show() 
 
-	local r = Region(ttype,id,parent)
+	local r = Region(ttype,'R'..id,parent)
 	r.tl = r:TextLabel()
 	r.t = r:Texture("tw_roundrec.png")
 	r:SetLayer("LOW")
