@@ -41,7 +41,7 @@ end
 function gestureManager:BeginGestureOnRegion(region)
 	if not tableHasObj(self.allRegions, region) then
 		table.insert(self.allRegions, region)
-		-- DPrint(#self.allRegions..'+')
+		DPrint(#self.allRegions..'+')
 	end
 	
 	if #self.allRegions ~= 2 then
@@ -51,7 +51,7 @@ end
 
 function gestureManager:EndGestureOnRegion(region)
 	tableRemoveObj(self.allRegions, region)
-	-- DPrint(#self.allRegions..'-')
+	DPrint(#self.allRegions..'-')
 	if self.mode == LEARN_GROUP then
 		self.mode = LEARN_OFF
 		self.gestureMode = LEARN_OFF
@@ -120,11 +120,14 @@ function gestureManager:EndGestureOnRegion(region)
 		r2:SetPosition(r2.rx, r2.ry)
 		
 	elseif #self.allRegions ~= 2 then
+		local r1 = self.sender
+		local r2 = self.receiver
+		self.sender = nil
+		self.receiver = nil
 		if self.gestureMode == LEARN_LINK then
 			self.gestureMode = LEARN_OFF
 			self.mode = LEARN_OFF
-			local r1 = self.sender
-			local r2 = self.receiver
+			DPrint(self.sender:Name()..'<->'..self.receiver:Name())
 			-- check if we are breaking or making links:
 			-- local oldD = (r1.rx - r2.rx)^2 + (r1.ry - r2.ry)^2
 			-- local newD = (r1.x - r2.x)^2 + (r1.y - r2.y)^2
@@ -151,8 +154,8 @@ function gestureManager:EndGestureOnRegion(region)
 					initialLinkRegion = r2
 					finishLinkRegion = r1
 				else
-					initialLinkRegion = self.sender
-					finishLinkRegion = self.receiver
+					initialLinkRegion = r1
+					finishLinkRegion = r2
 				end
 				-- TODO clean this up later!
 				FinishLink(TWRegion.Move)
