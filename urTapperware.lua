@@ -442,14 +442,14 @@ function ChooseAction(message)
 	DPrint("action!")
 	linkEvent = message
 	-- menu:dismiss()
-	menu=nil
+	-- menu=nil
 	cmdlist = {
 		{'Move', FinishLink, TWRegion.Move},
 		{'Send X', FinishLink, TWRegion.UpdateX},
 		{'Send Y', FinishLink, TWRegion.UpdateY},
 		-- {'Move Left', FinishLink, MoveLeft},
 		-- {'Move Right', FinishLink, MoveRight},
-		{'Send X,Y',FinishLink, TWRegion.UpdateVal},
+		-- {'Send X,Y',FinishLink, TWRegion.UpdateVal},
 		{'Cancel', nil, nil}}
 
 	menu = loadSimpleMenu(cmdlist, 'Choose Action to respond')

@@ -158,6 +158,7 @@ end
 function LockPos(r)
 	r:ToggleMovement()
 	CloseMenu(r)
+	OpenRegionMenu(r)
 end
 
 function DupOnDrag(self)
@@ -231,11 +232,11 @@ if InputMode == 1 then
 	regionMenu.cmdList = {
 		{"", CloseRegion, 1, "tw_closebox.png"},
 		-- {"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
-		{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
+		-- {"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
 		-- {"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
-		{"", LockPos, 6, "tw_unlock.png"},
 		{"", LoadInspector, 7, "tw_paint.png"},
-		{"", MiscMenu, 5, "tw_more.png"}
+		{"", MiscMenu, 5, "tw_more.png"},
+		{"", LockPos, 6, "tw_unlock.png"}
 		-- {"", CloseMenu, 8, "tw_socket1.png"}
 	}
 elseif InputMode == 2 then
@@ -244,8 +245,8 @@ elseif InputMode == 2 then
 		{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
 		-- {"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
 		{"", GroupSelection, 4, "texture/tw_group_sel.png", StartGroupSel, DragGuideAnimationHandler},
-		{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
 		{"", LockPos, 6, "tw_unlock.png"},
+		{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
 		{"", LoadInspector, 7, "tw_paint.png"},
 		{"", MiscMenu, 8, "tw_more.png"}
 	}
@@ -253,10 +254,10 @@ elseif InputMode == 3 then
 	regionMenu.cmdList = {
 		{"", CloseRegion, 1, "tw_closebox.png"},
 		-- {"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
-		{"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
+		-- {"", SwitchRegionTypeAction, 4, 	"tw_varswitcher.png"},
 		{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
-		{"", LockPos, 6, "tw_unlock.png"},
 		{"", LoadInspector, 7, "tw_paint.png"},
+		{"", LockPos, 6, "tw_unlock.png"}
 		-- {"", MiscMenu, 8, "tw_more.png"}
 	}
 end
@@ -384,6 +385,42 @@ function OpenMenu(self)
 	end
 	
 	regionMenu.v = self
+	
+	-- modify menu based on context
+	-- group?
+	if InputMode == 2 then
+		--only for icon based mode
+		if self.group~=nil then
+			-- don't show
+			local r = regionMenu.items[3]
+			r.t = r:Texture("texture/tw_group_remove.png")
+			r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
+			r.t:SetBlendMode("BLEND")
+			r.func = self.RemoveFromGroup
+			r.draglet = nil
+			r.aniHandler = nil
+		else
+			local r = regionMenu.items[3]
+			r.t = r:Texture("texture/tw_group_sel.png")
+			r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
+			r.t:SetBlendMode("BLEND")
+			r.func = GroupSelection
+			r.draglet = StartGroupSel
+			r.aniHandler = DragGuideAnimationHandler
+		end
+	end
+	
+	if self.canBeMoved then
+		local r = regionMenu.items[4]
+		r.t = r:Texture("texture/tw_pin_inactive.png")
+		r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
+		r.t:SetBlendMode("BLEND")
+	else
+		local r = regionMenu.items[4]
+		r.t = r:Texture("texture/tw_pin_active.png")
+		r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
+		r.t:SetBlendMode("BLEND")
+	end
 	
 	for i = 1,#regionMenu.items do
 		if regionMenu.items[i].draglet ~= nil then
