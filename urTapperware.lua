@@ -418,7 +418,7 @@ function StartLinkRegion(self, draglet)
 		-- otherwise ask for a target
 		if menu then
 			menu:dismiss()
-			menu=nil
+			-- menu=nil
 		end
 		notifyView:ShowTimedText("Tap another region to link")
 		gestureManager:SetSelector(ChooseEvent)
@@ -441,7 +441,7 @@ end
 function ChooseAction(message)
 	DPrint("action!")
 	linkEvent = message
-	-- menu:dismiss()
+	menu:dismiss()
 	-- menu=nil
 	cmdlist = {
 		{'Move', FinishLink, TWRegion.Move},

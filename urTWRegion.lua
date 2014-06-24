@@ -831,7 +831,7 @@ end
 function TWRegion:RemoveFromGroup()
 	if menu~=nil then
 		menu:dismiss()
-		menu=nil
+		-- menu=nil
 	end
 	if self.group then
 		self.group:RemoveRegion(self)

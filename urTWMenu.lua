@@ -165,7 +165,7 @@ function SimpleMenu:dismiss()
 		self.cmdLabels[i]:EnableInput(false)
 	end
 	table.insert(recycledMenus, self)
-	self=nil
+	-- self=nil
 end
 
 
@@ -177,11 +177,11 @@ end
 function SimpleMenu.CallFunc(self)
 	self.t:Clear(235,235,235,0)
 	Log:print('menu cmd '..self.tl:Label())
+	self.parent:dismiss()
 	
 	if self.func ~= nil then	-- if func is nil always dimiss parent menu
 		self.func(self.arg)
 	end
-	self.parent:dismiss()
 end
 
 function SimpleMenu.MenuDown(self)

@@ -25,11 +25,17 @@ function AddRegionsToGroupAction(RegionsParentPair)
 	if parentR.regionType ~= RTYPE_GROUP then
 		-- create new group, set sizes
 		newGroup = ToggleLockGroup(regions)
-		-- newGroup.r.h = parentR.h
-		-- newGroup.r.w = parentR.w
 		newGroup.r:SetAnchor("CENTER", parentR.rx, parentR.ry)
 		newGroup.r.x = parentR.rx
 		newGroup.r.y = parentR.ry
+		
+		if newGroup.r.h < parentR.h then
+			newGroup.r.h = parentR.h
+		end
+		if newGroup.r.w < parentR.w then
+			newGroup.r.w = parentR.w
+		end
+
 		
 		if parentR.textureFile~=nil then
 			newGroup.r:LoadTexture(parentR.textureFile)

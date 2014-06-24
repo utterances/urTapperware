@@ -44,7 +44,7 @@ end
 
 function LoadTexture(filename)
 	menu:dismiss()
-	menu=nil
+	-- menu=nil
 	inspectedRegion:LoadTexture(filename)
 	inspectedRegion = nil
 end
