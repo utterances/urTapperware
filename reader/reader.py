@@ -56,9 +56,6 @@ def main(argv=None):
 			waitTime += l[0]-lastTime
 		lastTime = l[0]
 		
-		if l[1] == 'mk' and l[2] == 'done':
-			#we are done
-			break
 		
 		if l[1] == 'bg':
 			if l[2] == 'move':
@@ -110,10 +107,15 @@ def main(argv=None):
 			if l[2] == 'show':
 				numMenuActivate += 1
 				
-			
-			numMenuCmd += 1
+			if l[2] != 'close':
+				numMenuCmd += 1
 		else:
 			saveLog += [l]
+			
+			if l[1] == 'mk' and l[2] == 'done':
+				#we are done
+				break
+			
 			
 	# cleaning steps, remove multi-touch resizing drag:
 	for i in xrange(len(saveLog)):
