@@ -203,7 +203,6 @@ backdrop:Show()
 -- = load file button on background =
 -- ==================================
 function loadButtonTouchUp()
-	DPrint('pressed load')
 	-- if menu ~= nil then -- low priority TODO: fix dup menu
 	-- 	return
 	-- end
@@ -228,10 +227,10 @@ function loadProjectAction(filepath)
 end
 
 loadButton = Region('region', 'load button', backdrop)
-loadButton:SetWidth(44)
-loadButton:SetHeight(44)
+loadButton:SetWidth(54)
+loadButton:SetHeight(54)
 loadButton:SetLayer("TOOLTIP")
-loadButton:SetAnchor('CENTER', ScreenWidth()-44, 44)
+loadButton:SetAnchor('CENTER', ScreenWidth()-54, 54)
 loadButton:Handle("OnDoubleTap", loadButtonTouchUp)
 loadButton:EnableInput(true)
 loadButton:EnableMoving(false)
@@ -554,10 +553,10 @@ end
 
 ----------------- v11.pagebutton -------------------
 local pagebutton=Region('region', 'pagebutton', UIParent)
-pagebutton:SetWidth(40)
-pagebutton:SetHeight(40)
+pagebutton:SetWidth(50)
+pagebutton:SetHeight(50)
 pagebutton:SetLayer("TOOLTIP")
-pagebutton:SetAnchor('BOTTOMLEFT',ScreenWidth()-40-4,ScreenHeight()-40-4)
+pagebutton:SetAnchor('BOTTOMLEFT',ScreenWidth()-50-4,ScreenHeight()-50-4)
 pagebutton:EnableClamping(true)
 pagebutton:Handle("OnTouchDown", FlipPage)
 pagebutton.texture = pagebutton:Texture("texture/tw_menu_button.png")
