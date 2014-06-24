@@ -21,7 +21,7 @@ EPSILON = 0.001	--small number for rounding
 -- selection param
 LASSOSEPDISTANCE = 10 -- pixels between each point when drawing selection lasso
 
-FreeAllRegions()
+-- FreeAllRegions()
 DPrint('')
 initialLinkRegion = nil
 finishLinkRegion = nil
@@ -31,7 +31,7 @@ startedSelection = false
 touchStateDown = false
 
 -- 1 - menu only, 2 - drag cable, 3 - gesture
-InputMode = 2
+-- InputMode = 2
 
 -- selection data structs
 selectionPoly = {}
@@ -228,10 +228,10 @@ function loadProjectAction(filepath)
 end
 
 loadButton = Region('region', 'load button', backdrop)
-loadButton:SetWidth(64)
-loadButton:SetHeight(64)
+loadButton:SetWidth(44)
+loadButton:SetHeight(44)
 loadButton:SetLayer("TOOLTIP")
-loadButton:SetAnchor('CENTER', ScreenWidth()-60, 60)
+loadButton:SetAnchor('CENTER', ScreenWidth()-44, 44)
 loadButton:Handle("OnDoubleTap", loadButtonTouchUp)
 loadButton:EnableInput(true)
 loadButton:EnableMoving(false)
@@ -440,8 +440,9 @@ function ChooseEvent(self)
 end
 
 function ChooseAction(message)
+	DPrint("action!")
 	linkEvent = message
-	menu:dismiss()
+	-- menu:dismiss()
 	menu=nil
 	cmdlist = {
 		{'Move', FinishLink, TWRegion.Move},
@@ -451,6 +452,7 @@ function ChooseAction(message)
 		-- {'Move Right', FinishLink, MoveRight},
 		{'Send X,Y',FinishLink, TWRegion.UpdateVal},
 		{'Cancel', nil, nil}}
+
 	menu = loadSimpleMenu(cmdlist, 'Choose Action to respond')
 	menu:present(finishLinkRegion:Center())
 end
@@ -552,15 +554,15 @@ end
 
 ----------------- v11.pagebutton -------------------
 local pagebutton=Region('region', 'pagebutton', UIParent)
-pagebutton:SetWidth(pagersize)
-pagebutton:SetHeight(pagersize)
+pagebutton:SetWidth(40)
+pagebutton:SetHeight(40)
 pagebutton:SetLayer("TOOLTIP")
-pagebutton:SetAnchor('BOTTOMLEFT',ScreenWidth()-pagersize-4,ScreenHeight()-pagersize-4)
+pagebutton:SetAnchor('BOTTOMLEFT',ScreenWidth()-40-4,ScreenHeight()-40-4)
 pagebutton:EnableClamping(true)
 pagebutton:Handle("OnTouchDown", FlipPage)
-pagebutton.texture = pagebutton:Texture("circlebutton-16.png")
-pagebutton.texture:SetGradientColor("TOP",255,255,255,255,255,255,255,255)
-pagebutton.texture:SetGradientColor("BOTTOM",255,255,255,255,255,255,255,255)
+pagebutton.texture = pagebutton:Texture("texture/tw_menu_button.png")
+-- pagebutton.texture:SetGradientColor("TOP",255,255,255,255,255,255,255,255)
+-- pagebutton.texture:SetGradientColor("BOTTOM",255,255,255,255,255,255,255,255)
 pagebutton.texture:SetBlendMode("BLEND")
 pagebutton.texture:SetTexCoord(0,1.0,0,1.0)
 pagebutton:EnableInput(true)

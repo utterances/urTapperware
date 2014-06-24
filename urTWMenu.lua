@@ -142,6 +142,7 @@ function SimpleMenu:present(x, y)
 	end
 	
 	self.r:SetAnchor('CENTER',lx,ly)
+
 	self.r:Show()
 	self.r:MoveToTop()
 	self.r:EnableInput(true)
@@ -157,7 +158,7 @@ end
 function SimpleMenu:dismiss()
 	self.r:Hide()
 	self.r:EnableInput(false)
-	Log:print('menu close'..self.r.tl:Label())
+	Log:print('menu close '..self.r.tl:Label())
 	
 	for i = 1, #self.cmdLabels do
 		self.cmdLabels[i]:Hide()
