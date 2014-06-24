@@ -122,12 +122,10 @@ function gestureManager:EndGestureOnRegion(region)
 	elseif #self.allRegions ~= 2 then
 		local r1 = self.sender
 		local r2 = self.receiver
-		self.sender = nil
-		self.receiver = nil
 		if self.gestureMode == LEARN_LINK then
 			self.gestureMode = LEARN_OFF
 			self.mode = LEARN_OFF
-			DPrint(self.sender:Name()..'<->'..self.receiver:Name())
+			DPrint(r1:Name()..'<->'..r2:Name())
 			-- check if we are breaking or making links:
 			-- local oldD = (r1.rx - r2.rx)^2 + (r1.ry - r2.ry)^2
 			-- local newD = (r1.x - r2.x)^2 + (r1.y - r2.y)^2
@@ -168,6 +166,8 @@ function gestureManager:EndGestureOnRegion(region)
 				r2:SetPosition(r2.rx, r2.ry)
 			end
 		end
+		self.sender = nil
+		self.receiver = nil
 		
 		-- don't cancel if it's group mode, we want the drop behaviour to persist
 		guideView:Disable()
