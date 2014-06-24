@@ -218,7 +218,7 @@ function loadButtonTouchUp()
 	table.insert(cmdlist,{'Load Menu', FlipPage, nil})
 	table.insert(cmdlist,{'Close', nil, nil})
 	menu = loadSimpleMenu(cmdlist, 'Load Project')
-	menu:present(ScreenWidth(), 200)
+	menu:present(ScreenWidth(), 260)
 end
 
 function loadProjectAction(filepath)
