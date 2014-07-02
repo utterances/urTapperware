@@ -591,7 +591,7 @@ function TWRegion:OnDoubleTap()
 	Log:print(self:Name()..' doubletap '..self.x..' '..self.y)
 	self:CallEvents("OnDoubleTap")
 	-- bubbleView:ShowEvent('Double Tap', self)
-	self:ToggleMenu()
+	-- self:ToggleMenu()
 end
 
 function TWRegion:OnTouchUp()
@@ -600,6 +600,7 @@ function TWRegion:OnTouchUp()
 	if self.isHeld and self.holdTimer < TIME_TO_HOLD then
 		-- a true tap without moving/dragging
 		gestureManager:Tapped(self)
+		self:ToggleMenu()
 	else
 		gestureManager:EndHold(self)
 	end
@@ -661,6 +662,7 @@ function TWRegion:OnTouchUp()
 	-- 	self:ReanchorToGroup()
 	-- 	-- see if we need to reanchor to group region
 	-- end
+	
 end
 
 function TWRegion:OnLeave()

@@ -41,7 +41,7 @@ end
 function gestureManager:BeginGestureOnRegion(region)
 	if not tableHasObj(self.allRegions, region) then
 		table.insert(self.allRegions, region)
-		DPrint(#self.allRegions..'+')
+		-- DPrint(#self.allRegions..'+')
 	end
 	
 	if #self.allRegions ~= 2 then
@@ -51,7 +51,7 @@ end
 
 function gestureManager:EndGestureOnRegion(region)
 	tableRemoveObj(self.allRegions, region)
-	DPrint(#self.allRegions..'-')
+	-- DPrint(#self.allRegions..'-')
 	if self.mode == LEARN_GROUP then
 		self.mode = LEARN_OFF
 		self.gestureMode = LEARN_OFF

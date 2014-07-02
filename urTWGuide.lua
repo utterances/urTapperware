@@ -202,21 +202,23 @@ function guideView:ShowGestureLink(r1, r2, deg)
 				gr:SetAlpha(-deg*.5+.5) -- little overlap here
 			end
 		else
-			gr:SetAlpha(-deg*.5+.5) -- little overlap here
+			-- gr:SetAlpha(-deg*.5+.5) -- little overlap here
 		end
 		
 		if i<3 then
 			gr:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
 			gr.t:SetRotation(math.atan2(x2-x1, y1-y2))
+			gr:Show()
+			
 		else
-			if i==3 then
-				gr:SetAnchor('CENTER', x1,y1)
-			else
-				-- i==4
-				gr:SetAnchor('CENTER', x2,y2)
-			end
+			-- if i==3 then
+			-- 	gr:SetAnchor('CENTER', x1,y1)
+			-- else
+			-- 	-- i==4
+			-- 	gr:SetAnchor('CENTER', x2,y2)
+			-- end
 		end
-		gr:Show()
+		-- gr:Show()
 	end
 	
 	if deg > 1 then
