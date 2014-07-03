@@ -263,9 +263,9 @@ elseif InputMode == 3 then
 		{"", CloseRegion, 1, "tw_closebox.png"},
 		-- {"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
 		-- {"", SwitchRegionTypeAction, 4, 	"tw_varswitcher.png"},
-		{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
+		-- {"", nil, 5, "tw_dup.png"},
 		{"", LoadInspector, 7, "tw_paint.png"},
-		{"", LockPos, 6, "tw_unlock.png"}
+		-- {"", LockPos, 6, "tw_unlock.png"}
 		-- {"", MiscMenu, 8, "tw_more.png"}
 	}
 end
@@ -418,16 +418,18 @@ function OpenMenu(self)
 		end
 	end
 	
-	if self.canBeMoved then
-		local r = regionMenu.items[4]
-		r.t = r:Texture("texture/tw_pin_inactive.png")
-		r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
-		r.t:SetBlendMode("BLEND")
-	else
-		local r = regionMenu.items[4]
-		r.t = r:Texture("texture/tw_pin_active.png")
-		r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
-		r.t:SetBlendMode("BLEND")
+	if InputMode ~= 3 then
+		if self.canBeMoved then
+			local r = regionMenu.items[4]
+			r.t = r:Texture("texture/tw_pin_inactive.png")
+			r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
+			r.t:SetBlendMode("BLEND")
+		else
+			local r = regionMenu.items[4]
+			r.t = r:Texture("texture/tw_pin_active.png")
+			r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
+			r.t:SetBlendMode("BLEND")
+		end
 	end
 	
 	for i = 1,#regionMenu.items do

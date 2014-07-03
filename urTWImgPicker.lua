@@ -43,6 +43,8 @@ function ImgPicker:new(o)
 	o.r:EnableMoving(false)
 	o.r:Hide()
 	
+	o.Margin=10
+	
 	o:setMessage('Pick an image:')
 	
 	o.imglist = {}
@@ -80,10 +82,10 @@ function ImgPicker:initButtons()
 
 		local label = Region('region', 'imgbtn', self.r)
 
-		label:SetWidth(ButtonSize)
-		label:SetHeight(ButtonSize)
-		label:SetAnchor("TOPLEFT",self.r,"TOPLEFT",ButtonSize*(i%5), 
-				-ButtonSize*math.floor((i-1)/5) - 30)
+		label:SetWidth(ButtonSize - self.Margin*2)
+		label:SetHeight(ButtonSize - self.Margin*2)
+		label:SetAnchor("TOPLEFT",self.r,"TOPLEFT",ButtonSize*(i%5)+self.Margin, 
+				-ButtonSize*math.floor((i-1)/5) - 30 - self.Margin)
 		label:SetLayer("TOOLTIP")
 		label:EnableInput(true)
 		label:EnableMoving(false)
@@ -109,6 +111,31 @@ function ImgPicker:initButtons()
 
 		table.insert(self.cmdLabels, label)
 	end
+	
+	local label = Region('region', 'cancelbtn', self.r)
+
+	label:SetWidth(ScreenWidth())
+	label:SetHeight(40)
+	label:SetAnchor("TOPLEFT",self.r,"TOPLEFT",0, ButtonSize * math.ceil(#self.imglist / 5)  + 54)
+	label:SetLayer("TOOLTIP")
+	label:EnableInput(true)
+	label:EnableMoving(false)
+	
+	label.t = label:Texture()
+	label.t:Clear(240,240,240)
+	label.t:SetBlendMode("BLEND")
+
+	label.tl = label:TextLabel()
+	label.tl:SetFontHeight(24)
+	label.tl:SetFont(MENUFONT)
+	label.tl:SetLabel('Cancel')
+	label.tl:SetColor(0,128,255,255)
+	label.tl:SetShadowColor(255,255,255,0)
+	-- hook up function call
+	label:Handle("OnTouchUp", self.dismiss)
+	label:Handle("OnTouchDown", self.CancelDown)
+	label:Show()
+	
 end
 
 function ImgPicker:present()
@@ -120,6 +147,8 @@ function ImgPicker:present()
 	
 	for i = 1, #self.cmdLabels do
 		self.cmdLabels[i]:MoveToTop()
+		self.cmdLabels[i]:Show()
+		self.cmdLabels[i]:EnableInput(true)
 	end
 end
 
