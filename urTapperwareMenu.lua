@@ -302,7 +302,7 @@ function initMenus(menuObj)
 		-- r.tl:SetHorizontalAlign("CENTER")
 		-- r.tl:SetFontHeight(13)
 		-- r.tl:SetFont("Avenir Next")
-		-- r.tl:SetColor(0,0,0,255) 	
+		-- r.tl:SetColor(0,0,0,255)
 		r.t = r:Texture(image)
 		r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
 		r.t:SetBlendMode("BLEND")
@@ -326,6 +326,18 @@ function initMenus(menuObj)
 	end
 	menuObj.show = 0
 	menuObj.v = nil
+	
+	
+	local pinR = Region('region','menu',UIParent)
+	pinR.t = r:Texture(image)
+	pinR.t:SetBlendMode("BLEND")
+	pinR:SetLayer("TOOLTIP")
+	pinR:SetHeight(BUTTONSIZE)
+	pinR:SetWidth(BUTTONSIZE)
+	pinR:MoveToTop()
+	pinR:Hide()
+
+	menuObj.pinOverlay = pinR
 end
 
 
@@ -436,7 +448,12 @@ function OpenRegionMenu(self)
 			r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
 			r.t:SetBlendMode("BLEND")
 		end
-		
+	
+	else
+		if not self.canBeMoved then
+			regionMenu.pinOverlay:SetAnchor("CENTER", self, "CENTER", 0, 30)
+			regionMenu.pinOverlay:Show()
+		end
 	end
 	
 	for i = 1,#regionMenu.items do
@@ -460,11 +477,8 @@ function OpenRegionMenu(self)
 		regionMenu.items[i]:EnableInput(true)
 		regionMenu.items[i]:Show()
 	end
-	   
-	 self.menu = regionMenu
-	 
-    -- regionMenu.show = 1
-  -- end
+	
+	self.menu = regionMenu
 	
 	-- TODO change this later
 	-- open receiver menu for all another region(s)
@@ -511,6 +525,8 @@ function CloseMenu(self)
 		regionMenu.items[i]:Handle("OnUpdate", nil)
 		regionMenu.items[i]:Handle("OnTouchDown", nil)
 	end
+	regionMenu.pinOverlay:Hide()
+	
 	regionMenu.show = 0
 	regionMenu.v = nil
 	self.menu = nil

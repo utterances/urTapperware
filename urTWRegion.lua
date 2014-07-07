@@ -590,6 +590,9 @@ end
 function TWRegion:OnDoubleTap()
 	Log:print(self:Name()..' doubletap '..self.x..' '..self.y)
 	self:CallEvents("OnDoubleTap")
+	if InputMode == 3 then
+		self:ToggleMovement()
+	end 
 	-- bubbleView:ShowEvent('Double Tap', self)
 	-- self:ToggleMenu()
 end
