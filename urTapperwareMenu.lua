@@ -74,7 +74,7 @@ function MiscMenu(self)
 	if InputMode == 1 then
 		cmdlist = {{'Add link', StartLinkRegion, self},
 			groupCmd,
-			-- {'Lock Movement', LockPos, self},
+			{'Lock Movement', LockPos, self},
 			{'Duplicate', DuplicateAction, self},
 			{'Cancel', nil, nil}}
 	elseif InputMode == 2 then
@@ -387,12 +387,20 @@ for k,item in pairs(linkReceiverMenu.cmdList) do
 end
 linkReceiverMenu.show = 0
 
-function OpenMenu(self)
-	for i = 1,#regions do
-		regions[i].menu = nil
+function OpenRegionMenu(self)
+	-- function OpenRegionMenu(self)
+	-- 	-- OpenMenu(self, regionMenu)
+	if regionMenu.v ~= self and regionMenu.v~= nil then
+		CloseMenu(regionMenu.v)
 	end
-	
 	regionMenu.v = self
+	
+	Log:print(self:Name()..' rmenu opened')
+	
+	-- for i = 1,#regions do
+	-- 	regions[i].menu = nil
+	-- end
+	
 	
 	-- modify menu based on context
 	-- group?
@@ -416,9 +424,7 @@ function OpenMenu(self)
 			r.draglet = StartGroupSel
 			r.aniHandler = DragGuideAnimationHandler
 		end
-	end
-	
-	if InputMode ~= 3 then
+		
 		if self.canBeMoved then
 			local r = regionMenu.items[4]
 			r.t = r:Texture("texture/tw_pin_inactive.png")
@@ -430,6 +436,7 @@ function OpenMenu(self)
 			r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
 			r.t:SetBlendMode("BLEND")
 		end
+		
 	end
 	
 	for i = 1,#regionMenu.items do
@@ -480,12 +487,6 @@ function OpenMenu(self)
 	-- 		break
 	-- 	end
 	-- end
-end
-
-function OpenRegionMenu(self)
-	-- OpenMenu(self, regionMenu)
-	Log:print(self:Name()..' rmenu opened')
-	OpenMenu(self)
 end
 
 -- keep menu on top of pesky things, like regions

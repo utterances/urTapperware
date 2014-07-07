@@ -107,7 +107,7 @@ function bgTouchUp(self, x, y)
 		y>CREATION_MARGIN and y<ScreenHeight()-CREATION_MARGIN then
 		
 		local newRegion
-		if #gestureManager.allRegions==1 then
+		if InputMode == 3 and #gestureManager.allRegions==1 then
 			newRegion = gestureManager.allRegions[1]:Copy(x,y)
 		else
 			newRegion = TWRegion:new(nil,updateEnv)
@@ -460,7 +460,7 @@ function ChooseEvent(self)
 end
 
 function ChooseAction(message)
-	DPrint("action!")
+	-- DPrint("action!")
 	linkEvent = message
 	menu:dismiss()
 	-- menu=nil

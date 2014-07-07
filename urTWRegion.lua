@@ -605,7 +605,6 @@ function TWRegion:OnTouchUp()
 		gestureManager:EndHold(self)
 	end
 	
-	
 	self.isHeld = false
 	
 	self.holdTimer = 0
