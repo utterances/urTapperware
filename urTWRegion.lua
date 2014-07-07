@@ -592,6 +592,11 @@ function TWRegion:OnDoubleTap()
 	self:CallEvents("OnDoubleTap")
 	if InputMode == 3 then
 		self:ToggleMovement()
+		
+		if self.menu ~= nil then
+			CloseMenu(self)
+		end
+		OpenRegionMenu(self)
 	end 
 	-- bubbleView:ShowEvent('Double Tap', self)
 	-- self:ToggleMenu()

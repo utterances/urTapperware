@@ -244,7 +244,7 @@ if InputMode == 1 then
 		-- {"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
 		{"", LoadInspector, 7, "tw_paint.png"},
 		{"", MiscMenu, 5, "tw_more.png"},
-		{"", LockPos, 6, "tw_unlock.png"}
+		-- {"", LockPos, 6, "tw_unlock.png"}
 		-- {"", CloseMenu, 8, "tw_socket1.png"}
 	}
 elseif InputMode == 2 then
@@ -256,7 +256,7 @@ elseif InputMode == 2 then
 		{"", LockPos, 6, "tw_unlock.png"},
 		{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
 		{"", LoadInspector, 7, "tw_paint.png"},
-		{"", MiscMenu, 8, "tw_more.png"}
+		-- {"", MiscMenu, 8, "tw_more.png"}
 	}
 elseif InputMode == 3 then
 	regionMenu.cmdList = {
@@ -309,7 +309,6 @@ function initMenus(menuObj)
 		r:SetLayer("TOOLTIP")
 		r:SetHeight(BUTTONSIZE)
 		r:SetWidth(BUTTONSIZE)
-		r:MoveToTop()
 		r:Hide()
 
 		r.func = func
@@ -329,12 +328,11 @@ function initMenus(menuObj)
 	
 	
 	local pinR = Region('region','menu',UIParent)
-	pinR.t = r:Texture(image)
+	pinR.t = pinR:Texture('texture/tw_pin.png')
 	pinR.t:SetBlendMode("BLEND")
 	pinR:SetLayer("TOOLTIP")
-	pinR:SetHeight(BUTTONSIZE)
-	pinR:SetWidth(BUTTONSIZE)
-	pinR:MoveToTop()
+	pinR:SetHeight(BUTTONSIZE/1.5)
+	pinR:SetWidth(BUTTONSIZE/1.5)
 	pinR:Hide()
 
 	menuObj.pinOverlay = pinR
@@ -451,7 +449,8 @@ function OpenRegionMenu(self)
 	
 	else
 		if not self.canBeMoved then
-			regionMenu.pinOverlay:SetAnchor("CENTER", self, "CENTER", 0, 30)
+			regionMenu.pinOverlay:SetAnchor("CENTER", self, "CENTER", 0, 50)
+			regionMenu.pinOverlay:MoveToTop()
 			regionMenu.pinOverlay:Show()
 		end
 	end
