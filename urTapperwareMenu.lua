@@ -64,17 +64,22 @@ function CloseRegion(self)
 end
 
 function MiscMenu(self)
-	local groupCmd
+	local groupCmd, lockCmd
 	if self.group~= nil then
 		 groupCmd = {'Remove from group', self.RemoveFromGroup, self}
 	else
 		 groupCmd = {'Add to group', addGroupPicker, self}
 	end
 	
+	if self.canBeMoved then
+		lockCmd = {'Lock Movement', LockPos, self}
+	else
+		lockCmd = {'Allow Movement', LockPos, self}		
+	end
+	
 	if InputMode == 1 then
 		cmdlist = {{'Add link', StartLinkRegion, self},
-			groupCmd,
-			{'Lock Movement', LockPos, self},
+			groupCmd, lockCmd,
 			{'Duplicate', DuplicateAction, self},
 			{'Cancel', nil, nil}}
 	elseif InputMode == 2 then

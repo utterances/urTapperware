@@ -87,7 +87,14 @@ function linkLayer:Update()
 			X1, Y1 = link.sender:Center()
 			X2, Y2 = link.receiver:Center()
 
-			if link.sender.menu ~= nil or link.receiver.menu ~= nil then
+			if link.active then
+				self.t:SetBrushColor(200,120,120,200)
+				self.t:SetBrushSize(5)
+				self.t:Line(X1,Y1,X2,Y2)
+				self.parent:DrawArrow(X1,Y1,X2,Y2)
+				link.active = false
+				self.needsDraw = true
+			elseif link.sender.menu ~= nil or link.receiver.menu ~= nil then
 				self.t:SetBrushColor(100,120,120,200)
 				self.t:SetBrushSize(5)
 				self.t:Line(X1,Y1,X2,Y2)

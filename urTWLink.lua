@@ -15,6 +15,7 @@ function link:new(initialLinkRegion, finishLinkRegion, event, action, data)
 	o.data = data or {}
 	o.menu = newLinkMenu(o)
 	o.origin = false
+	o.active = false
 	linkLayer:Add(o)
 	
 	Log:print('link created '..initialLinkRegion:Name()..'->'..finishLinkRegion:Name()..' '..event)
@@ -64,6 +65,7 @@ function link:SendMessageToReceivers(message, origin)
 		if origin ~= self.receiver.lastMessageOrigin or origin == nil then
 			self.receiver.lastMessageOrigin = origin
 			self.action(self.receiver, message, self.data)
+			self.active = true
 		end
 	end
 end
