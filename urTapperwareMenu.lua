@@ -262,7 +262,7 @@ elseif InputMode == 3 then
 		-- {"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
 		-- {"", SwitchRegionTypeAction, 4, 	"tw_varswitcher.png"},
 		-- {"", nil, 5, "tw_dup.png"},
-		{"", LoadInspector, 7, "tw_paint.png"},
+		-- {"", LoadInspector, 7, "tw_paint.png"},
 		-- {"", LockPos, 6, "tw_unlock.png"}
 		-- {"", MiscMenu, 8, "tw_more.png"}
 	}

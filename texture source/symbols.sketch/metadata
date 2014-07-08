@@ -11,9 +11,10 @@
 	<key>fonts</key>
 	<array>
 		<string>HelveticaNeue</string>
+		<string>AppleColorEmoji</string>
 	</array>
 	<key>length</key>
-	<integer>122900</integer>
+	<integer>126665</integer>
 	<key>version</key>
 	<integer>37</integer>
 </dict>

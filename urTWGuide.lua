@@ -156,6 +156,18 @@ function guideView:Init()
 	self.trash:EnableInput(false)
 	self.trash:SetAnchor('BOTTOMRIGHT', ScreenWidth(), 0)
 	self.trash:Hide()
+
+	-- init ungroup guide
+	self.paintCorner = Region('region', 'focus', self.r)
+	self.paintCorner:SetLayer("TOOLTIP")
+	self.paintCorner:SetWidth(180)
+	self.paintCorner:SetHeight(180)
+	self.paintCorner.t = self.paintCorner:Texture("texture/tw_cornerPaint.png")
+	self.paintCorner.t:SetBlendMode("BLEND")
+	self.paintCorner:MoveToTop()
+	self.paintCorner:EnableInput(false)
+	self.paintCorner:SetAnchor('TOPRIGHT', ScreenWidth(), ScreenHeight())
+	self.paintCorner:Hide()
 	
 	self.showDrop = true
 	self.showLink = true
@@ -324,12 +336,14 @@ function guideView:ShowTwoTouchGestureGuide(r1, r2)
 	self.r:Handle("OnUpdate", guideUpdateAniGuide)
 end
 
-function guideView:ShowTrash()
+function guideView:ShowGestMenu()
 	self.trash:Show()
+	self.paintCorner:Show()
 end
 
-function guideView:HideTrash()
+function guideView:HideGestMenu()
 	self.trash:Hide()
+	self.paintCorner:Hide()
 end
 
 function guideUpdateAniGuide(self, e)	
@@ -398,6 +412,7 @@ function guideView:Disable()
 	
 	self.ungroup:Hide()
 	self.trash:Hide()
+	self.paintCorner:Hide()
 	self.dropGuide:Hide()
 	self.breakLink:Hide()
 end

@@ -33,7 +33,7 @@ function gestureManager:Reset()
 	self.gestureMode = LEARN_OFF
 	self.recording = {}
 	self.sender = nil
-	self.trashOpen = false
+	self.GestMenuOpen = false
 	
 	self.pinchGestDeg = nil
 	guideView:Disable()
@@ -169,11 +169,20 @@ function gestureManager:EndGestureOnRegion(region)
 		end
 		
 		if #self.allRegions == 0 then
-			if self.trashOpen and region.x + region.w/2 - ScreenWidth() < 1 and
+			if self.GestMenuOpen then
+				if region.x + region.w/2 - ScreenWidth() < 1 and
 					region.y - region.h/2 <1 then
-				RemoveRegion(region)
-					--
+					RemoveRegion(region)
 					-- DPrint('delete!')
+				elseif region.x + region.w/2 - ScreenWidth() < 1 and
+					ScreenHeight() - region.y - region.h/2 < 1 then
+					-- DPrint('paint')
+					LoadInspector(region)
+					region:SetPosition(region.rx, region.ry)
+				-- else
+				-- 	DPrint('nothing')
+				end
+				
 			end
 		end
 		self.sender = nil
@@ -219,8 +228,8 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		-- end
 		
 		if #self.allRegions == 2 then
-			guideView:HideTrash()
-			self.trashOpen = false
+			guideView:HideGestMenu()
+			self.GestMenuOpen = false
 			
 			-- check for overlap, if exist check movement speed
 			local r1 = self.allRegions[1]
@@ -302,8 +311,8 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 			end
 		elseif #self.allRegions == 1 then
 			-- dragging only one region, show trash overlay in corner
-			guideView:ShowTrash()
-			self.trashOpen = true
+			guideView:ShowGestMenu()
+			self.GestMenuOpen = true
 		end
 		return
 		
@@ -433,7 +442,7 @@ function gestureManager:EndHold(region)
 		
 		region.movepath = {}
 		guideView:Disable()
-		self.trashOpen = false
+		self.GestMenuOpen = false
 		
 	elseif region == self.holding then
 		-- DPrint('stop hold')
@@ -445,7 +454,7 @@ function gestureManager:EndHold(region)
 		self:Reset()
 		notifyView:Dismiss()
 		guideView:Disable()
-		self.trashOpen = false
+		self.GestMenuOpen = false
 		
 	end
 end

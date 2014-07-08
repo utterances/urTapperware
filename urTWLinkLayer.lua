@@ -100,13 +100,17 @@ function linkLayer:Update()
 				self.t:Line(X1,Y1,X2,Y2)
 				self.parent:DrawArrow(X1,Y1,X2,Y2)
 				-- draw the link menu (close button), it will compute centroid using
-				-- region locations	
-				OpenLinkMenu(link.menu)
+				-- region locations
+				if InputMode ~= 3 then
+					OpenLinkMenu(link.menu)
+				end
 			else
 				self.t:SetBrushColor(100,120,120,100)
 				self.t:SetBrushSize(3)
 				self.t:Line(X1,Y1,X2,Y2)
-				HideLinkMenu(link.menu)
+				if InputMode ~= 3 then
+					HideLinkMenu(link.menu)
+				end
 			end
 		end
 	end

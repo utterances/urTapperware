@@ -6,8 +6,8 @@
 
 -- link action icon, shows briefly when a link is made
 
-FADE_RATE = 2
-DEFAULT_TIME = 3.0
+FADE_RATE = 0.5
+DEFAULT_TIME = 6.0
 notifyView = {}
 
 function notifyView:Init()
@@ -58,7 +58,7 @@ function notifyUpdate(self, e)
 	end
 	
 	if self:Alpha() > 0 then
-		self:SetAlpha(self:Alpha() - self:Alpha() * e/FADE_RATE)
+		self:SetAlpha(self:Alpha() - self:Alpha() * e*FADE_RATE)
 	else
 		self:Hide()
 		self:Handle("OnUpdate", nil)
