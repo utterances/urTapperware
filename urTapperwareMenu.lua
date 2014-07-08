@@ -57,12 +57,6 @@ function LoadTexture(filename)
 	inspectedRegion = nil
 end
 
-function CloseRegion(self)
-	RemoveRegion(self)
-	CloseMenu(self)
-	-- CloseRegionWrapper(self)
-end
-
 function MiscMenu(self)
 	local groupCmd, lockCmd
 	if self.group~= nil then
@@ -241,9 +235,8 @@ local regionMenu = {}
 -- label, func, anchor relative to region, image file, draggable or not
 
 if InputMode == 1 then
-	
 	regionMenu.cmdList = {
-		{"", CloseRegion, 1, "tw_closebox.png"},
+		{"", RemoveRegion, 1, "tw_closebox.png"},
 		-- {"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
 		-- {"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
 		-- {"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
@@ -254,7 +247,7 @@ if InputMode == 1 then
 	}
 elseif InputMode == 2 then
 	regionMenu.cmdList = {
-		{"", CloseRegion, 1, "tw_closebox.png"},
+		{"", RemoveRegion, 1, "tw_closebox.png"},
 		{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
 		-- {"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
 		{"", GroupSelection, 4, "texture/tw_group_sel.png", StartGroupSel, DragGuideAnimationHandler},
@@ -265,7 +258,7 @@ elseif InputMode == 2 then
 	}
 elseif InputMode == 3 then
 	regionMenu.cmdList = {
-		{"", CloseRegion, 1, "tw_closebox.png"},
+		-- {"", RemoveRegion, 1, "tw_closebox.png"},
 		-- {"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
 		-- {"", SwitchRegionTypeAction, 4, 	"tw_varswitcher.png"},
 		-- {"", nil, 5, "tw_dup.png"},
@@ -283,7 +276,7 @@ linkMenu.cmdList = {
 local linkReceiverMenu = {}
 -- label, func, anchor relative to region, image file
 linkReceiverMenu.cmdList = {
-	{"", CloseRegion, 1, "tw_closebox.png"},
+	{"", RemoveRegion, 1, "tw_closebox.png"},
 	{"+", ReceiveLinkRegion, 4, "tw_socket2.png"},
 	{"-", ReceiveLinkRegion, 6, "tw_socket2.png"},
 	{"", testMenu, 3, "tw_unlock.png"},

@@ -14,7 +14,11 @@ function ToggleLockGroup(regions)
 	local newGroup = Group:new()
 	newGroup:SetRegions(regions)
 	newGroup:Draw()
-	Log:print('created group with '..regions[1]:Name())
+	if #regions > 0 then
+		Log:print('created group with '..regions[1]:Name())
+	else
+		Log:print('created group')
+	end
 	return newGroup
 end
 
@@ -40,7 +44,7 @@ function AddRegionsToGroupAction(RegionsParentPair)
 		if parentR.textureFile~=nil then
 			newGroup.r:LoadTexture(parentR.textureFile)
 		end
-		Log:print('done grouping, based on '..parentR:Name())
+		Log:print('finished grouping, based on '..parentR:Name())
 		RemoveRegion(parentR)
 	else
 		for i = 1, #regions do

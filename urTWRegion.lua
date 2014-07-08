@@ -330,12 +330,12 @@ function TWRegion:Copy(cx, cy, groupregion)
 	end
 	
 	newRegion.movepath = self.movepath
-	newRegion.canBeMoved = self.canBeMoved
+	-- newRegion.canBeMoved = self.canBeMoved
 	-- copy type and properties
 	if self.regionType == RTYPE_VAR then
 		newRegion:SwitchRegionType()
 		newRegion.value = self.value
-		-- newRegion.tl:SetLabel(newRegion.value)
+		newRegion.tl:SetLabel(newRegion.value)
 		newRegion.tl:SetLabel(0)
 	else
 		newRegion:LoadTexture(self.textureFile)
@@ -845,6 +845,11 @@ function TWRegion:RemoveFromGroup()
 	if self.group then
 		self.group:RemoveRegion(self)
 		notifyView:ShowTimedText('removed '..self:Name()..' from group')
+	end
+	
+	if self.menu ~=nil then
+		CloseMenu(self)
+		OpenRegionMenu(self)
 	end
 end
 

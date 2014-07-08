@@ -76,6 +76,7 @@ function ImgPicker:initButtons()
 	local ButtonSize = ScreenWidth()/5
 	self.r:SetWidth(ScreenWidth())
 	self.r:SetHeight( ButtonSize * math.ceil(#self.imglist / 5)  + 84)
+	-- self.r.parent = self
 	-- create a grid now, use labels and 
 	for i = 1, #self.imglist do
 		-- local text = self.imglist[i][1]
@@ -113,12 +114,11 @@ function ImgPicker:initButtons()
 	end
 	
 	local label = Region('region', 'cancelbtn', self.r)
-
+	label.parent = self
 	label:SetWidth(ScreenWidth())
 	label:SetHeight(40)
-	label:SetAnchor("TOPLEFT",self.r,"TOPLEFT",0, ButtonSize * math.ceil(#self.imglist / 5)  + 54)
+	label:SetAnchor("TOPLEFT",self.r,"TOPLEFT",0, -ButtonSize * math.ceil(#self.imglist / 5) - 54)
 	label:SetLayer("TOOLTIP")
-	label:EnableInput(true)
 	label:EnableMoving(false)
 	
 	label.t = label:Texture()
@@ -129,12 +129,12 @@ function ImgPicker:initButtons()
 	label.tl:SetFontHeight(24)
 	label.tl:SetFont(MENUFONT)
 	label.tl:SetLabel('Cancel')
-	label.tl:SetColor(0,128,255,255)
-	label.tl:SetShadowColor(255,255,255,0)
+	label.tl:SetColor(255,128,128,255)
+	-- label.tl:SetShadowColor(255,255,255,0)
 	-- hook up function call
-	label:Handle("OnTouchUp", self.dismiss)
-	label:Handle("OnTouchDown", self.CancelDown)
-	label:Show()
+	label:Handle("OnTouchUp", PickerCancelBtn)
+	-- label:Handle("OnTouchDown", self.CancelDown)
+	self.cancelBtn = label
 	
 end
 
@@ -150,6 +150,9 @@ function ImgPicker:present()
 		self.cmdLabels[i]:Show()
 		self.cmdLabels[i]:EnableInput(true)
 	end
+	self.cancelBtn:Show()
+	self.cancelBtn:MoveToTop()
+	self.cancelBtn:EnableInput(true)
 end
 
 function ImgPicker:dismiss()
@@ -159,6 +162,9 @@ function ImgPicker:dismiss()
 		self.cmdLabels[i]:Hide()
 		self.cmdLabels[i]:EnableInput(false)
 	end
+	self.cancelBtn:Hide()
+	self.cancelBtn:EnableInput(false)
+	
 	table.insert(recycledPicker, self)
 end
 
@@ -187,4 +193,8 @@ end
 function PickerLeave(self)
 	-- self.t:Clear(235,235,235,0)
 	self.tl:SetColor(0,128,255,255)
+end
+
+function PickerCancelBtn(self)
+	self.parent:dismiss()
 end

@@ -134,7 +134,7 @@ function guideView:Init()
 	self.breakLink:EnableInput(false)
 	self.breakLink:Hide()
 	
-	-- init focus/spotlight
+	-- init ungroup guide
 	self.ungroup = Region('region', 'focus', self.r)
 	self.ungroup:SetLayer("TOOLTIP")
 	self.ungroup:SetWidth(1000) --scale this later according to region size
@@ -144,6 +144,18 @@ function guideView:Init()
 	self.ungroup:SetAlpha(.5)
 	self.ungroup:EnableInput(false)
 	self.ungroup:Hide()
+	
+	-- init ungroup guide
+	self.trash = Region('region', 'focus', self.r)
+	self.trash:SetLayer("TOOLTIP")
+	self.trash:SetWidth(180)
+	self.trash:SetHeight(180)
+	self.trash.t = self.trash:Texture("texture/tw_trashCorner.png")
+	self.trash.t:SetBlendMode("BLEND")
+	self.trash:MoveToTop()
+	self.trash:EnableInput(false)
+	self.trash:SetAnchor('BOTTOMRIGHT', ScreenWidth(), 0)
+	self.trash:Hide()
 	
 	self.showDrop = true
 	self.showLink = true
@@ -248,7 +260,7 @@ function guideView:ShowGestureLink(r1, r2, deg)
 end
 
 function guideView:ShowRemoveFromGroup(groupR)
-	self.ungroup:SetAnchor('CENTER', groupR, 'CENTER', 0,0)
+	self.ungroup:SetAnchor('CENTER', groupR, 'CENTER', 60,-90)
 	self.ungroup:SetWidth(groupR:Width()*10)
 	self.ungroup:SetHeight(groupR:Height()*10)
 	
@@ -310,6 +322,14 @@ function guideView:ShowTwoTouchGestureGuide(r1, r2)
 	end
 	self.r.aniGuideTimer = 0
 	self.r:Handle("OnUpdate", guideUpdateAniGuide)
+end
+
+function guideView:ShowTrash()
+	self.trash:Show()
+end
+
+function guideView:HideTrash()
+	self.trash:Hide()
 end
 
 function guideUpdateAniGuide(self, e)	
@@ -377,6 +397,7 @@ function guideView:Disable()
 	end
 	
 	self.ungroup:Hide()
+	self.trash:Hide()
 	self.dropGuide:Hide()
 	self.breakLink:Hide()
 end

@@ -33,7 +33,8 @@ function gestureManager:Reset()
 	self.gestureMode = LEARN_OFF
 	self.recording = {}
 	self.sender = nil
-
+	self.trashOpen = false
+	
 	self.pinchGestDeg = nil
 	guideView:Disable()
 end
@@ -76,7 +77,7 @@ function gestureManager:EndGestureOnRegion(region)
 			if region.textureFile~=nil then
 				newGroup.r:LoadTexture(region.textureFile)
 			end
-			Log:print('done grouping, based on '..groupRegion:Name())
+			Log:print('finished grouping, based on '..groupRegion:Name())
 			RemoveRegion(groupRegion)
 		else
 			groupRegion.h = groupRegion.oldh
@@ -166,6 +167,15 @@ function gestureManager:EndGestureOnRegion(region)
 				r2:SetPosition(r2.rx, r2.ry)
 			end
 		end
+		
+		if #self.allRegions == 0 then
+			if self.trashOpen and region.x + region.w/2 - ScreenWidth() < 1 and
+					region.y - region.h/2 <1 then
+				RemoveRegion(region)
+					--
+					-- DPrint('delete!')
+			end
+		end
 		self.sender = nil
 		self.receiver = nil
 		
@@ -209,6 +219,9 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		-- end
 		
 		if #self.allRegions == 2 then
+			guideView:HideTrash()
+			self.trashOpen = false
+			
 			-- check for overlap, if exist check movement speed
 			local r1 = self.allRegions[1]
 			local r2 = self.allRegions[2]
@@ -285,36 +298,12 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 						self.sender = r1
 						self.receiver = r2
 					end
-
-					
-					-- if math.abs(ox1)+math.abs(oy1) < GESTURE_THRES_DIST or
-					-- 	math.abs(ox2)+math.abs(oy2) < GESTURE_THRES_DIST then
-						-- if r1.regionType==RTYPE_GROUP and 
-						-- 	r2.regionType~=RTYPE_GROUP then
-						-- 	self.groupR = r1
-						-- 	self.otherR = r2
-						-- elseif r2.regionType==RTYPE_GROUP and
-						-- 	r1.regionType~=RTYPE_GROUP then
-						-- 	self.groupR = r2
-						-- 	self.otherR = r1
-						-- elseif r1.regionType~=RTYPE_GROUP and
-						-- 	r2.regionType~=RTYPE_GROUP then
-						-- 	if math.abs(ox1)+math.abs(oy1) < GESTURE_THRES_DIST then
-						-- 		self.groupR = r2
-						-- 		self.otherR = r1
-						-- 	else
-						-- 		self.groupR = r1
-						-- 		self.otherR = r2
-						-- 	end
-						-- end
-						-- self.gestureMode = LEARN_GROUP
-						-- DPrint('group')
-					-- else -- in this case we are doing linking
-						-- learn group mode
-						
-					-- end
 				end
 			end
+		elseif #self.allRegions == 1 then
+			-- dragging only one region, show trash overlay in corner
+			guideView:ShowTrash()
+			self.trashOpen = true
 		end
 		return
 		
@@ -444,6 +433,7 @@ function gestureManager:EndHold(region)
 		
 		region.movepath = {}
 		guideView:Disable()
+		self.trashOpen = false
 		
 	elseif region == self.holding then
 		-- DPrint('stop hold')
@@ -455,6 +445,8 @@ function gestureManager:EndHold(region)
 		self:Reset()
 		notifyView:Dismiss()
 		guideView:Disable()
+		self.trashOpen = false
+		
 	end
 end
 
