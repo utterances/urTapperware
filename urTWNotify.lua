@@ -7,7 +7,7 @@
 -- link action icon, shows briefly when a link is made
 
 FADE_RATE = 0.5
-DEFAULT_TIME = 6.0
+DEFAULT_TIME = 8.0
 notifyView = {}
 
 function notifyView:Init()

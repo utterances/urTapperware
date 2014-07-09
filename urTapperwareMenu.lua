@@ -454,25 +454,28 @@ function OpenRegionMenu(self)
 	end
 	
 	for i = 1,#regionMenu.items do
-		if regionMenu.items[i].draglet ~= nil then
-			regionMenu.items[i]:EnableMoving(true)
-			regionMenu.items[i]:Handle("OnDragging", regionMenu.items[i].draglet)
-			regionMenu.items[i]:Handle("OnUpdate", regionMenu.items[i].aniHandler)
-			-- need to stop animation when user interact
-			-- regionMenu.items[i]:Handle("OnTouchDown", nil)
-			regionMenu.items[i].isDragging = false
-		end
+		if InputMode~=3 or regionMenu.showMenu then
+			
+			if regionMenu.items[i].draglet ~= nil then
+				regionMenu.items[i]:EnableMoving(true)
+				regionMenu.items[i]:Handle("OnDragging", regionMenu.items[i].draglet)
+				regionMenu.items[i]:Handle("OnUpdate", regionMenu.items[i].aniHandler)
+				-- need to stop animation when user interact
+				-- regionMenu.items[i]:Handle("OnTouchDown", nil)
+				regionMenu.items[i].isDragging = false
+			end
 				
-		regionMenu.items[i]:Handle("OnTouchDown", MenuDown)
-		regionMenu.items[i]:Handle("OnTouchUp", OptEventFunc)
-		local pos = regionMenu.items[i].anchorpos
-		regionMenu.items[i]:SetAnchor("CENTER", self,
-													buttonLocation[pos][1],
-													buttonLocation[pos][2],
-													buttonLocation[pos][3])
-		regionMenu.items[i]:MoveToTop()
-		regionMenu.items[i]:EnableInput(true)
-		regionMenu.items[i]:Show()
+			regionMenu.items[i]:Handle("OnTouchDown", MenuDown)
+			regionMenu.items[i]:Handle("OnTouchUp", OptEventFunc)
+			local pos = regionMenu.items[i].anchorpos
+			regionMenu.items[i]:SetAnchor("CENTER", self,
+														buttonLocation[pos][1],
+														buttonLocation[pos][2],
+														buttonLocation[pos][3])
+			regionMenu.items[i]:MoveToTop()
+			regionMenu.items[i]:EnableInput(true)
+			regionMenu.items[i]:Show()
+		end
 	end
 	
 	self.menu = regionMenu

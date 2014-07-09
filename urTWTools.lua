@@ -72,7 +72,7 @@ end
 -- = slicing array =
 -- =================
 
-function pick (t,...)
+function pick(t,...)
 	local out = {}
 	for i =1,select ('#',...) do
 		out[#out+1] = t[select (i,...)]

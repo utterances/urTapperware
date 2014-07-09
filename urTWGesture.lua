@@ -33,7 +33,7 @@ function gestureManager:Reset()
 	self.gestureMode = LEARN_OFF
 	self.recording = {}
 	self.sender = nil
-	self.GestMenuOpen = false
+	self.isGestMenuOpen = false
 	
 	self.pinchGestDeg = nil
 	guideView:Disable()
@@ -68,8 +68,13 @@ function gestureManager:EndGestureOnRegion(region)
 		if groupRegion.regionType ~= RTYPE_GROUP then
 			-- create new group, set sizes
 			newGroup = ToggleLockGroup({region})
-			newGroup.r.h = groupRegion.h
-			newGroup.r.w = groupRegion.w
+			
+			if newGroup.r.h < groupRegion.h then
+				newGroup.r.h = groupRegion.h
+			end
+			if newGroup.r.w < groupRegion.w then
+				newGroup.r.w = groupRegion.w
+			end
 			-- newGroup.r:SetAnchor("CENTER", groupRegion.rx, groupRegion.ry)
 			newGroup.r.x = groupRegion.rx
 			newGroup.r.y = groupRegion.ry
@@ -169,20 +174,20 @@ function gestureManager:EndGestureOnRegion(region)
 		end
 		
 		if #self.allRegions == 0 then
-			if self.GestMenuOpen then
-				if region.x + region.w/2 - ScreenWidth() < 1 and
-					region.y - region.h/2 <1 then
+			if self.isGestMenuOpen then
+				if ScreenWidth() - region.x - region.w/2  < 2 and
+					region.y - region.h/2 < 2 then
 					RemoveRegion(region)
 					-- DPrint('delete!')
-				elseif region.x + region.w/2 - ScreenWidth() < 1 and
-					ScreenHeight() - region.y - region.h/2 < 1 then
+				elseif ScreenWidth() - region.x - region.w/2  < 2 and
+					ScreenHeight() - region.y - region.h/2 < 2 then
 					-- DPrint('paint')
 					LoadInspector(region)
 					region:SetPosition(region.rx, region.ry)
 				-- else
 				-- 	DPrint('nothing')
 				end
-				
+				self.isGestMenuOpen = false
 			end
 		end
 		self.sender = nil
@@ -210,6 +215,14 @@ function gestureManager:StartHold(region)
 	-- 	self.holding:AnimateShaking(false)
 	-- -- elseif self.mode == LEARN_ON then
 	-- -- 	gestureManager:EndHold(region)
+		
+		-- open gest menu if holding single one:
+		if #self.allRegions == 1 then
+			if not self.isGestMenuOpen then
+				guideView:ShowGestMenu()
+				self.isGestMenuOpen = true
+			end
+		end
 	elseif self.mode == LEARN_OFF and #self.allRegions == 2 then
 		-- exactly two holds, let's do linking gesture instead
 		r1 = self.allRegions[1]
@@ -229,7 +242,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		
 		if #self.allRegions == 2 then
 			guideView:HideGestMenu()
-			self.GestMenuOpen = false
+			self.isGestMenuOpen = false
 			
 			-- check for overlap, if exist check movement speed
 			local r1 = self.allRegions[1]
@@ -311,8 +324,10 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 			end
 		elseif #self.allRegions == 1 then
 			-- dragging only one region, show trash overlay in corner
-			guideView:ShowGestMenu()
-			self.GestMenuOpen = true
+			if region.group == nil then
+				guideView:ShowGestMenu()
+				self.isGestMenuOpen = true
+			end
 		end
 		return
 		
@@ -442,7 +457,7 @@ function gestureManager:EndHold(region)
 		
 		region.movepath = {}
 		guideView:Disable()
-		self.GestMenuOpen = false
+		self.isGestMenuOpen = false
 		
 	elseif region == self.holding then
 		-- DPrint('stop hold')
@@ -454,8 +469,17 @@ function gestureManager:EndHold(region)
 		self:Reset()
 		notifyView:Dismiss()
 		guideView:Disable()
-		self.GestMenuOpen = false
+		self.isGestMenuOpen = false
 		
+	end
+end
+
+function gestureManager:Leave(region)
+	tableRemoveObj(self.allRegions, region)
+	self:EndHold(region)
+	if self.isGestMenuOpen then
+		guideView:HideGestMenu()
+		self.isGestMenuOpen = false
 	end
 end
 

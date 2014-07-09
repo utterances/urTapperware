@@ -28,7 +28,7 @@ heldRegions = {}
 -- = Parameters =
 -- ==============
 SHADOW_MARGIN = 60
-TIME_TO_HOLD = .6	--time to wait to activate hold behaviour (not for hold event)
+TIME_TO_HOLD = 1.5	--time to wait to activate hold behaviour (not for hold event)
 HOLD_SHIFT_TOR = 2 --pixel to tolerate for holding
 
 -- Reset region to initial state
@@ -375,11 +375,13 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	self.dy = dy
 	local ndx, ndy
 	
-	if not gestureManager:IsMultiTouch(self) then
+	if gestureManager.isGestMenuOpen then
+		DPrint('gets')
+	end
+	if not (gestureManager:IsMultiTouch(self) or gestureManager.isGestMenuOpen) then
 		ndx, ndy = self:ClampedMovement(x-dx, y-dy, dx, dy)
 	else
 		ndx, ndy = dx, dy
-		-- DPrint(self:Name()..' multi')
 	end
 	
 	if self.group ~= nil then
@@ -673,7 +675,7 @@ function TWRegion:OnTouchUp()
 end
 
 function TWRegion:OnLeave()
-	gestureManager:EndHold(self)
+	gestureManager:Leave(self)
 	self.isHeld = false
 	self.holdTimer = 0
 end
