@@ -112,10 +112,11 @@ function bgTouchUp(self, x, y)
 		else
 			newRegion = TWRegion:new(nil,updateEnv)
 		end
-		
-		newRegion:Show()
-		newRegion:SetAnchor("CENTER",x,y) --only time to anchor directly		
-		newRegion:SetPosition(x,y)
+		if newRegion ~=nil then
+			newRegion:Show()
+			newRegion:SetAnchor("CENTER",x,y) --only time to anchor directly		
+			newRegion:SetPosition(x,y)
+		end
 	end
 	touchStateDown = false
 	-- startedSelection = false
