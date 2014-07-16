@@ -308,7 +308,7 @@ function TWRegion:Copy(cx, cy, groupregion)
 	newRegion:Show()	
 	
 	if cx ~= nil then
-		newRegion:SetAnchor("CENTER",cx,cy)
+		-- newRegion:SetAnchor("CENTER",cx,cy)
 		newRegion:SetPosition(cx, cy)
 	else
 		newRegion:SetAnchor("CENTER",x+INITSIZE+20,y)

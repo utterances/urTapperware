@@ -111,10 +111,7 @@ function bgTouchUp(self, x, y)
 			newRegion = gestureManager.allRegions[1]:Copy(x,y)
 		else
 			newRegion = TWRegion:new(nil,updateEnv)
-		end
-		if newRegion ~=nil then
 			newRegion:Show()
-			newRegion:SetAnchor("CENTER",x,y) --only time to anchor directly		
 			newRegion:SetPosition(x,y)
 		end
 	end
