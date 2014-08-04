@@ -176,21 +176,22 @@ function gestureManager:EndGestureOnRegion(region)
 		
 		if #self.allRegions == 0 then
 			if self:IsGestMenuOpen() then
-				if ScreenWidth() - region.x - region.w/2  < 2 and
-					region.y - region.h/2 < 2 then
-					RemoveRegion(region)
-					-- DPrint('delete!')
-				elseif ScreenWidth() - region.x - region.w/2  < 2 and
-					ScreenHeight() - region.y - region.h/2 < 2 then
-					-- DPrint('paint')
-					LoadInspector(region)
-					region:SetPosition(region.rx, region.ry)
-				-- else
-				-- 	DPrint('nothing')
-				end
+				-- if ScreenWidth() - region.x - region.w/2  < 2 and
+				-- 	region.y - region.h/2 < 2 then
+				-- 	RemoveRegion(region)
+				-- 	-- DPrint('delete!')
+				-- elseif ScreenWidth() - region.x - region.w/2  < 2 and
+				-- 	ScreenHeight() - region.y - region.h/2 < 2 then
+				-- 	-- DPrint('paint')
+				-- 	LoadInspector(region)
+				-- -- else
+				-- -- 	DPrint('nothing')
+				-- end
 				
+				self.gestMenu:ExecuteCmd()
+				self:CloseGestMenu()				
+				region:SetPosition(region.rx, region.ry)
 			end
-			self:CloseGestMenu()
 			
 		end
 		self.sender = nil
@@ -226,13 +227,7 @@ function gestureManager:StartHold(region)
 				self.gestMenu = loadGestureMenu()
 				-- find out where is the actual touch down event				
 				x, y = InputPosition()
-				self.gestMenu:Present(x,y)
-				
-				-- self.allRegions[1]:
-				-- enable moving later for now use tracking data?
-				-- self.allRegions[1]:EnableMoving(true)
-				-- self.allRegions[1]:EnableInput(false)
-				
+				self.gestMenu:Present(x,y, self.allRegions[1])
 			end
 		end
 	elseif self.mode == LEARN_OFF and #self.allRegions == 2 then

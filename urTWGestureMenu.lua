@@ -10,7 +10,7 @@
 
 -- MENUMESSAGEFONTSIZE = 16
 -- MENUFONT = "Helvetica Neue"
-GESTACCELFACTOR = 1.3
+GESTACCELFACTOR = 1.7
 
 -- radial menu layout:
 -- 2 3 4
@@ -120,30 +120,30 @@ function GestureMenu:setCommandList(cmdlist)
 	end
 end
 
-function GestureMenu:Present(x, y)
+function GestureMenu:Present(x, y, region)
 	self.old_x = x
 	self.old_y = y
+	self.region = region
+	
 	self.r:SetAnchor('CENTER',x,y+40)
-	
-	self:UpdateGest(x,y)
-	
-	self.r:Show()
+	self.r:SetAlpha(1)
 	self.r:MoveToTop()
+	self.r:Show()
+	self.dragCircle:SetAnchor("TOPLEFT", self.r, "TOPLEFT", 80, -80)
 	self.dragCircle:MoveToTop()
 	
 	for i = 1, #self.cmdLabels do
+		self.cmdLabels[i]:SetAlpha(.5)
 		self.cmdLabels[i]:MoveToTop()
-		self.cmdLabels[i]:Show()
-		self.cmdLabels[i]:EnableInput(true)
 	end
-	
 end
 
 function GestureMenu:Dismiss()
+	self.region = nil
 	self.r:Hide()
 	self.r:EnableInput(false)
 	for i = 1, #self.cmdLabels do
-		self.cmdLabels[i]:Hide()
+		-- self.cmdLabels[i]:Hide()
 		self.cmdLabels[i]:EnableInput(false)
 	end
 	table.insert(recycledGMenus, self)
@@ -175,12 +175,27 @@ function GestureMenu:UpdateGest(x,y)
 	end
 end
 
+function GestureMenu:ExecuteCmd()
+	-- actually run the command that's selected
+	-- should call dismiss right after this call usually
+	local dx, _ = self.dragCircle:Center()
+	dx = dx - self.old_x
+	-- DPrint('exec '..dx)
+	
+	if 80-dx < 2 then
+		--execute cmd 2
+		self.cmdLabels[2].func(self.region)
+	elseif dx + 80 < 2 then
+		self.cmdLabels[1].func(self.region)
+	end
+end
+
 -- ===================
 -- = private methods =
 -- ===================
 
 function OnGestureMove(self,x,y,dx,dy,n)
-	DPrint('gest:'..x..' '..y..' '..dx..' '..dy..' '..n)
+	-- DPrint('gest:'..x..' '..y..' '..dx..' '..dy..' '..n)
    -- self.t:SetBrushColor(255,127,(6-n)*50,30)
 	self.t:SetBrushSize(10)
    self.t:SetBrushColor(0,0,0,255)
@@ -189,22 +204,22 @@ function OnGestureMove(self,x,y,dx,dy,n)
 end
 
 -- this actually calls all the menu function on the right region(s)
-function CallFunc(self)
-	self.t:Clear(235,235,235,0)
-	
-	if self.func ~= nil then	-- if func is nil always dimiss parent menu
-		self.func(self.arg)
-	else
-		self.parent:dismiss()
-	end
-end
+-- function CallFunc(self)
+-- 	self.t:Clear(235,235,235,0)
+--
+-- 	if self.func ~= nil then	-- if func is nil always dimiss parent menu
+-- 		self.func(self.arg)
+-- 	else
+-- 		self.parent:dismiss()
+-- 	end
+-- end
 
-function MenuDown(self)
-	self.t:Clear(215,215,235,255)
-	self.tl:SetColor(20,140,255,255)
-end
-
-function MenuLeave(self)
-	self.t:Clear(235,235,235,0)
-	self.tl:SetColor(0,128,255,255)	
-end
+-- function MenuDown(self)
+-- 	self.t:Clear(215,215,235,255)
+-- 	self.tl:SetColor(20,140,255,255)
+-- end
+--
+-- function MenuLeave(self)
+-- 	self.t:Clear(235,235,235,0)
+-- 	self.tl:SetColor(0,128,255,255)
+-- end

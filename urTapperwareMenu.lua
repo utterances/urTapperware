@@ -29,7 +29,7 @@ end
 -- TODO refactor, move this into its own class, loading file and inspector?
 function LoadInspector(self)
 	
-	if InputMode ~= 3 then
+	-- if InputMode ~= 3 then
 	-- 	cmdlist = {}
 	--
 	-- 	for file in lfs.dir(DocumentPath("sprites")) do
@@ -42,9 +42,9 @@ function LoadInspector(self)
 	-- 	menu = loadSimpleMenu(cmdlist, 'Choose Texture File:')
 	-- 	menu:present(self:Center())
 	-- else
-		picker = loadImgPicker()
-		picker:present()
-	end
+	picker = loadImgPicker()
+	picker:present()
+	-- end
 	inspectedRegion = self
 end
 
