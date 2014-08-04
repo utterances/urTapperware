@@ -33,7 +33,8 @@ function gestureManager:Reset()
 	self.gestureMode = LEARN_OFF
 	self.recording = {}
 	self.sender = nil
-	self.isGestMenuOpen = false
+	self.gestMenu = nil
+	-- self.isGestMenuOpen = false
 	
 	self.pinchGestDeg = nil
 	guideView:Disable()
@@ -163,7 +164,7 @@ function gestureManager:EndGestureOnRegion(region)
 				end
 				-- TODO clean this up later!
 				FinishLink(TWRegion.Move)
-				-- ChooseEvent(self.receiver)				
+				-- ChooseEvent(self.receiver)
 				didSomething = true
 			end
 			
@@ -218,9 +219,18 @@ function gestureManager:StartHold(region)
 		
 		-- open gest menu if holding single one:
 		if #self.allRegions == 1 then
-			if not self.isGestMenuOpen then
-				guideView:ShowGestMenu()
-				self.isGestMenuOpen = true
+			if not self.gestMenu then
+				-- guideView:ShowGestMenu()
+				self.gestMenu = loadGestureMenu()
+				-- find out where is the actual touch down event				
+				x, y = InputPosition()
+				self.gestMenu:Present(x,y)
+				
+				self.allRegions[1]:EnableMoving(false)
+				-- enable moving later for now use tracking data?
+				-- self.allRegions[1]:EnableMoving(true)
+				-- self.allRegions[1]:EnableInput(false)
+				
 			end
 		end
 	elseif self.mode == LEARN_OFF and #self.allRegions == 2 then
@@ -241,9 +251,10 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		-- end
 		
 		if #self.allRegions == 2 then
-			guideView:HideGestMenu()
-			self.isGestMenuOpen = false
-			
+			if self.gestMenu then
+				self.gestMenu:Dismiss()
+				self.gestMenu = nil
+			end						
 			-- check for overlap, if exist check movement speed
 			local r1 = self.allRegions[1]
 			local r2 = self.allRegions[2]
@@ -324,10 +335,10 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 			end
 		elseif #self.allRegions == 1 then
 			-- dragging only one region, show trash overlay in corner
-			if region.group == nil then
-				guideView:ShowGestMenu()
-				self.isGestMenuOpen = true
-			end
+			-- if region.group == nil then
+			-- 	guideView:ShowGestMenu()
+			-- 	self.isGestMenuOpen = true
+			-- end
 		end
 		return
 		
@@ -477,9 +488,9 @@ end
 function gestureManager:Leave(region)
 	tableRemoveObj(self.allRegions, region)
 	self:EndHold(region)
-	if self.isGestMenuOpen then
-		guideView:HideGestMenu()
-		self.isGestMenuOpen = false
+	if self.gestMenu then
+		self.gestMenu:Dismiss()
+		self.gestMenu = nil
 	end
 end
 

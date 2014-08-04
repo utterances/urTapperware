@@ -45,7 +45,7 @@ dofile(DocumentPath("urTWEventBubble.lua"))	-- event notification view
 dofile(DocumentPath("urTapperwareMenu.lua"))	-- old menu system, need rewrite
 dofile(DocumentPath("urTWMenu.lua"))	-- new cleaner simple menu
 dofile(DocumentPath("urTWImgPicker.lua"))
--- dofile(DocumentPath("urTWGestureMenu.lua"))	-- new cleaner simple menu
+dofile(DocumentPath("urTWGestureMenu.lua"))	-- new cleaner simple menu
 dofile(DocumentPath("urTWLink.lua"))	-- needs menu, links
 dofile(DocumentPath("urTWRegion.lua"))
 
@@ -243,6 +243,7 @@ loadButton:Show()
 function markDone()
 	notifyView:ShowTimedText("Thanks!")
 	Log:print('mk done')
+	-- Log:stop()
 end
 
 doneButton = Region('region', 'load button', backdrop)
@@ -292,7 +293,6 @@ Log:start()
 -- Log:stop()
 
 menu = nil
-
 
 function selectionLayer:DrawSelectionPoly()
 	if #selectionPoly < 2 then	-- need at least two points to draw
@@ -387,6 +387,31 @@ end
 -- end
 
 linkLayer:Init()
+-- label, func, anchor relative to region, image file, draggable or not
+
+regionMenu = {}
+
+if InputMode == 1 then
+	regionMenu.cmdList = {
+		{"", RemoveRegion, 1, "tw_closebox.png"},
+		{"", LoadInspector, 7, "tw_paint.png"},
+		{"", MiscMenu, 5, "tw_more.png"}
+	}
+elseif InputMode == 2 then
+	regionMenu.cmdList = {
+		{"", testMenu, 1, "tw_closebox.png"},
+		{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
+		{"", GroupSelection, 4, "texture/tw_group_sel.png", StartGroupSel, DragGuideAnimationHandler},
+		{"", LockPos, 6, "tw_unlock.png"},
+		{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
+		{"", LoadInspector, 7, "tw_paint.png"}
+	}
+elseif InputMode == 3 then
+	regionMenu.cmdList = {}
+end
+
+-- initialize regionMenu graphics
+initMenus(regionMenu)
 
 function ChangeSelectionStateRegion(self, select)
 	if select ~= self.isSelected then

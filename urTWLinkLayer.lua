@@ -6,7 +6,7 @@
 -- assumes urTapperwareMenu.lua is already processed
 
 linkLayer = {}
-ARROW_OFFSET = 35
+ARROW_OFFSET = 40
 ARROW_SIZE = 20
 
 function linkLayer:Init()
@@ -106,7 +106,7 @@ function linkLayer:Update()
 				end
 			else
 				self.t:SetBrushColor(100,120,120,100)
-				self.t:SetBrushSize(3)
+				self.t:SetBrushSize(2)
 				self.t:Line(X1,Y1,X2,Y2)
 				if InputMode ~= 3 then
 					HideLinkMenu(link.menu)

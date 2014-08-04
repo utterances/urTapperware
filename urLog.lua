@@ -24,3 +24,11 @@ function Log:print(text)
 		self.file:flush()
 	end
 end
+
+function Log:startRecord()
+	WriteMovie("vid.mp4")
+end
+
+function Log:stopRecord()
+	FinishMovie()
+end

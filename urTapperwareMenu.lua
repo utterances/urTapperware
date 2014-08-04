@@ -30,18 +30,18 @@ end
 function LoadInspector(self)
 	
 	if InputMode ~= 3 then
-		cmdlist = {}
-	
-		for file in lfs.dir(DocumentPath("sprites")) do
-			if string.sub(file,1,1) ~= "." then
-				table.insert(cmdlist, {file, LoadTexture, "sprites/"..file})
-			end
-		end
-	
-		table.insert(cmdlist,{'Cancel', nil, nil})
-		menu = loadSimpleMenu(cmdlist, 'Choose Texture File:')
-		menu:present(self:Center())
-	else
+	-- 	cmdlist = {}
+	--
+	-- 	for file in lfs.dir(DocumentPath("sprites")) do
+	-- 		if string.sub(file,1,1) ~= "." then
+	-- 			table.insert(cmdlist, {file, LoadTexture, "sprites/"..file})
+	-- 		end
+	-- 	end
+	--
+	-- 	table.insert(cmdlist,{'Cancel', nil, nil})
+	-- 	menu = loadSimpleMenu(cmdlist, 'Choose Texture File:')
+	-- 	menu:present(self:Center())
+	-- else
 		picker = loadImgPicker()
 		picker:present()
 	end
@@ -72,12 +72,12 @@ function MiscMenu(self)
 	end
 	
 	if InputMode == 1 then
-		cmdlist = {{'Add link', StartLinkRegion, self},
+		local cmdlist = {{'Add link', StartLinkRegion, self},
 			groupCmd, lockCmd,
 			{'Duplicate', DuplicateAction, self},
 			{'Cancel', nil, nil}}
 	elseif InputMode == 2 then
-		cmdlist = {
+		local cmdlist = {
 			-- {'Add link', StartLinkRegion, self},
 			groupCmd,
 			-- {'Lock Movement', LockPos, self},
@@ -231,67 +231,67 @@ function DragGuideAnimationHandler(self, elapsed)
 	end
 end
 
-local regionMenu = {}
--- label, func, anchor relative to region, image file, draggable or not
+-- local regionMenu = {}
+-- -- label, func, anchor relative to region, image file, draggable or not
+--
+-- if InputMode == 1 then
+-- 	regionMenu.cmdList = {
+-- 		{"", RemoveRegion, 1, "tw_closebox.png"},
+-- 		-- {"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
+-- 		-- {"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
+-- 		-- {"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
+-- 		{"", LoadInspector, 7, "tw_paint.png"},
+-- 		{"", MiscMenu, 5, "tw_more.png"}
+-- 		-- {"", LockPos, 6, "tw_unlock.png"}
+-- 		-- {"", CloseMenu, 8, "tw_socket1.png"}
+-- 	}
+-- elseif InputMode == 2 then
+-- 	regionMenu.cmdList = {
+-- 		{"", testMenu, 1, "tw_closebox.png"},
+-- 		{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
+-- 		-- {"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
+-- 		{"", GroupSelection, 4, "texture/tw_group_sel.png", StartGroupSel, DragGuideAnimationHandler},
+-- 		{"", LockPos, 6, "tw_unlock.png"},
+-- 		{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
+-- 		{"", LoadInspector, 7, "tw_paint.png"}
+-- 		-- {"", MiscMenu, 8, "tw_more.png"}
+-- 	}
+-- elseif InputMode == 3 then
+-- 	regionMenu.cmdList = {
+-- 		-- {"", RemoveRegion, 1, "tw_closebox.png"},
+-- 		-- {"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
+-- 		-- {"", SwitchRegionTypeAction, 4, 	"tw_varswitcher.png"},
+-- 		-- {"", nil, 5, "tw_dup.png"},
+-- 		-- {"", LoadInspector, 7, "tw_paint.png"},
+-- 		-- {"", LockPos, 6, "tw_unlock.png"}
+-- 		-- {"", MiscMenu, 8, "tw_more.png"}
+-- 	}
+-- end
 
-if InputMode == 1 then
-	regionMenu.cmdList = {
-		{"", RemoveRegion, 1, "tw_closebox.png"},
-		-- {"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
-		-- {"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
-		-- {"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
-		{"", LoadInspector, 7, "tw_paint.png"},
-		{"", MiscMenu, 5, "tw_more.png"},
-		-- {"", LockPos, 6, "tw_unlock.png"}
-		-- {"", CloseMenu, 8, "tw_socket1.png"}
-	}
-elseif InputMode == 2 then
-	regionMenu.cmdList = {
-		{"", RemoveRegion, 1, "tw_closebox.png"},
-		{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
-		-- {"", SwitchRegionTypeAction, 4, "tw_varswitcher.png"},
-		{"", GroupSelection, 4, "texture/tw_group_sel.png", StartGroupSel, DragGuideAnimationHandler},
-		{"", LockPos, 6, "tw_unlock.png"},
-		{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
-		{"", LoadInspector, 7, "tw_paint.png"},
-		-- {"", MiscMenu, 8, "tw_more.png"}
-	}
-elseif InputMode == 3 then
-	regionMenu.cmdList = {
-		-- {"", RemoveRegion, 1, "tw_closebox.png"},
-		-- {"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
-		-- {"", SwitchRegionTypeAction, 4, 	"tw_varswitcher.png"},
-		-- {"", nil, 5, "tw_dup.png"},
-		-- {"", LoadInspector, 7, "tw_paint.png"},
-		-- {"", LockPos, 6, "tw_unlock.png"}
-		-- {"", MiscMenu, 8, "tw_more.png"}
-	}
-end
-
-local linkMenu = {}
-linkMenu.cmdList = {
-	{"",testMenu, 3, "tw_socket1.png"}
-}
-
-local linkReceiverMenu = {}
--- label, func, anchor relative to region, image file
-linkReceiverMenu.cmdList = {
-	{"", RemoveRegion, 1, "tw_closebox.png"},
-	{"+", ReceiveLinkRegion, 4, "tw_socket2.png"},
-	{"-", ReceiveLinkRegion, 6, "tw_socket2.png"},
-	{"", testMenu, 3, "tw_unlock.png"},
-	{"", testMenu, 5, "tw_sound.png"},
-	{"", testMenu, 8, "tw_more.png"}
-}
+-- local linkMenu = {}
+-- linkMenu.cmdList = {
+-- 	{"",testMenu, 3, "tw_socket1.png"}
+-- }
+--
+-- local linkReceiverMenu = {}
+-- -- label, func, anchor relative to region, image file
+-- linkReceiverMenu.cmdList = {
+-- 	{"", RemoveRegion, 1, "tw_closebox.png"},
+-- 	{"+", ReceiveLinkRegion, 4, "tw_socket2.png"},
+-- 	{"-", ReceiveLinkRegion, 6, "tw_socket2.png"},
+-- 	{"", testMenu, 3, "tw_unlock.png"},
+-- 	{"", testMenu, 5, "tw_sound.png"},
+-- 	{"", testMenu, 8, "tw_more.png"}
+-- }
 
 function initMenus(menuObj)
 	menuObj.items = {}
 
 	for _,item in pairs(menuObj.cmdList) do
-		label = item[1]
-		func = item[2]
-		anchor = item[3]
-		image = item[4]
+		local label = item[1]
+		local func = item[2]
+		local anchor = item[3]
+		local image = item[4]
 		
 		local r = Region('region','menu',UIParent)
 		-- r.tl = r:TextLabel()
@@ -360,40 +360,40 @@ function initLinkMenus()
 end
 
 -- initialize regionMenu graphics
-initMenus(regionMenu)
+-- initMenus(regionMenu)
 -- initMenus(linkMenu)
 -- initialize connection receiver menu graphics
-linkReceiverMenu.items = {}
+-- linkReceiverMenu.items = {}
 
-for k,item in pairs(linkReceiverMenu.cmdList) do
-	label = item[1]
-	func = item[2]
-	anchor = item[3]
-	image = item[4]
-	
-	local r = Region('region','menu',UIParent)
-	r.tl = r:TextLabel()
-	r.tl:SetLabel(label)
-	r.tl:SetFontHeight(13)
-	r.tl:SetColor(0,0,0,255) 	
-	r.t = r:Texture(image)
-	r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
-	r.t:SetBlendMode("BLEND")
-	-- r:SetAnchor(anchor, UIParent)
-	r:SetLayer("TOOLTIP")
-	r:SetHeight(BUTTONSIZE)
-	r:SetWidth(BUTTONSIZE)
-	r:MoveToTop()
-	-- r:Show()
-	r:Hide()
-	r:Handle("OnTouchUp",OptEventFunc)
-	r.parent = linkReceiverMenu
-
-	r.func = func
-	r.anchorpos = anchor
-	table.insert(linkReceiverMenu.items, r)
-end
-linkReceiverMenu.show = 0
+-- for k,item in pairs(linkReceiverMenu.cmdList) do
+-- 	label = item[1]
+-- 	func = item[2]
+-- 	anchor = item[3]
+-- 	image = item[4]
+--
+-- 	local r = Region('region','menu',UIParent)
+-- 	r.tl = r:TextLabel()
+-- 	r.tl:SetLabel(label)
+-- 	r.tl:SetFontHeight(13)
+-- 	r.tl:SetColor(0,0,0,255)
+-- 	r.t = r:Texture(image)
+-- 	r.t:SetTexCoord(0,BUTTONIMAGESIZE/128,BUTTONIMAGESIZE/128,0)
+-- 	r.t:SetBlendMode("BLEND")
+-- 	-- r:SetAnchor(anchor, UIParent)
+-- 	r:SetLayer("TOOLTIP")
+-- 	r:SetHeight(BUTTONSIZE)
+-- 	r:SetWidth(BUTTONSIZE)
+-- 	r:MoveToTop()
+-- 	-- r:Show()
+-- 	r:Hide()
+-- 	r:Handle("OnTouchUp",OptEventFunc)
+-- 	r.parent = linkReceiverMenu
+--
+-- 	r.func = func
+-- 	r.anchorpos = anchor
+-- 	table.insert(linkReceiverMenu.items, r)
+-- end
+-- linkReceiverMenu.show = 0
 
 function OpenRegionMenu(self)
 	-- function OpenRegionMenu(self)
@@ -510,9 +510,9 @@ function RaiseMenu(self)
         regionMenu.items[i]:MoveToTop()
     end
 		
-    for i = 1,#linkReceiverMenu.items do
-        linkReceiverMenu.items[i]:MoveToTop()
-    end
+    -- for i = 1,#linkReceiverMenu.items do
+    --     linkReceiverMenu.items[i]:MoveToTop()
+    -- end
 		
 	-- end
 end

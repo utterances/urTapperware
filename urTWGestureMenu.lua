@@ -15,26 +15,16 @@ MENUFONT = "Helvetica Neue"
 -- 2 3 4
 -- 1 X 5
 
-BUTTONOFFSET = 0
-local areaLocation = {
-	[1]={"LEFT", BUTTONOFFSET, 0},
-	[2]={"TOPLEFT", BUTTONOFFSET, -BUTTONOFFSET},
-	[3]={"TOP", 0, -BUTTONOFFSET},
-	[4]={"TOPRIGHT", -BUTTONOFFSET, -BUTTONOFFSET},
-	[5]={"RIGHT", -BUTTONOFFSET, 0}
-}
-
 -- example usage: m = loadGestureMenu(cmdlist), m:present(x,y), m:dismiss()
 
-function loadGestureMenu(cmdlist, message)
+function loadGestureMenu(cmdlist)
 	-- recycling constructor
 	local menu
 	if # recycledGMenus > 0 then
 		menu = table.remove(recycledGMenus, 1)
-		menu:setMessage(message)
-		menu:setCommandList(cmdlist)
+		-- menu:setCommandList(cmdlist)
 	else
-		menu = GestureMenu:new(nil,cmdlist,message)
+		menu = GestureMenu:new(nil,cmdlist)
 	end
 	
 	return menu
@@ -42,45 +32,60 @@ end
 
 -- ======================
 
-GestureMenu = {}	-- class
+GestureMenu = {} -- class
 recycledGMenus = {}
 
-function GestureMenu:new(o, cmdlist, message)
+function GestureMenu:new(o)
 	o = o or {}   -- create object if user does not provide one
 	setmetatable(o, self)
 	self.__index = self
 	 
 	o.r = Region('region', 'backdrop', UIParent)
-	o.r.t = o.r:Texture()
-	o.r.t:Clear(255,255,255,200)
+	o.r.t = o.r:Texture("texture/tw_gestMenu.png")
 	o.r.t:SetBlendMode("BLEND")
-	o.r:SetWidth(MENUWIDTH)
-	o.r:SetHeight(MENUHEIGHT)
+	o.r.t:SetTexCoord(0,240/256.0,160/256.0,0.0)
+	o.r:SetWidth(240)
+	o.r:SetHeight(160)
 	o.r:SetLayer("TOOLTIP")
 	
 	o.r:Handle("OnMove", OnGestureMove)
-	o.r:Handle("OnTouchUp", GestureMenu.dismiss)
+	-- o.r:Handle("OnTouchUp", GestureMenu.dismiss)
 	o.r:EnableInput(true)
 	o.r:EnableMoving(false)
 	o.r:Hide()
 	
-	o:setMessage(message)	
+	local r = Region('region','gmenu', o.r)
+	r:SetLayer("TOOLTIP")
+	r.t = r:Texture("texture/tw_gestTouch.png")
+	r.t:SetBlendMode("BLEND")
+	r.t:SetTexCoord(0,80/128.0,80/128.0,0.0)
+	r:SetWidth(80)
+	r:SetHeight(80)
+	r:SetAlpha(.6)
+	r:Hide()
+	
+	o.dragCircle = r
+
+	local cmdlist = {
+		{'Delete', RemoveRegion, 'texture/tw_gestMenu_trash.png'},
+		{'Change Texture', LoadInspector, 'texture/tw_gestMenu_edit.png'}
+	}
 	o:setCommandList(cmdlist)
 	
 	table.insert(menus, o)
 	return o
 end
 	
-function GestureMenu:setMessage(messageText)
-	self.r.tl = self.r:TextLabel()
-	self.r.tl:SetLabel(messageText)
-	self.r.tl:SetFont(MENUFONT)
-	self.r.tl:SetFontHeight(MENUMESSAGEFONTSIZE)
-	self.r.tl:SetColor(20,20,20,255)
-	self.r.tl:SetVerticalAlign("CENTER")
-	self.r.tl:SetShadowColor(0,0,0,0)
-	self.r.tl:SetShadowBlur(2.0)
-end
+-- function GestureMenu:setMessage(messageText)
+-- 	self.r.tl = self.r:TextLabel()
+-- 	self.r.tl:SetLabel(messageText)
+-- 	self.r.tl:SetFont(MENUFONT)
+-- 	self.r.tl:SetFontHeight(MENUMESSAGEFONTSIZE)
+-- 	self.r.tl:SetColor(20,20,20,255)
+-- 	self.r.tl:SetVerticalAlign("CENTER")
+-- 	self.r.tl:SetShadowColor(0,0,0,0)
+-- 	self.r.tl:SetShadowBlur(2.0)
+-- end
 
 function GestureMenu:setCommandList(cmdlist)
 	self.cmdlist = cmdlist
@@ -89,53 +94,50 @@ function GestureMenu:setCommandList(cmdlist)
 	for i = 1, #self.cmdlist do
 		local text = cmdlist[i][1]
 		
-		local label = Region('region', 'menutext', self.r)
+		local label = Region('region', 'gmenu', self.r)
 				
 		-- label.t:SetBlendMode("BLEND")
-		label:SetWidth(150)
-		label:SetHeight(150)
-		label:SetAnchor("CENTER", self.r, areaLocation[i][1],
-												areaLocation[i][2],
-												areaLocation[i][3])
+		label:SetWidth(80)
+		label:SetHeight(80)
+		if i==1 then
+			label:SetAnchor("TOPLEFT", self.r, "TOPLEFT", 0, 0)
+		else
+			label:SetAnchor("TOPLEFT", self.r, "TOPLEFT", 160, 0)
+		end
 		label:SetLayer("TOOLTIP")
 		label:Show()
-		label:EnableInput(true)
+		-- label:EnableInput(false)
 		label:EnableMoving(false)
-		label.t = label:Texture()
-		label.t:Clear(235,235,235,90)
+		label.t = label:Texture(cmdlist[i][3])
 		label.t:SetBlendMode("BLEND")
+		label.t:SetTexCoord(0,80/128.0,80/128.0,0.0)
 		
-		label.tl = label:TextLabel()
-		label.tl:SetLabel(text)
-  	  	label.tl:SetFontHeight(MENUFONTSIZE)
-  		label.tl:SetFont(MENUFONT)
-		label.tl:SetColor(0,128,255,255)
-		label.tl:SetShadowColor(0,0,0,0)
-		
+				
 		-- hook up function call
 		label:Handle("OnTouchUp", CallFunc)
 		-- label:Handle("OnTouchDown", MenuDown)
-		label:Handle("OnEnter", MenuDown)
-		label:Handle("OnLeave", MenuLeave)
+		-- label:Handle("OnEnter", MenuDown)
+		-- label:Handle("OnLeave", MenuLeave)
 		label.func = cmdlist[i][2]
-		label.arg = cmdlist[i][3]
 		label.parent = self
 		
 		table.insert(self.cmdLabels, label)
 	end
 end
 
-function GestureMenu:present(x, y)
+function GestureMenu:Present(x, y)
 	self.r:SetAnchor('CENTER',x,y)
 	self.r:Show()
 	self.r:MoveToTop()
 	
 	for i = 1, #self.cmdLabels do
 		self.cmdLabels[i]:MoveToTop()
+		self.cmdLabels[i]:Show()
+		self.cmdLabels[i]:EnableInput(true)
 	end
 end
 
-function GestureMenu:dismiss()
+function GestureMenu:Dismiss()
 	self.r:Hide()
 	self.r:EnableInput(false)
 	for i = 1, #self.cmdLabels do

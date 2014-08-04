@@ -28,7 +28,7 @@ heldRegions = {}
 -- = Parameters =
 -- ==============
 SHADOW_MARGIN = 60
-TIME_TO_HOLD = 1.3	--time to wait to activate hold behaviour (not for hold event)
+TIME_TO_HOLD = 0.9	--time to wait to activate hold behaviour (not for hold event)
 HOLD_SHIFT_TOR = 2 --pixel to tolerate for holding
 
 -- Reset region to initial state
@@ -351,11 +351,12 @@ end
 
 function TWRegion:OnMove(x,y,dx,dy)
 	
+	DPrint('moved on '..x..' '..y)
 	-- for k,v in pairs(self.outlinks) do
 	-- 	if(v.event == "_Move") then
 	-- 		v:SendMessageToReceivers({dx, dy})
 	-- 	end
-	-- end	
+	-- end
 
 	self.updateEnv()
 
@@ -562,7 +563,7 @@ function TWRegion:Update(elapsed)
 	-- end
 end
 
-function TWRegion:OnTouchDown()	
+function TWRegion:OnTouchDown()
 	self.rx, self.ry = self:Center()
 	Log:print(self:Name()..' touchdown '..self.rx..' '..self.ry)
 	gestureManager:BeginGestureOnRegion(self)
