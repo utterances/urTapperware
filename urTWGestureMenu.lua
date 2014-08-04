@@ -8,8 +8,9 @@
 -- MENUWIDTH = 300
 -- MENUHEIGHT = 300
 
-MENUMESSAGEFONTSIZE = 16
-MENUFONT = "Helvetica Neue"
+-- MENUMESSAGEFONTSIZE = 16
+-- MENUFONT = "Helvetica Neue"
+GESTACCELFACTOR = 1.3
 
 -- radial menu layout:
 -- 2 3 4
@@ -39,7 +40,7 @@ function GestureMenu:new(o)
 	o = o or {}   -- create object if user does not provide one
 	setmetatable(o, self)
 	self.__index = self
-	 
+	
 	o.r = Region('region', 'backdrop', UIParent)
 	o.r.t = o.r:Texture("texture/tw_gestMenu.png")
 	o.r.t:SetBlendMode("BLEND")
@@ -50,7 +51,7 @@ function GestureMenu:new(o)
 	
 	o.r:Handle("OnMove", OnGestureMove)
 	-- o.r:Handle("OnTouchUp", GestureMenu.dismiss)
-	o.r:EnableInput(true)
+	o.r:EnableInput(false)
 	o.r:EnableMoving(false)
 	o.r:Hide()
 	
@@ -58,11 +59,13 @@ function GestureMenu:new(o)
 	r:SetLayer("TOOLTIP")
 	r.t = r:Texture("texture/tw_gestTouch.png")
 	r.t:SetBlendMode("BLEND")
-	r.t:SetTexCoord(0,80/128.0,80/128.0,0.0)
+	-- r.t:SetTexCoord(0,80/128.0,80/128.0,0.0)
 	r:SetWidth(80)
 	r:SetHeight(80)
-	r:SetAlpha(.6)
-	r:Hide()
+	-- r:SetAlpha(.9)
+	r:Show()
+	r:SetAnchor("TOPLEFT", o.r, "TOPLEFT", 80, -80)
+	r:EnableInput(false)
 	
 	o.dragCircle = r
 
@@ -72,20 +75,12 @@ function GestureMenu:new(o)
 	}
 	o:setCommandList(cmdlist)
 	
-	table.insert(menus, o)
+	-- table.insert(menus, o)
+	
+	o.old_x = 0
+	o.old_y = 0
 	return o
 end
-	
--- function GestureMenu:setMessage(messageText)
--- 	self.r.tl = self.r:TextLabel()
--- 	self.r.tl:SetLabel(messageText)
--- 	self.r.tl:SetFont(MENUFONT)
--- 	self.r.tl:SetFontHeight(MENUMESSAGEFONTSIZE)
--- 	self.r.tl:SetColor(20,20,20,255)
--- 	self.r.tl:SetVerticalAlign("CENTER")
--- 	self.r.tl:SetShadowColor(0,0,0,0)
--- 	self.r.tl:SetShadowBlur(2.0)
--- end
 
 function GestureMenu:setCommandList(cmdlist)
 	self.cmdlist = cmdlist
@@ -106,15 +101,15 @@ function GestureMenu:setCommandList(cmdlist)
 		end
 		label:SetLayer("TOOLTIP")
 		label:Show()
-		-- label:EnableInput(false)
 		label:EnableMoving(false)
+		label:EnableInput(false)
 		label.t = label:Texture(cmdlist[i][3])
 		label.t:SetBlendMode("BLEND")
 		label.t:SetTexCoord(0,80/128.0,80/128.0,0.0)
 		
 				
 		-- hook up function call
-		label:Handle("OnTouchUp", CallFunc)
+		-- label:Handle("OnTouchUp", CallFunc)
 		-- label:Handle("OnTouchDown", MenuDown)
 		-- label:Handle("OnEnter", MenuDown)
 		-- label:Handle("OnLeave", MenuLeave)
@@ -126,15 +121,22 @@ function GestureMenu:setCommandList(cmdlist)
 end
 
 function GestureMenu:Present(x, y)
-	self.r:SetAnchor('CENTER',x,y)
+	self.old_x = x
+	self.old_y = y
+	self.r:SetAnchor('CENTER',x,y+40)
+	
+	self:UpdateGest(x,y)
+	
 	self.r:Show()
 	self.r:MoveToTop()
+	self.dragCircle:MoveToTop()
 	
 	for i = 1, #self.cmdLabels do
 		self.cmdLabels[i]:MoveToTop()
 		self.cmdLabels[i]:Show()
 		self.cmdLabels[i]:EnableInput(true)
 	end
+	
 end
 
 function GestureMenu:Dismiss()
@@ -147,6 +149,31 @@ function GestureMenu:Dismiss()
 	table.insert(recycledGMenus, self)
 end
 
+function GestureMenu:UpdateGest(x,y)
+	-- use new drag coordinates to update visual and also states
+	-- first need to check which path we are on, and act accordingly
+	local dx = x - self.old_x
+	local dy = y - self.old_y
+	-- DPrint('gest drag '..dx..' '..dy)
+		
+	-- clamp position to the gesture menu guide 
+	local absx = math.abs(dx)
+	local absy = math.max(dy,0)
+	local cx,cy
+	cx = math.min(math.min(absx, absy)*GESTACCELFACTOR, 80)* absx/dx
+	cy = math.abs(cx)
+	
+	self.dragCircle:SetAnchor("TOPLEFT", self.r, "TOPLEFT", cx+80, cy-80)
+	
+	-- set alpha value accordingly
+	self.r:SetAlpha(1 - cy/80*.6)
+	
+	for i = 1, #self.cmdLabels do
+		self.cmdLabels[i]:SetAlpha(.5 + .5*math.max((i-1.5)*2*cx/80,0))
+		-- 2:
+		-- self.cmdLabels[i]:SetAlpha(.7 + .3*math.max(cx/80,0))
+	end
+end
 
 -- ===================
 -- = private methods =

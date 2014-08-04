@@ -175,7 +175,7 @@ function gestureManager:EndGestureOnRegion(region)
 		end
 		
 		if #self.allRegions == 0 then
-			if self.isGestMenuOpen then
+			if self:IsGestMenuOpen() then
 				if ScreenWidth() - region.x - region.w/2  < 2 and
 					region.y - region.h/2 < 2 then
 					RemoveRegion(region)
@@ -188,8 +188,10 @@ function gestureManager:EndGestureOnRegion(region)
 				-- else
 				-- 	DPrint('nothing')
 				end
-				self.isGestMenuOpen = false
+				
 			end
+			self:CloseGestMenu()
+			
 		end
 		self.sender = nil
 		self.receiver = nil
@@ -226,7 +228,7 @@ function gestureManager:StartHold(region)
 				x, y = InputPosition()
 				self.gestMenu:Present(x,y)
 				
-				self.allRegions[1]:EnableMoving(false)
+				-- self.allRegions[1]:
 				-- enable moving later for now use tracking data?
 				-- self.allRegions[1]:EnableMoving(true)
 				-- self.allRegions[1]:EnableInput(false)
@@ -251,10 +253,7 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 		-- end
 		
 		if #self.allRegions == 2 then
-			if self.gestMenu then
-				self.gestMenu:Dismiss()
-				self.gestMenu = nil
-			end						
+			self:CloseGestMenu()
 			-- check for overlap, if exist check movement speed
 			local r1 = self.allRegions[1]
 			local r2 = self.allRegions[2]
@@ -334,6 +333,15 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 				end
 			end
 		elseif #self.allRegions == 1 then
+			if self.gestMenu then
+				x,y = InputPosition()
+				self.gestMenu:UpdateGest(x,y)
+				
+				-- gesture menu is on, send coordinates to update 
+
+			end
+
+			-- old deprecated gest overlay menu
 			-- dragging only one region, show trash overlay in corner
 			-- if region.group == nil then
 			-- 	guideView:ShowGestMenu()
@@ -488,10 +496,7 @@ end
 function gestureManager:Leave(region)
 	tableRemoveObj(self.allRegions, region)
 	self:EndHold(region)
-	if self.gestMenu then
-		self.gestMenu:Dismiss()
-		self.gestMenu = nil
-	end
+	self:CloseGestMenu()
 end
 
 function gestureManager:SetSelector(selectorFunc)
@@ -502,6 +507,18 @@ function gestureManager:IsMultiTouch(region)
 	-- DPrint('check multi '..region:Name())
 	return #self.allRegions>1 and tableHasObj(self.allRegions, region)
 end
+
+function gestureManager:IsGestMenuOpen()
+	return self.gestMenu
+end
+
+function gestureManager:CloseGestMenu()
+	if self.gestMenu then
+		self.gestMenu:Dismiss()
+		self.gestMenu = nil
+	end
+end
+
 -- function gestureManager:EndHold(region)
 -- 	-- Do NOT call this with region == initial holding region
 -- 	self.mode = LEARN_OFF

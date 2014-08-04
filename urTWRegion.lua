@@ -376,7 +376,7 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	self.dy = dy
 	local ndx, ndy
 	
-	if not (gestureManager:IsMultiTouch(self) or gestureManager.isGestMenuOpen) then
+	if not (gestureManager:IsMultiTouch(self) or gestureManager:IsGestMenuOpen()) then
 		ndx, ndy = self:ClampedMovement(x-dx, y-dy, dx, dy)
 	else
 		ndx, ndy = dx, dy
