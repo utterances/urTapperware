@@ -394,7 +394,7 @@ regionMenu = {}
 if InputMode == 1 then
 	regionMenu.cmdList = {
 		{"", RemoveRegion, 1, "tw_closebox.png"},
-		{"", LoadInspector, 7, "tw_paint.png"},
+		-- {"", LoadInspector, 7, "tw_paint.png"},
 		{"", MiscMenu, 5, "tw_more.png"}
 	}
 elseif InputMode == 2 then

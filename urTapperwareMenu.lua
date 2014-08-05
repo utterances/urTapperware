@@ -70,14 +70,17 @@ function MiscMenu(self)
 	else
 		lockCmd = {'Allow Movement', LockPos, self}		
 	end
+	local miscList
 	
 	if InputMode == 1 then
-		local cmdlist = {{'Add link', StartLinkRegion, self},
+		miscList = {{'Add link', StartLinkRegion, self},
 			groupCmd, lockCmd,
+			{'Change Texture', LoadInspector, self},
 			{'Duplicate', DuplicateAction, self},
 			{'Cancel', nil, nil}}
+		
 	elseif InputMode == 2 then
-		local cmdlist = {
+		miscList = {
 			-- {'Add link', StartLinkRegion, self},
 			groupCmd,
 			-- {'Lock Movement', LockPos, self},
@@ -85,7 +88,7 @@ function MiscMenu(self)
 			{'Cancel', nil, nil}}
 	end
 		
-	menu = loadSimpleMenu(cmdlist, 'Command Menu')
+	menu = loadSimpleMenu(miscList, 'Command Menu')
 	menu:present(self:Center())
 end
 
