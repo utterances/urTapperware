@@ -79,9 +79,10 @@ function gestureManager:EndGestureOnRegion(region)
 			-- newGroup.r:SetAnchor("CENTER", groupRegion.rx, groupRegion.ry)
 			newGroup.r.x = groupRegion.rx
 			newGroup.r.y = groupRegion.ry
+
 			
-			if region.textureFile~=nil then
-				newGroup.r:LoadTexture(region.textureFile)
+			if groupRegion.textureFile~=nil then
+				newGroup.r:LoadTexture(groupRegion.textureFile)
 			end
 			Log:print('finished grouping, based on '..groupRegion:Name())
 			RemoveRegion(groupRegion)

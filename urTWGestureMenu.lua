@@ -10,7 +10,7 @@
 
 -- MENUMESSAGEFONTSIZE = 16
 -- MENUFONT = "Helvetica Neue"
-GESTACCELFACTOR = 2
+GESTACCELFACTOR = 2.5
 
 -- radial menu layout:
 -- 2 3 4

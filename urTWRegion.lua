@@ -28,7 +28,7 @@ heldRegions = {}
 -- = Parameters =
 -- ==============
 SHADOW_MARGIN = 60
-TIME_TO_HOLD = 0.75	--time to wait to activate hold behaviour (not for hold event)
+TIME_TO_HOLD = 0.45	--time to wait to activate hold behaviour (not for hold event)
 HOLD_SHIFT_TOR = 2 --pixel to tolerate for holding
 
 -- Reset region to initial state
