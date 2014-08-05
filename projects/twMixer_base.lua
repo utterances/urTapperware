@@ -8,7 +8,7 @@ r5:SwitchRegionType()
 r5:SetPosition(10,10)
 r5.h = 100
 r5.w = 100
-r5:ToggleMovement()
+-- r5:ToggleMovement()
 r5:Show()
 
 local r6 = TWRegion:new(nil, updateEnv)
@@ -16,5 +16,5 @@ r6:SwitchRegionType()
 r6:SetPosition(150,10)
 r6.h = 100
 r6.w = 100
-r6:ToggleMovement()
+-- r6:ToggleMovement()
 r6:Show()

@@ -399,7 +399,7 @@ if InputMode == 1 then
 	}
 elseif InputMode == 2 then
 	regionMenu.cmdList = {
-		{"", testMenu, 1, "tw_closebox.png"},
+		{"", RemoveRegion, 1, "tw_closebox.png"},
 		{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
 		{"", GroupSelection, 4, "texture/tw_group_sel.png", StartGroupSel, DragGuideAnimationHandler},
 		{"", LockPos, 6, "tw_unlock.png"},
@@ -485,7 +485,9 @@ end
 function ChooseAction(message)
 	-- DPrint("action!")
 	linkEvent = message
-	menu:dismiss()
+	if menu~=nil then
+		menu:dismiss()
+	end
 	-- menu=nil
 	cmdlist = {
 		{'Move', FinishLink, TWRegion.Move},

@@ -79,6 +79,7 @@ function GestureMenu:new(o)
 	
 	o.old_x = 0
 	o.old_y = 0
+	o.region_moveLock = false
 	return o
 end
 
@@ -124,6 +125,11 @@ function GestureMenu:Present(x, y, region)
 	self.old_x = x
 	self.old_y = y
 	self.region = region
+	self.region_moveLock = region.canBeMoved
+	
+	if not self.region_moveLock then
+		self.region:EnableMoving(true)
+	end
 	
 	self.r:SetAnchor('CENTER',x,y+40)
 	self.r:SetAlpha(1)
@@ -140,6 +146,10 @@ function GestureMenu:Present(x, y, region)
 end
 
 function GestureMenu:Dismiss()
+	if not self.region_moveLock then
+		self.region:EnableMoving(false)
+	end
+	
 	self.region = nil
 	self.r:Hide()
 	self.r:EnableInput(false)

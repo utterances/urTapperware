@@ -332,8 +332,8 @@ function guideView:ShowTwoTouchGestureGuide(r1, r2)
 	for i=1,2 do
 		self.touchGuides[i]:MoveToTop()
 	end
-	self.r.aniGuideTimer = 0
-	self.r:Handle("OnUpdate", guideUpdateAniGuide)
+	-- self.r.aniGuideTimer = 0
+	-- self.r:Handle("OnUpdate", guideUpdateAniGuide)
 end
 
 -- function guideView:ShowGestMenu()

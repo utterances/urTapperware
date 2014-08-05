@@ -28,8 +28,8 @@ heldRegions = {}
 -- = Parameters =
 -- ==============
 SHADOW_MARGIN = 60
-TIME_TO_HOLD = 0.45	--time to wait to activate hold behaviour (not for hold event)
-HOLD_SHIFT_TOR = 2 --pixel to tolerate for holding
+TIME_TO_HOLD = 0.5	--time to wait to activate hold behaviour (not for hold event)
+HOLD_SHIFT_TOR = 4 --pixel to tolerate for holding
 
 -- Reset region to initial state
 function ResetRegion(self) -- customized parameter initialization of region, events are initialized in VRegion()
@@ -409,7 +409,7 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 		-- not in a group
 		if not self.canBeMoved then
 			-- ok this should actually not print at all, just to be sure
-			DPrint('tries to move but fail')
+			-- DPrint('tries to move but fail')
 		end
 	end
 	
@@ -887,6 +887,10 @@ end
 -- return the clampped deltas, (ndx, ndy)
 -- does _NOT_ actually do the anchoring.moving
 function TWRegion:ClampedMovement(oldx,oldy,dx,dy)
+	if not self.canBeMoved then
+		return 0,0
+	end
+	
 	if self.group ~= nil then
 		local ndx = dx
 		local ndy = dy

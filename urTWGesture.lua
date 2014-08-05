@@ -59,16 +59,28 @@ function gestureManager:EndGestureOnRegion(region)
 		self.gestureMode = LEARN_OFF
 		-- two things here, turn last region into a group, then add the current region into this group
 		
-		local groupRegion = self.allRegions[1]
+		local groupRegion = nil
+		local insideRegion = nil
+		
+		--actually, lets always use the bigger region as group
+		if self.allRegions[1]:Width() + self.allRegions[1]:Height() > 
+				region:Width() + region:Height() then
+			groupRegion = self.allRegions[1]
+			insideRegion = region
+		else
+			groupRegion = region
+			insideRegion = self.allRegions[1]
+		end
+		
 		self:Reset()
 		
-		if groupRegion==nil or region.regionType==RTYPE_GROUP then
+		if groupRegion==nil or insideRegion.regionType==RTYPE_GROUP then
 			return
 		end
 		
 		if groupRegion.regionType ~= RTYPE_GROUP then
 			-- create new group, set sizes
-			newGroup = ToggleLockGroup({region})
+			newGroup = ToggleLockGroup({insideRegion})
 			
 			if newGroup.r.h < groupRegion.h then
 				newGroup.r.h = groupRegion.h
@@ -89,7 +101,7 @@ function gestureManager:EndGestureOnRegion(region)
 		else
 			groupRegion.h = groupRegion.oldh
 			groupRegion.w = groupRegion.oldw
-			groupRegion.groupObj:AddRegion(region)
+			groupRegion.groupObj:AddRegion(insideRegion)
 			-- put group back for consecutive add
 			table.insert(self.allRegions, groupRegion)
 			-- DPrint(#self.allRegions..'+g')
@@ -105,7 +117,9 @@ function gestureManager:EndGestureOnRegion(region)
 		
 		if r2==nil or 
 		(region.regionType~=RTYPE_GROUP and r2.regionType~= RTYPE_GROUP) then
-			DPrint(r2:Name())
+			if r2~=nil then
+				DPrint(r2:Name())
+			end
 			return
 		end
 		if region.group==nil then
@@ -117,8 +131,10 @@ function gestureManager:EndGestureOnRegion(region)
 		-- sanity check
 		-- assert(region.group == r2.groupObj, 'nest group is wrong')
 		-- check if not overlaping, if yes remove from group:
-		if r1.x-r1.w/2 >= r2.x+r2.w/2 or r1.x+r1.w/2 >= r2.x-r2.w/2 or
-				r1.y-r1.h/2 >= r2.y+r2.h/2 or r1.y+r1.h/2 >= r2.y-r2.h/2 then
+		-- increase the margin here to reduce accidental removals
+		local MARGIN = 15
+		if r1.x-r1.w/2 >= r2.x+r2.w/2 + MARGIN or r1.x+r1.w/2 >= r2.x-r2.w/2 + MARGIN or
+				r1.y-r1.h/2 >= r2.y+r2.h/2 + MARGIN or r1.y+r1.h/2 >= r2.y-r2.h/2 + MARGIN then
 			-- remove r1 from r2:
 			r1:RemoveFromGroup()
 			-- r2:SetPosition(r2.rx, r2.ry)
@@ -133,7 +149,7 @@ function gestureManager:EndGestureOnRegion(region)
 		if self.gestureMode == LEARN_LINK then
 			self.gestureMode = LEARN_OFF
 			self.mode = LEARN_OFF
-			DPrint(r1:Name()..'<->'..r2:Name())
+			-- DPrint(r1:Name()..'<->'..r2:Name())
 			-- check if we are breaking or making links:
 			-- local oldD = (r1.rx - r2.rx)^2 + (r1.ry - r2.ry)^2
 			-- local newD = (r1.x - r2.x)^2 + (r1.y - r2.y)^2
@@ -153,20 +169,37 @@ function gestureManager:EndGestureOnRegion(region)
 				
 				notifyView:ShowTimedText("remove links")
 				didSomething = true
-			elseif self.pinchGestDeg < -.6 and self.pinchGestDeg > -0.9 then
+			elseif self.pinchGestDeg < -.5 and self.pinchGestDeg > -.9 then
 				notifyView:Dismiss()
-				linkEvent = 'OnDragging'
-				if r1:HasLinkTo(r2, linkEvent) then
-					initialLinkRegion = r2
-					finishLinkRegion = r1
+				
+				if r1.regionType~=RTYPE_VAR and r2.regionType~=RTYPE_VAR then
+					linkEvent = 'OnDragging'
+					if r1:HasLinkTo(r2, linkEvent) then
+						initialLinkRegion = r2
+						finishLinkRegion = r1
+					else
+						initialLinkRegion = r1
+						finishLinkRegion = r2
+					end
+					-- TODO clean this up later!
+					FinishLink(TWRegion.Move)
+					didSomething = true
 				else
-					initialLinkRegion = r1
-					finishLinkRegion = r2
+					-- linkEvent = 'OnDragging'
+					if r1.regionType==RTYPE_VAR then
+						initialLinkRegion = r2
+						finishLinkRegion = r1
+					else
+						initialLinkRegion = r1
+						finishLinkRegion = r2
+					end
+					-- finishLinkRegion:SetPosition(finishLinkRegion.rx, finishLinkRegion.ry)
+					-- ChooseAction('OnDragging')
+					
+					linkEvent = 'OnDragging'
+					FinishLink(TWRegion.UpdateX)
+					didSomething = true
 				end
-				-- TODO clean this up later!
-				FinishLink(TWRegion.Move)
-				-- ChooseEvent(self.receiver)
-				didSomething = true
 			end
 			
 			if didSomething then
@@ -223,7 +256,7 @@ function gestureManager:StartHold(region)
 		
 		-- open gest menu if holding single one:
 		if #self.allRegions == 1 then
-			if not self.gestMenu then
+			if not self.gestMenu and InputMode == 3 then
 				-- guideView:ShowGestMenu()
 				self.gestMenu = loadGestureMenu()
 				-- find out where is the actual touch down event				
