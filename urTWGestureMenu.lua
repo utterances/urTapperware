@@ -136,6 +136,7 @@ function GestureMenu:Present(x, y, region)
 		self.cmdLabels[i]:SetAlpha(.5)
 		self.cmdLabels[i]:MoveToTop()
 	end
+	Log:print('menuGest show')
 end
 
 function GestureMenu:Dismiss()
@@ -147,6 +148,7 @@ function GestureMenu:Dismiss()
 		self.cmdLabels[i]:EnableInput(false)
 	end
 	table.insert(recycledGMenus, self)
+	Log:print('menuGest dismiss')
 end
 
 function GestureMenu:UpdateGest(x,y)
@@ -185,8 +187,10 @@ function GestureMenu:ExecuteCmd()
 	if 80-dx < 2 then
 		--execute cmd 2
 		self.cmdLabels[2].func(self.region)
+		Log:print('menuGest exec 2')		
 	elseif dx + 80 < 2 then
 		self.cmdLabels[1].func(self.region)
+		Log:print('menuGest exec 1')
 	end
 end
 
