@@ -10,7 +10,7 @@
 
 -- MENUMESSAGEFONTSIZE = 16
 -- MENUFONT = "Helvetica Neue"
-GESTACCELFACTOR = 2.5
+GESTACCELFACTOR = 2
 
 -- radial menu layout:
 -- 2 3 4
@@ -194,11 +194,11 @@ function GestureMenu:ExecuteCmd()
 	dx = dx - self.old_x
 	-- DPrint('exec '..dx)
 	
-	if 80-dx < 2 then
+	if 80-dx < 0.5 then
 		--execute cmd 2
 		self.cmdLabels[2].func(self.region)
 		Log:print('menuGest exec 2')		
-	elseif dx + 80 < 2 then
+	elseif dx + 80 < 0.5 then
 		self.cmdLabels[1].func(self.region)
 		Log:print('menuGest exec 1')
 	end

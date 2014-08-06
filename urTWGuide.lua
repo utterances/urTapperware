@@ -208,7 +208,7 @@ function guideView:ShowSpotlight(region)
 	self.focusOverlay:Show()
 end
 
-function guideView:ShowGestureLink(r1, r2, deg)
+function guideView:ShowGestureLink(r1, r2, deg, degabs)
 	-- DPrint(deg)
 	local x1,y1 = r1:Center()
 	local x2,y2 = r2:Center()	
@@ -245,7 +245,7 @@ function guideView:ShowGestureLink(r1, r2, deg)
 		-- gr:Show()
 	end
 	
-	if deg > 1 then
+	if degabs > 100 or deg > 1 then
 		-- show remove icon
 		linkLayer:ResetPotentialLink()
 		self:ZoomRegionOverlays(300)
@@ -253,12 +253,12 @@ function guideView:ShowGestureLink(r1, r2, deg)
 			self.breakLink:SetAnchor('CENTER',(x1+x2)/2, (y1+y2)/2)
 			self.breakLink:Show()
 		end
-	elseif deg < -0.65 and deg > -0.9 then
+	elseif deg < -.6 and deg > -0.9 then
 		-- show potential
 		linkLayer:DrawPotentialLink(r1, r2)
 		self.breakLink:Hide()
 		self:ZoomRegionOverlays(300)
-	elseif deg <-0.9 then
+	elseif deg <= -0.9 then
 		linkLayer:ResetPotentialLink()
 		self.breakLink:Hide()
 		notifyView:ShowTimedText('Drop on top to group')

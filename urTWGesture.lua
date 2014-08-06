@@ -132,7 +132,7 @@ function gestureManager:EndGestureOnRegion(region)
 		-- assert(region.group == r2.groupObj, 'nest group is wrong')
 		-- check if not overlaping, if yes remove from group:
 		-- increase the margin here to reduce accidental removals
-		local MARGIN = 15
+		local MARGIN = 10
 		if r1.x-r1.w/2 >= r2.x+r2.w/2 + MARGIN or r1.x+r1.w/2 >= r2.x-r2.w/2 + MARGIN or
 				r1.y-r1.h/2 >= r2.y+r2.h/2 + MARGIN or r1.y+r1.h/2 >= r2.y-r2.h/2 + MARGIN then
 			-- remove r1 from r2:
@@ -155,35 +155,42 @@ function gestureManager:EndGestureOnRegion(region)
 			-- local newD = (r1.x - r2.x)^2 + (r1.y - r2.y)^2
 			-- local deg = 2.0*(newD - oldD)/oldD
 			local didSomething = false
-			if self.pinchGestDeg > 1 then
+			if self.pinchGestAbs > 100 or self.pinchGestDeg > 1 then
 				for _,link in ipairs(r1.outlinks) do
 					if link.receiver == r2 then
 						link:destroy()
+						didSomething = true
 					end
 				end
 				for _,link in ipairs(r2.outlinks) do
 					if link.receiver == r1 then
 						link:destroy()
+						didSomething = true
 					end
 				end
-				
-				notifyView:ShowTimedText("remove links")
-				didSomething = true
-			elseif self.pinchGestDeg < -.5 and self.pinchGestDeg > -.9 then
+				if didSomething then
+					notifyView:ShowTimedText("remove links")
+				end
+			elseif self.pinchGestDeg < -.6 and self.pinchGestDeg > -.9 then
 				notifyView:Dismiss()
 				
 				if r1.regionType~=RTYPE_VAR and r2.regionType~=RTYPE_VAR then
 					linkEvent = 'OnDragging'
-					if r1:HasLinkTo(r2, linkEvent) then
+					if not r2:HasLinkTo(r1, linkEvent) then
 						initialLinkRegion = r2
 						finishLinkRegion = r1
-					else
+						didSomething = true
+						
+					elseif not r1:HasLinkTo(r2, linkEvent) then
 						initialLinkRegion = r1
 						finishLinkRegion = r2
+						didSomething = true
+						
 					end
 					-- TODO clean this up later!
-					FinishLink(TWRegion.Move)
-					didSomething = true
+					if didSomething then
+						FinishLink(TWRegion.Move)
+					end
 				else
 					-- linkEvent = 'OnDragging'
 					if r1.regionType==RTYPE_VAR then
@@ -193,12 +200,15 @@ function gestureManager:EndGestureOnRegion(region)
 						initialLinkRegion = r1
 						finishLinkRegion = r2
 					end
-					-- finishLinkRegion:SetPosition(finishLinkRegion.rx, finishLinkRegion.ry)
-					-- ChooseAction('OnDragging')
 					
-					linkEvent = 'OnDragging'
-					FinishLink(TWRegion.UpdateX)
-					didSomething = true
+					if not initialLinkRegion:HasLinkTo(finishLinkRegion, linkEvent) then
+					
+					-- finishLinkRegion:SetPosition(finishLinkRegion.rx, finishLinkRegion.ry)
+					-- ChooseAction('OnDragging')					
+						linkEvent = 'OnDragging'
+						FinishLink(TWRegion.UpdateX)
+						didSomething = true
+					end
 				end
 			end
 			
@@ -206,6 +216,7 @@ function gestureManager:EndGestureOnRegion(region)
 				r1:SetPosition(r1.rx, r1.ry)
 				r2:SetPosition(r2.rx, r2.ry)
 			end
+			self:Reset()
 		end
 		
 		if #self.allRegions == 0 then
@@ -306,8 +317,9 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 						otherR = r1
 					elseif r1.regionType~=RTYPE_GROUP and
 						r2.regionType~=RTYPE_GROUP then
-						if math.abs(r1.dx)+math.abs(r1.dy) >
-						math.abs(r2.dx)+math.abs(r2.dy) then
+						-- if math.abs(r1.dx)+math.abs(r1.dy) >
+						-- math.abs(r2.dx)+math.abs(r2.dy) then
+						if r2:Width() + r2:Height() > r1:Width() + r1:Height() then
 							groupR = r2
 							otherR = r1
 						else
@@ -354,7 +366,8 @@ function gestureManager:Dragged(region, dx, dy, x, y)
 					local newD = math.sqrt((r1.x - r2.x)^2 + (r1.y - r2.y)^2)
 					
 					self.pinchGestDeg = 1.75*(newD - oldD)/oldD
-					guideView:ShowGestureLink(r1, r2, self.pinchGestDeg)
+					self.pinchGestAbs = newD - oldD
+					guideView:ShowGestureLink(r1, r2, self.pinchGestDeg, self.pinchGestAbs)
 					if self.sender == nil then
 						self.sender = r1
 						self.receiver = r2

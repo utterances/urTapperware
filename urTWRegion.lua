@@ -29,7 +29,7 @@ heldRegions = {}
 -- ==============
 SHADOW_MARGIN = 60
 TIME_TO_HOLD = 0.5	--time to wait to activate hold behaviour (not for hold event)
-HOLD_SHIFT_TOR = 4 --pixel to tolerate for holding
+HOLD_SHIFT_TOR = 15 --pixel to tolerate for holding
 
 -- Reset region to initial state
 function ResetRegion(self) -- customized parameter initialization of region, events are initialized in VRegion()
@@ -368,7 +368,8 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	-- x,y current pos after the drag
 	-- dx dy change in the last e seconds
 	-- Log:print('drag '..self:Name()..' '..x..' '..y)
-	if math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR then
+	if self.isHeld and 
+		(math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR) then
 		self.isHeld = false	-- cancel hold gesture if over tolerance
 	end
 	
@@ -539,8 +540,10 @@ function TWRegion:Update(elapsed)
 			-- do hold action here
 			self:CallEvents("OnTapAndHold", elapsed)
 			gestureManager:StartHold(self)
+			self.isHeld = false
 		else
 			self.holdTimer = self.holdTimer + elapsed
+			-- DPrint('+'..self.holdTimer)
 		end
 	end
 	
@@ -567,21 +570,17 @@ function TWRegion:OnTouchDown()
 	self.rx, self.ry = self:Center()
 	Log:print(self:Name()..' touchdown '..self.rx..' '..self.ry)
 	gestureManager:BeginGestureOnRegion(self)
-	if self.regionType == RTYPE_GROUP then
-		self.isHeld = true
-		self.holdTimer = -1
-		return
-	end
 	
 	self.isHeld = true
 	self.holdTimer = 0
-	self:CallEvents("OnTouchDown")
-	self:RaiseToTop()
-	self.alpha = .9
-	-- isHoldingRegion = true
-	-- table.insert(heldRegions, self)
 
-	-- bring menu up if they are already open
+	if self.regionType ~= RTYPE_GROUP then	
+		self:CallEvents("OnTouchDown")
+		self:RaiseToTop()
+		self.alpha = .9
+	end	
+	-- bring menu up if they are already open	
+	
 	if self.menu ~= nil then
 		RaiseMenu(self)
 	end
@@ -780,9 +779,7 @@ function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
 		self:EnableResizing(true)
 		-- self.regionType = RTYPE_SOUND
 		
-	-- 	
-	-- 	
-	-- elseif self.regionType == RTYPE_SOUND then
+		-- elseif self.regionType == RTYPE_SOUND then
 		self.regionType = RTYPE_BLANK	
 	end
 	
