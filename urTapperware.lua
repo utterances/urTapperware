@@ -400,7 +400,7 @@ if InputMode == 1 then
 elseif InputMode == 2 then
 	regionMenu.cmdList = {
 		{"", RemoveRegion, 1, "tw_closebox.png"},
-		{"Link", StartLinkRegionAction, 3, "tw_socket1.png", StartLinkOnDrag, DragGuideAnimationHandler},
+		{"Link", StartLinkRegionAction, 3, "texture/tw_link_new.png", StartLinkOnDrag, DragGuideAnimationHandler},
 		{"", GroupSelection, 4, "texture/tw_group_sel.png", StartGroupSel, DragGuideAnimationHandler},
 		{"", LockPos, 6, "tw_unlock.png"},
 		{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},

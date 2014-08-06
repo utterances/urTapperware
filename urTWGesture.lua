@@ -135,7 +135,7 @@ function gestureManager:EndGestureOnRegion(region)
 		-- assert(region.group == r2.groupObj, 'nest group is wrong')
 		-- check if not overlaping, if yes remove from group:
 		-- increase the margin here to reduce accidental removals
-		local MARGIN = 10
+		local MARGIN = 20
 		
 		if r1.x-r1.w/2 >= r2.x+r2.w/2 + MARGIN or r1.x+r1.w/2 <= r2.x-r2.w/2 + MARGIN or
 				r1.y-r1.h/2 >= r2.y+r2.h/2 + MARGIN or r1.y+r1.h/2 <= r2.y-r2.h/2 + MARGIN then
@@ -222,7 +222,7 @@ function gestureManager:EndGestureOnRegion(region)
 				r1:SetPosition(r1.rx, r1.ry)
 				r2:SetPosition(r2.rx, r2.ry)
 			end
-			-- self:Reset()
+			self:Reset()
 		end
 		
 		if #self.allRegions == 0 then

@@ -415,6 +415,7 @@ function guideView:Disable()
 	-- self.paintCorner:Hide()
 	self.dropGuide:Hide()
 	self.breakLink:Hide()
+	linkLayer:ResetPotentialLink()
 end
 
 function guideUpdate(self, e)
