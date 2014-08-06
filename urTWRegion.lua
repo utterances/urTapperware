@@ -29,7 +29,7 @@ heldRegions = {}
 -- ==============
 SHADOW_MARGIN = 60
 TIME_TO_HOLD = 0.5	--time to wait to activate hold behaviour (not for hold event)
-HOLD_SHIFT_TOR = 4 --pixel to tolerate for holding
+HOLD_SHIFT_TOR = 5 --pixel to tolerate for holding
 
 -- Reset region to initial state
 function ResetRegion(self) -- customized parameter initialization of region, events are initialized in VRegion()
@@ -368,8 +368,9 @@ function TWRegion:OnDrag(x,y,dx,dy,e)
 	-- x,y current pos after the drag
 	-- dx dy change in the last e seconds
 	-- Log:print('drag '..self:Name()..' '..x..' '..y)
-	if self.isHeld and 
-		(math.abs(dx) > HOLD_SHIFT_TOR or math.abs(dy) > HOLD_SHIFT_TOR) then
+	if self.isHeld and
+		(math.abs(x-self.rx) > HOLD_SHIFT_TOR or
+		math.abs(y-self.ry) > HOLD_SHIFT_TOR) then	
 		self.isHeld = false	-- cancel hold gesture if over tolerance
 	end
 	
@@ -787,9 +788,9 @@ function TWRegion:SwitchRegionType() -- TODO: change method name to reflect
 end
 
 function TWRegion:ToggleMovement()
-	notifyView:ShowTimedText("toggled movement")
-	self.canBeMoved = not self.canBeMoved
 	if self.group==nil then
+		self.canBeMoved = not self.canBeMoved
+		notifyView:ShowTimedText("toggled movement")		
 		self:EnableMoving(self.canBeMoved)
 	end
 end

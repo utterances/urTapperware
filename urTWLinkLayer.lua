@@ -164,3 +164,5 @@ end
 function linkLayer:ResetPotentialLink()
 	self.linkGuides.t:Clear(0,0,0,0)
 end
+
+linkLayer:Init()

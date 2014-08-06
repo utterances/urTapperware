@@ -415,6 +415,7 @@ function guideView:Disable()
 	-- self.paintCorner:Hide()
 	self.dropGuide:Hide()
 	self.breakLink:Hide()
+	--TODO: this is hacky:
 	linkLayer:ResetPotentialLink()
 end
 

@@ -22,7 +22,6 @@ EPSILON = 0.001	--small number for rounding
 LASSOSEPDISTANCE = 10 -- pixels between each point when drawing selection lasso
 
 -- FreeAllRegions()
-DPrint('')
 initialLinkRegion = nil
 finishLinkRegion = nil
 linkEvent = nil
@@ -385,8 +384,6 @@ end
 -- 		self:Handle("OnUpdate", nil)
 -- 	end
 -- end
-
-linkLayer:Init()
 -- label, func, anchor relative to region, image file, draggable or not
 
 regionMenu = {}
@@ -595,7 +592,7 @@ function AddRegionToGroup(region)
 	end
 end
 
-
+DPrint('')
 
 ----------------- v11.pagebutton -------------------
 -- local pagebutton=Region('region', 'pagebutton', UIParent)

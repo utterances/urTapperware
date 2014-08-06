@@ -6,7 +6,7 @@ BUTTONSIZE = 54	-- on screen size in points/pixels
 BUTTONOFFSET = 3
 BUTTONIMAGESIZE = 80		-- size of the square icon image
 
-GROUPMARGIN = 40
+GROUPMARGIN = 10
 
 recycledGroupMenu = {}
 
