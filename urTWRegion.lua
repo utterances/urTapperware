@@ -29,7 +29,7 @@ heldRegions = {}
 -- ==============
 SHADOW_MARGIN = 60
 TIME_TO_HOLD = 0.5	--time to wait to activate hold behaviour (not for hold event)
-HOLD_SHIFT_TOR = 15 --pixel to tolerate for holding
+HOLD_SHIFT_TOR = 4 --pixel to tolerate for holding
 
 -- Reset region to initial state
 function ResetRegion(self) -- customized parameter initialization of region, events are initialized in VRegion()

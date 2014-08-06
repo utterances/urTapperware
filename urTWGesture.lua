@@ -27,6 +27,7 @@ function gestureManager:Reset()
 	self.receiver = nil
 	self.receivers = {}
 	self.allRegions = {}
+	-- DPrint('reset allregions')
 	self.rx = -1
 	self.ry = -1
 	self.mode = LEARN_OFF
@@ -43,7 +44,7 @@ end
 function gestureManager:BeginGestureOnRegion(region)
 	if not tableHasObj(self.allRegions, region) then
 		table.insert(self.allRegions, region)
-		-- DPrint(#self.allRegions..'+')
+		-- DPrint(#self.allRegions..'+begin')
 	end
 	
 	if #self.allRegions ~= 2 then
@@ -53,7 +54,7 @@ end
 
 function gestureManager:EndGestureOnRegion(region)
 	tableRemoveObj(self.allRegions, region)
-	-- DPrint(#self.allRegions..'-')
+	-- DPrint(#self.allRegions..'-end')
 	if self.mode == LEARN_GROUP then
 		self.mode = LEARN_OFF
 		self.gestureMode = LEARN_OFF
@@ -102,9 +103,10 @@ function gestureManager:EndGestureOnRegion(region)
 			groupRegion.h = groupRegion.oldh
 			groupRegion.w = groupRegion.oldw
 			groupRegion.groupObj:AddRegion(insideRegion)
+			notifyView:ShowTimedText('added '..insideRegion:Name()..' to group')
 			-- put group back for consecutive add
 			table.insert(self.allRegions, groupRegion)
-			-- DPrint(#self.allRegions..'+g')
+			-- DPrint(#self.allRegions..'+group')
 		end
 	elseif self.mode == NESTED_GROUP then
 		self.mode = LEARN_OFF
@@ -128,13 +130,17 @@ function gestureManager:EndGestureOnRegion(region)
 			r1 = r2
 			r2 = region
 		end
+		
 		-- sanity check
 		-- assert(region.group == r2.groupObj, 'nest group is wrong')
 		-- check if not overlaping, if yes remove from group:
 		-- increase the margin here to reduce accidental removals
 		local MARGIN = 10
-		if r1.x-r1.w/2 >= r2.x+r2.w/2 + MARGIN or r1.x+r1.w/2 >= r2.x-r2.w/2 + MARGIN or
-				r1.y-r1.h/2 >= r2.y+r2.h/2 + MARGIN or r1.y+r1.h/2 >= r2.y-r2.h/2 + MARGIN then
+		
+		if r1.x-r1.w/2 >= r2.x+r2.w/2 + MARGIN or r1.x+r1.w/2 <= r2.x-r2.w/2 + MARGIN or
+				r1.y-r1.h/2 >= r2.y+r2.h/2 + MARGIN or r1.y+r1.h/2 <= r2.y-r2.h/2 + MARGIN then
+
+			
 			-- remove r1 from r2:
 			r1:RemoveFromGroup()
 			-- r2:SetPosition(r2.rx, r2.ry)
@@ -216,7 +222,7 @@ function gestureManager:EndGestureOnRegion(region)
 				r1:SetPosition(r1.rx, r1.ry)
 				r2:SetPosition(r2.rx, r2.ry)
 			end
-			self:Reset()
+			-- self:Reset()
 		end
 		
 		if #self.allRegions == 0 then
@@ -237,8 +243,9 @@ function gestureManager:EndGestureOnRegion(region)
 				self:CloseGestMenu()				
 				region:SetPosition(region.rx, region.ry)
 			end
-			
 		end
+		self:Reset()
+		
 		self.sender = nil
 		self.receiver = nil
 		
@@ -471,7 +478,11 @@ end
 
 function gestureManager:EndHold(region)
 	tableRemoveObj(self.allRegions, region)
-	-- DPrint(#self.allregions..'-h')
+	-- if self.allregions ~= nil then
+	-- 	DPrint(#self.allregions..'-')
+	-- else
+	-- 	DPrint("0")
+	-- end
 	if self.mode == LEARN_OFF then
 		return
 	elseif self.mode == LEARN_DRAG and tableHasObj(self.receivers, region) then
@@ -537,6 +548,12 @@ end
 
 function gestureManager:Leave(region)
 	tableRemoveObj(self.allRegions, region)
+	-- if self.allregions ~= nil then
+	-- 	DPrint(#self.allregions..'-leave')
+	-- else
+	-- 	DPrint("0")
+	-- end
+
 	self:EndHold(region)
 	self:CloseGestMenu()
 end
