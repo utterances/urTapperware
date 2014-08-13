@@ -12,6 +12,7 @@
 -- ==================================
 
 CREATION_MARGIN = 40	-- margin for creating via tapping
+CREATION_THRES = 6
 INITSIZE = 120	-- initial size for regions
 MENUHOLDWAIT = 0.4 -- seconds to wait for hold to menu
 
@@ -118,25 +119,30 @@ function bgTouchUp(self, x, y)
 	-- startedSelection = false
 end
 
--- function bgMove(self, x, y)
--- 	Log:print('bg move '..x..' '..y)
--- 	startedSelection = true
--- 	shadow:Hide()
--- 	CloseGroupMenu(lassoGroupMenu)
--- 	
--- 	-- change creation behavior to selection box/lasso
--- 	if #selectionPoly > 0 then
--- 		last = selectionPoly[#selectionPoly]
--- 		if math.sqrt((x - last[1])^2 + (y - last[2])^2) > LASSOSEPDISTANCE then
--- 			--more than the lasso point distance, add a new point to selection poly
--- 			table.insert(selectionPoly, {x,y})
--- 			selectionLayer:DrawSelectionPoly()
--- 		end
--- 	else
--- 		table.insert(selectionPoly, {x,y})
--- 		selectionLayer:DrawSelectionPoly()
--- 	end
--- end
+function bgDoubleTap(self, x, y)
+end
+function bgMove(self, x, y)
+	Log:print('bg move '..x..' '..y)
+	-- startedSelection = true
+	shadow:Hide()
+	if x > CREATION_THRES or y > CREATION_THRES then
+		touchStateDown = false
+	end
+	-- CloseGroupMenu(lassoGroupMenu)
+	--
+	-- -- change creation behavior to selection box/lasso
+	-- if #selectionPoly > 0 then
+	-- 	last = selectionPoly[#selectionPoly]
+	-- 	if math.sqrt((x - last[1])^2 + (y - last[2])^2) > LASSOSEPDISTANCE then
+	-- 		--more than the lasso point distance, add a new point to selection poly
+	-- 		table.insert(selectionPoly, {x,y})
+	-- 		selectionLayer:DrawSelectionPoly()
+	-- 	end
+	-- else
+	-- 	table.insert(selectionPoly, {x,y})
+	-- 	selectionLayer:DrawSelectionPoly()
+	-- end
+end
 
 function bgDragletUp(self, x, y)
 	if startedSelection then
@@ -182,10 +188,10 @@ backdrop:SetLayer("BACKGROUND")
 backdrop:SetAnchor('BOTTOMLEFT',0,0)
 backdrop:Handle("OnTouchDown", bgTouchDown)
 backdrop:Handle("OnTouchUp", bgTouchUp)
-backdrop:Handle("OnDoubleTap", bgDoubleTap)
+-- backdrop:Handle("OnDoubleTap", bgDoubleTap)
 backdrop:Handle("OnEnter", bgEnter)
 backdrop:Handle("OnLeave", bgLeave)
--- backdrop:Handle("OnMove", bgMove)
+backdrop:Handle("OnMove", bgMove)
 backdrop:Handle("OnPageEntered", visdown)
 
 backdrop:EnableInput(true)
@@ -292,6 +298,9 @@ Log:start()
 -- Log:stop()
 
 menu = nil
+
+-- TODO:HACKY
+linkLayer.linkGuides:MoveToTop()
 
 function selectionLayer:DrawSelectionPoly()
 	if #selectionPoly < 2 then	-- need at least two points to draw

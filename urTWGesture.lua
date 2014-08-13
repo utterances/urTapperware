@@ -58,6 +58,7 @@ function gestureManager:EndGestureOnRegion(region)
 	if self.mode == LEARN_GROUP then
 		self.mode = LEARN_OFF
 		self.gestureMode = LEARN_OFF
+		guideView:Disable()
 		-- two things here, turn last region into a group, then add the current region into this group
 		
 		local groupRegion = nil
@@ -76,6 +77,15 @@ function gestureManager:EndGestureOnRegion(region)
 		self:Reset()
 		
 		if groupRegion==nil or insideRegion.regionType==RTYPE_GROUP then
+			groupRegion.h = groupRegion.oldh
+			groupRegion.w = groupRegion.oldw
+			
+			return
+		end
+		
+		if math.abs(insideRegion.x - insideRegion.rx) + math.abs(insideRegion.y - insideRegion.ry) < math.max(insideRegion.h, insideRegion.w)/2 then
+			groupRegion.h = groupRegion.oldh
+			groupRegion.w = groupRegion.oldw
 			return
 		end
 		
