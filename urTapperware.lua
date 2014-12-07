@@ -410,7 +410,7 @@ elseif InputMode == 2 then
 		{"", GroupSelection, 4, "texture/tw_group_sel.png", StartGroupSel, DragGuideAnimationHandler},
 		{"", LockPos, 6, "tw_unlock.png"},
 		{"", DuplicateAction, 5, "tw_dup.png", DupOnDrag, DragGuideAnimationHandler},
-		{"", LoadInspector, 7, "tw_paint.png"}
+		{"", LoadInspector, 7, "texture/tw_paint.png"}
 	}
 elseif InputMode == 3 then
 	regionMenu.cmdList = {}

@@ -790,8 +790,12 @@ end
 function TWRegion:ToggleMovement()
 	if self.group==nil then
 		self.canBeMoved = not self.canBeMoved
-		notifyView:ShowTimedText("toggled movement")		
-		self:EnableMoving(self.canBeMoved)
+		notifyView:ShowTimedText("toggled movement")
+		if self.canBeMoved then
+			Log:print(self:Name()..' switchMov true')
+		else
+			Log:print(self:Name()..' switchMov false')
+		end
 	end
 end
 
