@@ -9,7 +9,7 @@ r2.h = 100
 r2.w = 100
 r2:Show()
 
-local rgroup = ToggleLockGroup({r2})
+local rgroup = CreateGroupFromRegions({r2})
 rgroup.r:SetPosition(100,ScreenHeight()/2)
 rgroup.r.h = 400
 rgroup.r.w = 100
@@ -26,7 +26,7 @@ r3.w = 100
 r3:Show()
 
 rgroup = nil
-rgroup = ToggleLockGroup({r3})
+rgroup = CreateGroupFromRegions({r3})
 rgroup.r:SetPosition(ScreenWidth()/2,800)
 rgroup.r.h = 100
 rgroup.r.w = 400
@@ -42,7 +42,7 @@ r4.h = 100
 r4.w = 100
 r4:Show()
 
-rgroup = ToggleLockGroup({r4})
+rgroup = CreateGroupFromRegions({r4})
 rgroup.r:SetPosition(ScreenWidth()/2,ScreenHeight()/2)
 rgroup.r.h = 400
 rgroup.r.w = 400

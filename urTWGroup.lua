@@ -10,7 +10,7 @@ GROUPMARGIN = 10
 
 recycledGroupMenu = {}
 
-function ToggleLockGroup(regions)
+function CreateGroupFromRegions(regions)
 	local newGroup = Group:new()
 	newGroup:SetRegions(regions)
 	newGroup:Draw()
@@ -28,7 +28,7 @@ function AddRegionsToGroupAction(RegionsParentPair)
 	local regions = RegionsParentPair[2]
 	if parentR.regionType ~= RTYPE_GROUP then
 		-- create new group, set sizes
-		newGroup = ToggleLockGroup(regions)
+		newGroup = CreateGroupFromRegions(regions)
 		newGroup.r:SetAnchor("CENTER", parentR.rx, parentR.ry)
 		newGroup.r.x = parentR.rx
 		newGroup.r.y = parentR.ry
@@ -59,7 +59,7 @@ function initGroupMenu()
 	local groupMenu = {}
 	-- label, func, anchor relative to region, image file, draggable or not
 	-- groupMenu.cmdList = {
-	-- 	{"", ToggleLockGroup, "texture/tw_group_cmd.png"}
+	-- 	{"", CreateGroupFromRegions, "texture/tw_group_cmd.png"}
 	-- }
 
 	local r = Region('region','menu',UIParent)
@@ -72,7 +72,7 @@ function initGroupMenu()
 	r:MoveToTop()
 	r:Hide()
 	r.parent = groupMenu
-	r.func = ToggleLockGroup
+	r.func = CreateGroupFromRegions
 	
 	groupMenu.item = r
 	groupMenu.selectedRegions = {}
@@ -224,7 +224,7 @@ function Group:NestRegionInto(r1, r2)
 	-- nest r1 into r2, change r2 into a group if not already one
 	if r2.regionType ~= RTYPE_GROUP then
 		-- create new group, set sizes
-		newGroup = ToggleLockGroup({r1})
+		newGroup = CreateGroupFromRegions({r1})
 		if r2.h > newGroup.h or r2.w > newGroup.w then
 			newGroup.h = r2.h
 			newGroup.w = r2.w

@@ -581,7 +581,7 @@ function AddRegionToGroup(region)
 		if region.regionType ~= RTYPE_GROUP then
 			if region.group==nil then
 				-- create new group, set sizes
-				newGroup = ToggleLockGroup({initialGroupRegion})
+				newGroup = CreateGroupFromRegions({initialGroupRegion})
 				newGroup.r.h = region.h
 				newGroup.r.w = region.w
 				newGroup.r:SetAnchor("CENTER", region.x, region.y)

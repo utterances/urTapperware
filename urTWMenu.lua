@@ -152,13 +152,13 @@ function SimpleMenu:present(x, y)
 	for i = 1, #self.cmdLabels do
 		self.cmdLabels[i]:MoveToTop()
 	end
-	Log:print('menu show '..self.r.tl:Label())
+	-- Log:print('menu show '..self.r.tl:Label())
 end
 
 function SimpleMenu:dismiss()
 	self.r:Hide()
 	self.r:EnableInput(false)
-	Log:print('menu close '..self.r.tl:Label())
+	-- Log:print('menu close '..self.r.tl:Label())
 	
 	for i = 1, #self.cmdLabels do
 		self.cmdLabels[i]:Hide()
@@ -176,7 +176,7 @@ end
 -- this actually calls all the menu function on the right region(s)
 function SimpleMenu.CallFunc(self)
 	self.t:Clear(235,235,235,0)
-	Log:print('menu cmd '..self.tl:Label())
+	-- Log:print('menu cmd '..self.tl:Label())
 	self.parent:dismiss()
 	
 	if self.func ~= nil then	-- if func is nil always dimiss parent menu

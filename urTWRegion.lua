@@ -294,7 +294,7 @@ function TWRegion:Copy(cx, cy, groupregion)
 	
 		end
 				
-		local group_copy = ToggleLockGroup(newRegions)
+		local group_copy = CreateGroupFromRegions(newRegions)
 		group_copy.r.h = self:Height()
 		group_copy.r.w = self:Width()
 		group_copy.r:LoadTexture(self.textureFile)
@@ -336,7 +336,7 @@ function TWRegion:Copy(cx, cy, groupregion)
 		newRegion:SwitchRegionType()
 		newRegion.value = self.value
 		newRegion.tl:SetLabel(newRegion.value)
-		newRegion.tl:SetLabel(0)
+		-- newRegion.tl:SetLabel(0)
 	else
 		newRegion:LoadTexture(self.textureFile)
 		newRegion.h = self.h

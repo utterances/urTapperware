@@ -91,7 +91,7 @@ function gestureManager:EndGestureOnRegion(region)
 		
 		if groupRegion.regionType ~= RTYPE_GROUP then
 			-- create new group, set sizes
-			newGroup = ToggleLockGroup({insideRegion})
+			newGroup = CreateGroupFromRegions({insideRegion})
 			
 			if newGroup.r.h < groupRegion.h then
 				newGroup.r.h = groupRegion.h
